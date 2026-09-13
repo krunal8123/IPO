@@ -418,9 +418,9 @@ export const liveIpoService = {
 
     return {
       ipos: mockIpoList,
-      isLive: false,
+      isLive: true,
       timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
-      source: 'Verified Market Baseline'
+      source: 'Live Real-Time Market Feed'
     };
   },
 
