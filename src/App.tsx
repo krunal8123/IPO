@@ -17,6 +17,7 @@ import { AllotmentChecker } from './components/allotment/AllotmentChecker';
 import { IpoCalendar } from './components/calendar/IpoCalendar';
 import { BuybackTracker } from './components/buyback/BuybackTracker';
 import { ServerSettingsModal } from './components/common/ServerSettingsModal';
+import { InstallPwaBanner } from './components/common/InstallPwaBanner';
 import { RefreshCw, Radio, Sparkles, Settings } from 'lucide-react';
 
 const VALID_TABS = ['ipos', 'gmp', 'subscription', 'allotment', 'calendar', 'buyback'] as const;
@@ -440,6 +441,9 @@ export const App: React.FC = () => {
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
       />
+
+      {/* 6b. Add to Home Screen Banner (PWA Installation Prompt) */}
+      <InstallPwaBanner />
 
       {/* 7. Footer */}
       <footer className="mt-16 border-t border-slate-200/80 dark:border-slate-800/80 pt-8 pb-24 md:pb-8 px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-500 dark:text-slate-400">

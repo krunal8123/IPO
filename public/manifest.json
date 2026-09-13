@@ -1,14 +1,17 @@
 {
-  "name": "IPORadar - Live IPO & GMP Tracker",
+  "name": "IPORadar - Live IPO & GMP Terminal",
   "short_name": "IPORadar",
-  "description": "Live Mainboard and SME IPOs, Real-time GMP, Allotment Status and Financials",
-  "start_url": "/",
+  "description": "Live Mainboard & SME IPOs, Real-Time GMP, Allotment Status, and Financial Intelligence",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#6366f1",
+  "orientation": "portrait",
+  "background_color": "#070b14",
+  "theme_color": "#4f46e5",
+  "categories": ["finance", "business", "utilities"],
   "icons": [
     {
-      "src": "/favicon.svg",
+      "src": "./favicon.svg",
       "sizes": "192x192 512x512",
       "type": "image/svg+xml",
       "purpose": "any maskable"

@@ -14,3 +14,13 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     </ThemeProvider>
   </React.StrictMode>,
 );
+
+// Register Service Worker for PWA Home Screen Installation & Offline Readiness
+if ('serviceWorker' in navigator && (import.meta.env.PROD || window.location.protocol === 'https:')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch((err) => {
+      console.warn('Service Worker registration failed:', err);
+    });
+  });
+}
+
