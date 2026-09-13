@@ -16,16 +16,20 @@ export const InstallPwaBanner: React.FC = () => {
     // 1. If already installed or running as PWA / Capacitor App, do not show
     const isStandalone = 
       window.matchMedia('(display-mode: standalone)').matches || 
-      (window.navigator as any).standalone === true;
+      (window.navigator as any).standalone === true ||
+      localStorage.getItem('iporadar_pwa_installed') === 'true';
 
     if (isStandalone) {
       return;
     }
 
-    // 2. Check if user dismissed recently
-    const dismissed = sessionStorage.getItem('iporadar_pwa_dismissed');
-    if (dismissed) {
-      return;
+    // 2. Check if user dismissed recently (remember for 14 days so it never pesters on reloads)
+    const dismissedAt = localStorage.getItem('iporadar_pwa_dismissed');
+    if (dismissedAt) {
+      const daysSince = (Date.now() - parseInt(dismissedAt, 10)) / (1000 * 60 * 60 * 24);
+      if (daysSince < 14) {
+        return;
+      }
     }
 
     // 3. Detect iOS
@@ -39,15 +43,24 @@ export const InstallPwaBanner: React.FC = () => {
       setDeferredPrompt(e as BeforeInstallPromptEvent);
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    // 5. Detect when user installs app so prompt is never shown again
+    const handleAppInstalled = () => {
+      localStorage.setItem('iporadar_pwa_installed', 'true');
+      setIsVisible(false);
+      setShowGuideModal(false);
+    };
 
-    // 5. Always display the Flipkart-style banner on mobile after 800ms
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    // 6. Display the banner on mobile after a short delay
     const timer = setTimeout(() => {
       setIsVisible(true);
-    }, 800);
+    }, 1200);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
       clearTimeout(timer);
     };
   }, []);
@@ -59,6 +72,7 @@ export const InstallPwaBanner: React.FC = () => {
         await deferredPrompt.prompt();
         const choice = await deferredPrompt.userChoice;
         if (choice.outcome === 'accepted') {
+          localStorage.setItem('iporadar_pwa_installed', 'true');
           setIsVisible(false);
           setDeferredPrompt(null);
           return;
@@ -75,7 +89,7 @@ export const InstallPwaBanner: React.FC = () => {
   const handleDismiss = () => {
     setIsVisible(false);
     setShowGuideModal(false);
-    sessionStorage.setItem('iporadar_pwa_dismissed', 'true');
+    localStorage.setItem('iporadar_pwa_dismissed', Date.now().toString());
   };
 
   if (!isVisible) return null;
