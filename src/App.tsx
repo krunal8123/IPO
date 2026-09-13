@@ -121,8 +121,8 @@ export const App: React.FC = () => {
       // Search
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
-        const match = 
-          ipo.name.toLowerCase().includes(q) || 
+        const match =
+          ipo.name.toLowerCase().includes(q) ||
           ipo.symbol.toLowerCase().includes(q) ||
           ipo.sector.toLowerCase().includes(q);
         if (!match) return false;
@@ -201,13 +201,13 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-[#070b14] text-slate-900 dark:text-slate-100 selection:bg-indigo-500 selection:text-white pb-16 md:pb-8 transition-colors duration-200">
-      
+
       {/* 1. Desktop Layout: Top Ticker followed by Desktop Navbar */}
       <div className="hidden md:block">
         <NoticeTicker ipos={ipos} isLive={isLive} onSelectIpo={(ipo) => setSelectedIpo(ipo)} />
-        <Navbar 
-          activeTab={activeTab} 
-          setActiveTab={setActiveTab} 
+        <Navbar
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           onOpenWatchlist={handleOpenWatchlist}
@@ -218,9 +218,9 @@ export const App: React.FC = () => {
 
       {/* 2. Mobile Layout: MobileHeader with safe-top first, then NoticeTicker cleanly below it */}
       <div className="md:hidden">
-        <MobileHeader 
-          activeTab={activeTab} 
-          onOpenWatchlist={handleOpenWatchlist} 
+        <MobileHeader
+          activeTab={activeTab}
+          onOpenWatchlist={handleOpenWatchlist}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           ipos={ipos}
@@ -237,15 +237,15 @@ export const App: React.FC = () => {
         {activeTab === 'ipos' && (
           <div>
             {/* Quick Metrics Bar */}
-            <QuickStatsBar 
-              ipos={ipos} 
+            <QuickStatsBar
+              ipos={ipos}
               selectedCategory={categoryFilter}
               selectedStatus={statusFilter}
-              onSelectFilter={handleFilterSelect} 
+              onSelectFilter={handleFilterSelect}
             />
 
             {/* Filter & Category Pills */}
-            <FilterBar 
+            <FilterBar
               category={categoryFilter}
               setCategory={setCategoryFilter}
               status={statusFilter}
@@ -291,10 +291,10 @@ export const App: React.FC = () => {
             {filteredIpos.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {filteredIpos.map(ipo => (
-                  <IpoCard 
-                    key={ipo.id} 
-                    ipo={ipo} 
-                    onSelect={(i) => setSelectedIpo(i)} 
+                  <IpoCard
+                    key={ipo.id}
+                    ipo={ipo}
+                    onSelect={(i) => setSelectedIpo(i)}
                   />
                 ))}
               </div>
@@ -307,7 +307,7 @@ export const App: React.FC = () => {
                   No IPOs Found
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
-                  {showWatchlistOnly 
+                  {showWatchlistOnly
                     ? "You haven't saved any IPOs to your watchlist yet. Tap the bookmark icon on any IPO card to save it."
                     : "No IPOs matched your current filter criteria. Try clearing search or selecting 'All Status'."}
                 </p>
@@ -329,26 +329,26 @@ export const App: React.FC = () => {
 
         {/* GMP Tab */}
         {activeTab === 'gmp' && (
-          <GmpTracker 
-            ipos={ipos} 
-            onSelectIpo={(i) => setSelectedIpo(i)} 
+          <GmpTracker
+            ipos={ipos}
+            onSelectIpo={(i) => setSelectedIpo(i)}
             searchQuery={searchQuery}
           />
         )}
 
         {/* Subscription Tab */}
         {activeTab === 'subscription' && (
-          <SubscriptionView 
-            ipos={ipos} 
-            onSelectIpo={(i) => setSelectedIpo(i)} 
+          <SubscriptionView
+            ipos={ipos}
+            onSelectIpo={(i) => setSelectedIpo(i)}
             searchQuery={searchQuery}
           />
         )}
 
         {/* Allotment Tab */}
         {activeTab === 'allotment' && (
-          <AllotmentChecker 
-            ipos={ipos} 
+          <AllotmentChecker
+            ipos={ipos}
             initialSelectedIpoId={allotmentTarget?.id}
             selectionTimestamp={allotmentTarget?.timestamp}
           />
@@ -356,7 +356,7 @@ export const App: React.FC = () => {
 
         {/* Calendar Tab */}
         {activeTab === 'calendar' && (
-          <IpoCalendar 
+          <IpoCalendar
             ipos={ipos}
             onSelectIpo={setSelectedIpo}
           />
@@ -364,8 +364,8 @@ export const App: React.FC = () => {
 
         {/* Buybacks Tab */}
         {activeTab === 'buyback' && (
-          <BuybackTracker 
-            buybacks={mockBuybacks} 
+          <BuybackTracker
+            buybacks={mockBuybacks}
           />
         )}
 
@@ -373,9 +373,9 @@ export const App: React.FC = () => {
 
       {/* 5. Prospectus / Detail Modal */}
       {selectedIpo && (
-        <IpoDetailModal 
+        <IpoDetailModal
           key={selectedIpo.id}
-          ipo={selectedIpo} 
+          ipo={selectedIpo}
           onClose={() => setSelectedIpo(null)}
           onOpenSubscription={() => {
             setActiveTab('subscription');
@@ -397,9 +397,9 @@ export const App: React.FC = () => {
       {/* 6. Mobile Bottom Tab Bar & PWA Banner (hidden when detail modal is open to prevent overlapping) */}
       {!selectedIpo && (
         <>
-          <MobileBottomNav 
-            activeTab={activeTab} 
-            setActiveTab={setActiveTab} 
+          <MobileBottomNav
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
           />
           <InstallPwaBanner />
         </>
@@ -415,7 +415,7 @@ export const App: React.FC = () => {
             Disclaimer: Grey Market Premium (GMP) rates and subject to sauda numbers are purely indicative market estimates. All financial metrics and prospectus details are for informational and educational purposes only. Please consult SEBI registered investment advisors before making investment decisions.
           </p>
           <p className="text-[10px] text-slate-400 pt-2">
-            © {new Date().getFullYear()} IPORadar. Ready for Web, Android & iOS with Capacitor.
+            © {new Date().getFullYear()} IPORadar
           </p>
         </div>
       </footer>

@@ -57,6 +57,17 @@ export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({
 
   const activeIpo = detailedIpo || ipo;
 
+  // Close modal on Escape key press
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   const bookmarked = activeIpo ? isInWatchlist(activeIpo.id) : false;
 
   const handleCopyIsin = () => {
@@ -270,7 +281,10 @@ export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({
   const maxInvest = activeIpo.category === 'sme' ? minInvest : minInvest * 13;
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
+    <div 
+      className="fixed inset-0 z-[80] flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in"
+      onClick={onClose}
+    >
       <div 
         className="w-full max-w-3xl max-h-[92vh] sm:max-h-[90vh] rounded-2xl sm:rounded-3xl overflow-hidden flex flex-col shadow-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800"
         onClick={(e) => e.stopPropagation()}
