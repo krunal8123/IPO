@@ -470,7 +470,7 @@ export const IpoCalendar: React.FC<IpoCalendarProps> = ({ ipos = [], events = []
               </h2>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Live Upstox Schedule
+                Live Market Schedule
               </span>
             </div>
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">

@@ -270,7 +270,7 @@ export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({
   const maxInvest = activeIpo.category === 'sme' ? minInvest : minInvest * 13;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
+    <div className="fixed inset-0 z-[80] flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
       <div 
         className="w-full max-w-3xl max-h-[92vh] sm:max-h-[90vh] rounded-2xl sm:rounded-3xl overflow-hidden flex flex-col shadow-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800"
         onClick={(e) => e.stopPropagation()}
@@ -1004,18 +1004,18 @@ export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({
         </div>
 
         {/* Modal Footer Actions */}
-        <div className="p-4 sm:p-5 border-t border-slate-200 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-900/90 flex flex-wrap items-center justify-between gap-3">
-          <div className="text-xs text-slate-500 dark:text-slate-400">
+        <div className="p-3.5 sm:p-5 border-t border-slate-200 dark:border-slate-800 bg-slate-50/95 dark:bg-slate-900/95 flex flex-col sm:flex-row items-center justify-between gap-3 safe-bottom shrink-0">
+          <div className="text-xs text-slate-500 dark:text-slate-400 text-center sm:text-left w-full sm:w-auto truncate">
             Designated Registrar: <strong className="text-slate-800 dark:text-slate-200">{activeIpo.registrar}</strong>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <button
               onClick={() => {
                 onClose();
                 onOpenSubscription?.(activeIpo);
               }}
-              className="px-4 py-2 text-xs font-bold rounded-xl border border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-colors cursor-pointer"
+              className="flex-1 sm:flex-initial px-4 py-2.5 text-xs font-bold rounded-xl border border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-colors cursor-pointer text-center"
             >
               Check Subscription
             </button>
@@ -1024,7 +1024,7 @@ export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({
                 onClose();
                 onOpenAllotment?.(activeIpo);
               }}
-              className="px-4 py-2 text-xs font-bold rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md hover:opacity-90 transition-opacity cursor-pointer"
+              className="flex-1 sm:flex-initial px-4 py-2.5 text-xs font-bold rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md hover:opacity-90 transition-opacity cursor-pointer text-center"
             >
               Check Allotment
             </button>

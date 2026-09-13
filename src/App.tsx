@@ -232,48 +232,6 @@ export const App: React.FC = () => {
 
       {/* 4. Main Body Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
-        
-        {/* Live Sync Status Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-2 mb-4 px-3 py-2 rounded-2xl bg-white/70 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800/80 backdrop-blur-md text-xs">
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isLive ? 'bg-emerald-400' : 'bg-amber-400'}`}></span>
-              <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${isLive ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
-            </span>
-            <span className="font-bold text-slate-800 dark:text-slate-200">
-              {isLive ? 'Live Real-Time Market Feed' : 'Offline Baseline Feed'}
-            </span>
-            {lastSyncTime && (
-              <>
-                <span className="text-slate-400 hidden sm:inline">•</span>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:inline">
-                  Updated: {lastSyncTime}
-                </span>
-              </>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowServerModal(true)}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-indigo-50 dark:bg-slate-800 dark:hover:bg-slate-700/80 text-slate-600 dark:text-slate-300 text-[11px] font-semibold transition-colors cursor-pointer"
-              title="Configure API Server IP"
-            >
-              <Settings className="w-3 h-3 text-slate-500" />
-              <span>Server</span>
-            </button>
-
-            <button
-              onClick={syncLiveData}
-              disabled={isSyncing}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-indigo-50 dark:bg-slate-800 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-300 font-semibold text-[11px] transition-colors disabled:opacity-50 cursor-pointer"
-              title="Refresh Live Data"
-            >
-              <RefreshCw className={`w-3 h-3 text-indigo-600 dark:text-indigo-400 ${isSyncing ? 'animate-spin' : ''}`} />
-              <span>{isSyncing ? 'Syncing...' : 'Refresh Live'}</span>
-            </button>
-          </div>
-        </div>
 
         {/* IPOs Tab */}
         {activeTab === 'ipos' && (
@@ -436,14 +394,16 @@ export const App: React.FC = () => {
         onSaved={syncLiveData}
       />
 
-      {/* 6. Mobile Bottom Tab Bar */}
-      <MobileBottomNav 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
-      />
-
-      {/* 6b. Add to Home Screen Banner (PWA Installation Prompt) */}
-      <InstallPwaBanner />
+      {/* 6. Mobile Bottom Tab Bar & PWA Banner (hidden when detail modal is open to prevent overlapping) */}
+      {!selectedIpo && (
+        <>
+          <MobileBottomNav 
+            activeTab={activeTab} 
+            setActiveTab={setActiveTab} 
+          />
+          <InstallPwaBanner />
+        </>
+      )}
 
       {/* 7. Footer */}
       <footer className="mt-16 border-t border-slate-200/80 dark:border-slate-800/80 pt-8 pb-24 md:pb-8 px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-500 dark:text-slate-400">
