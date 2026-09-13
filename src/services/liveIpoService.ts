@@ -2,7 +2,7 @@ import { Capacitor } from '@capacitor/core';
 import { IpoItem, AllotmentResult, KfinIssue, MufgIssue } from '../types/ipo';
 import { mockIpoList } from '../data/mockIpoData';
 
-export const DEFAULT_SERVER = 'https://a48442bf142892.lhr.life';
+export const DEFAULT_SERVER = 'https://ipo-wire.onrender.com';
 export const DEFAULT_LAN_SERVER = 'http://10.202.144.96:5001';
 
 export function getApiBaseUrl(): string {
