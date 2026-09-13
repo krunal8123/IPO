@@ -1,0 +1,151 @@
+export type IpoCategory = 'mainboard' | 'sme';
+export type IpoStatus = 'live' | 'upcoming' | 'closed' | 'listed';
+
+export interface SubscriptionBreakdown {
+  qib: number;        // Qualified Institutional
+  nii: number;        // Non-institutional / HNI
+  bNii?: number;      // Big HNI (> 10L)
+  sNii?: number;      // Small HNI (2L - 10L)
+  retail: number;     // Retail individual
+  employee?: number;  // Employee quota
+  total: number;      // Overall times
+  day: number;        // Current bidding day (1, 2, 3)
+  lastUpdated: string;
+}
+
+export interface GmpDetail {
+  gmpPrice: number;       // In INR, e.g. +45
+  gmpPercent: number;     // e.g. +38.5%
+  estimatedListingPrice: number;
+  trend: 'up' | 'down' | 'neutral';
+  kostakRate: number;     // In INR
+  subjectToSauda: number; // In INR
+  lastUpdated: string;
+}
+
+export interface FinancialYear {
+  year: string;
+  revenue: number; // in Cr
+  expense: number; // in Cr
+  pat: number;     // Profit after tax in Cr
+  netWorth: number;// in Cr
+}
+
+export interface IpoItem {
+  id: string;
+  symbol: string;
+  name: string;
+  category: IpoCategory;
+  status: IpoStatus;
+  badge?: string;
+  logo: string;
+  sector: string;
+  priceBandMin: number;
+  priceBandMax: number;
+  lotSize: number;
+  minInvestment: number;
+  issueSizeCr: number;
+  freshIssueCr: number;
+  ofsCr: number;
+  openDate: string;
+  closeDate: string;
+  allotmentDate: string;
+  refundDate: string;
+  creditDate: string;
+  listingDate: string;
+  listingPrice?: number;
+  currentPrice?: number;
+  listingGainPercent?: number;
+  registrar: string;
+  leadManagers: string[];
+  exchange: string[];
+  gmp: GmpDetail;
+  subscription: SubscriptionBreakdown;
+  financials: FinancialYear[];
+  about: string;
+  objectives: string[];
+  pros: string[];
+  cons: string[];
+  analystRating: 'Apply' | 'Avoid' | 'Neutral' | 'Apply for Listing Gain';
+  ratingScore: number; // out of 5
+  kfinClientId?: string;
+  mufgClientId?: string;
+  isin?: string;
+  rhpUrl?: string;
+  drhpUrl?: string;
+  faceValue?: number;
+  mandateEndDate?: string;
+  cutOffPrice?: number;
+  tickSize?: number;
+  dailyStartTime?: string;
+  dailyEndTime?: string;
+  preApplyStartDate?: string;
+  allotmentStartDate?: string;
+  minimumQuantity?: number;
+  investorCategories?: string[];
+  companyWebsite?: string;
+  registrarDetails?: {
+    name: string;
+    email?: string;
+    contactName?: string;
+    contactNumber?: string;
+    website?: string;
+  };
+}
+
+export interface RegistrarDetails {
+  name: string;
+  email?: string;
+  contactName?: string;
+  contactNumber?: string;
+  website?: string;
+}
+
+export interface KfinIssue {
+  clientId: string;
+  name: string;
+}
+
+export interface MufgIssue {
+  clientId: string;
+  name: string;
+}
+
+export interface AllotmentResult {
+  ipoId: string;
+  ipoName: string;
+  applicantName: string;
+  pan: string;
+  applicationNo: string;
+  dpId: string;
+  sharesApplied: number;
+  sharesAllotted: number;
+  status: 'Allotted' | 'Not Allotted' | 'Under Process' | 'Not Found';
+  finalizedDate?: string;
+  registrarPortalUrl?: string;
+  refundAmount: number;
+  message: string;
+  registrar: string;
+}
+
+export interface BuybackItem {
+  id: string;
+  companyName: string;
+  symbol: string;
+  status: 'open' | 'upcoming' | 'closed';
+  buybackPrice: number;
+  currentMarketPrice: number;
+  premiumPercent: number;
+  recordDate: string;
+  issueSizeCr: number;
+  type: 'Tender Offer' | 'Open Market';
+}
+
+export interface CalendarEvent {
+  date: string;
+  events: {
+    ipoName: string;
+    category: IpoCategory;
+    type: 'Open' | 'Close' | 'Allotment' | 'Refund' | 'Credit' | 'Listing';
+  }[];
+}

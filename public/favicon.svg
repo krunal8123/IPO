@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4F46E5" />
+      <stop offset="100%" stop-color="#7C3AED" />
+    </linearGradient>
+    <linearGradient id="radarSweep" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="100%" stop-color="#818CF8" />
+    </linearGradient>
+  </defs>
+  <!-- Rounded App Icon Background -->
+  <rect width="100" height="100" rx="26" fill="url(#bg)" />
+  
+  <!-- Outer Radar Ring -->
+  <circle cx="50" cy="50" r="32" stroke="rgba(255,255,255,0.25)" stroke-width="3" fill="none" />
+  
+  <!-- Middle Radar Ring -->
+  <circle cx="50" cy="50" r="20" stroke="rgba(255,255,255,0.4)" stroke-width="3" fill="none" />
+  
+  <!-- Radar Crosshairs -->
+  <line x1="18" y1="50" x2="82" y2="50" stroke="rgba(255,255,255,0.2)" stroke-width="2" stroke-dasharray="2,2" />
+  <line x1="50" y1="18" x2="50" y2="82" stroke="rgba(255,255,255,0.2)" stroke-width="2" stroke-dasharray="2,2" />
+  
+  <!-- Center Radar Ping -->
+  <circle cx="50" cy="50" r="7" fill="#38BDF8" />
+  <circle cx="50" cy="50" r="12" stroke="#38BDF8" stroke-width="2" fill="none" opacity="0.6" />
+  
+  <!-- Blip Detection Dot -->
+  <circle cx="66" cy="34" r="4" fill="#4ADE80" />
+</svg>

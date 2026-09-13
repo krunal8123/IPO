@@ -1,0 +1,107 @@
+{
+  "veegaland-developers": {
+    "domain": "veegaland.in",
+    "logo": "https://images.unsplash.com/photo-1541888946425-d0fbb1861593?w=128&auto=format&fit=crop&q=80",
+    "about": "Veegaland Developers Limited is a premier South Indian real estate developer specializing in high-quality, eco-friendly residential condominiums, commercial hubs, and township communities with over 4.5 million sq. ft. developed.",
+    "objectives": [
+      "Funding ongoing construction costs for residential projects in Kochi and Bengaluru",
+      "Acquisition of land development rights for green-certified township projects",
+      "Prepayment or repayment of certain outstanding borrowings",
+      "General corporate purposes"
+    ],
+    "pros": [
+      "Proven execution track record with over 4.5 million sq. ft. of residential and commercial spaces delivered on schedule.",
+      "Strong brand equity in green-certified sustainable housing with IGBC Platinum and Gold ratings.",
+      "Conservative balance sheet leverage with debt-to-equity below 0.35x compared to the industry average of 0.82x."
+    ],
+    "cons": [
+      "Geographical concentration risk with over 75% of active project portfolio located in Kerala and Karnataka.",
+      "Susceptibility to regulatory delays in municipal building plan sanctions and state RERA clearance timelines.",
+      "Fluctuations in raw material prices (cement, structural steel) impacting project gross margins."
+    ]
+  },
+  "maharaja-speedex-india": {
+    "domain": "maharajaspeedex.com",
+    "logo": "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=128&auto=format&fit=crop&q=80",
+    "about": "Maharaja Speedex India Limited is a rapidly expanding multimodal logistics and supply chain operator providing express parcel distribution, full truckload (FTL), and third-party warehousing across 450+ commercial routes in India.",
+    "objectives": [
+      "Purchase of specialized commercial freight vehicles to expand company-owned fleet",
+      "Setting up automated sorting hubs in Delhi NCR, Mumbai, and Bengaluru",
+      "Investment in cloud-native automated fleet tracking and dispatch technology",
+      "General corporate operations"
+    ],
+    "pros": [
+      "Comprehensive multimodal network covering 450+ commercial transit routes across Tier-1, Tier-2, and Tier-3 industrial clusters.",
+      "Proprietary IoT fleet management platform enabling real-time telemetry, automated dispatch, and route optimization.",
+      "Sticky relationship with institutional e-commerce, pharmaceutical, and consumer durable retail clients."
+    ],
+    "cons": [
+      "Operating margin vulnerability to diesel fuel price surges and interstate highway toll revisions.",
+      "Intense competition from organized nationwide 3PL players and fragmented unorganized regional operators.",
+      "Working capital intensity tied to extended credit terms granted to large enterprise corporate clients."
+    ]
+  },
+  "om-galaxy": {
+    "domain": "omgalaxy.in",
+    "logo": "https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=128&auto=format&fit=crop&q=80",
+    "about": "Om Galaxy Limited manufactures specialized precision industrial valves, high-pressure fluid control systems, and pipeline manifolds for petrochemical refineries, power generation plants, and fertilizer complexes.",
+    "objectives": [
+      "Expansion of precision valve casting and CNC machining capacity at Gujarat plant",
+      "Upgrading testing laboratory to obtain API-6D and ISO 15848 fugitive emissions certifications",
+      "Funding incremental working capital requirements",
+      "General corporate purposes"
+    ],
+    "pros": [
+      "High-margin custom engineering capabilities in severe-service industrial valves and cryogenic fluid systems.",
+      "Long-term vendor approvals with national public sector refineries and leading private petrochemical giants.",
+      "Stable recurring revenue stream driven by mandatory statutory valve overhaul and replacement cycles every 18 months."
+    ],
+    "cons": [
+      "Vulnerability to raw material cost swings in stainless steel, alloy steel, and forged bronze billets.",
+      "Dependence on ongoing capital expenditure cycles in the domestic oil refining and chemical processing sectors.",
+      "Competition from low-cost valve imports manufactured in China and Southeast Asia."
+    ]
+  },
+  "panchatv-bharat": {
+    "domain": "panchatvbharat.com",
+    "logo": "https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=128&auto=format&fit=crop&q=80",
+    "about": "Panchatv Bharat Limited is a regional media and broadcast entertainment company operating satellite television channels, regional news portals, and digital regional content syndication networks across Northern and Western India.",
+    "objectives": [
+      "Procurement of 4K digital broadcast transmission and uplinking infrastructure",
+      "Development of proprietary regional OTT streaming mobile application and content library",
+      "Expansion of regional news bureaus across rural Uttar Pradesh, Bihar, and Rajasthan",
+      "General corporate requirements"
+    ],
+    "pros": [
+      "Deep rural and semi-urban audience penetration in high-growth Hindi-speaking regional entertainment markets.",
+      "Asset-light broadcast distribution model utilizing shared satellite transponders and cloud uplinking.",
+      "Diversified advertising advertiser base comprising local regional businesses, FMCG majors, and public sector campaigns."
+    ],
+    "cons": [
+      "Structural migration of younger audiences from linear television broadcasting to short-form digital streaming.",
+      "Seasonality in advertising revenues heavily concentrated around pre-election periods and festival quarters.",
+      "Strict regulatory compliance monitoring by the Ministry of Information & Broadcasting and TRAI tariff guidelines."
+    ]
+  },
+  "raksan-transformers": {
+    "domain": "raksantransformers.com",
+    "logo": "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=128&auto=format&fit=crop&q=80",
+    "about": "Raksan Transformers Limited is a specialized power infrastructure company manufacturing electrical power transformers, distribution transformers, and solar inverter duty substations up to 33kV class.",
+    "objectives": [
+      "Setting up a new automated testing and CRGO lamination processing bay",
+      "Repayment of certain unsecured working capital borrowings",
+      "Funding long-term working capital requirements for utility EPC tenders",
+      "General corporate operations"
+    ],
+    "pros": [
+      "Robust order book of ₹185 Cr providing strong revenue predictability for the next 18 months.",
+      "Approved vendor accreditation with state electricity distribution companies (DISCOMs) and renewable EPC contractors.",
+      "Specialized engineering expertise in solar and wind park inverter duty dry-type transformers."
+    ],
+    "cons": [
+      "Customer concentration risk with state-run power DISCOMs accounting for over 65% of order deliveries.",
+      "Volatility in raw material inputs like electrolytic copper wire rods and cold-rolled grain-oriented (CRGO) steel.",
+      "Extended payment realization cycles typical of state government power procurement tenders."
+    ]
+  }
+}
