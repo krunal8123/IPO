@@ -1,5 +1,5 @@
 {
-  "id": "iporadar-app",
+  "id": "./",
   "name": "IPORadar - Live IPO & GMP Terminal",
   "short_name": "IPORadar",
   "description": "Live Mainboard & SME IPOs, Real-Time GMP, Allotment Status, and Financial Intelligence",

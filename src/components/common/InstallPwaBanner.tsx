@@ -41,6 +41,7 @@ export const InstallPwaBanner: React.FC = () => {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
+      setIsVisible(true);
     };
 
     // 5. Detect when user installs app so prompt is never shown again
@@ -53,15 +54,18 @@ export const InstallPwaBanner: React.FC = () => {
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
 
-    // 6. Display the banner on mobile after a short delay
-    const timer = setTimeout(() => {
-      setIsVisible(true);
-    }, 1200);
+    // 6. On iOS (where beforeinstallprompt does not exist), show banner after 1.5s
+    let iosTimer: any = null;
+    if (isApple) {
+      iosTimer = setTimeout(() => {
+        setIsVisible(true);
+      }, 1500);
+    }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
-      clearTimeout(timer);
+      if (iosTimer) clearTimeout(iosTimer);
     };
   }, []);
 
