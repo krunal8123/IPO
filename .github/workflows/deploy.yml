@@ -1,0 +1,62 @@
+name: Build and Deploy IPORadar to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  schedule:
+    # Runs during Indian Stock Market hours (Mon-Fri)
+    # 04:00 UTC = 09:30 AM IST (Market Open)
+    # 06:00 UTC = 11:30 AM IST
+    # 08:00 UTC = 01:30 PM IST
+    # 10:00 UTC = 03:30 PM IST (Market Close)
+    # 12:00 UTC = 05:30 PM IST (Evening Post-Market Final Subs & GMP)
+    - cron: '0 4,6,8,10,12 * * 1-5'
+  workflow_dispatch: # Allows manual trigger anytime from GitHub Actions tab
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci || npm install
+
+      - name: Run Market Data Scraper
+        run: node server/buildStaticData.js
+
+      - name: Build Web Application
+        run: npm run build
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

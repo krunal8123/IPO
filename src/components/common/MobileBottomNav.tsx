@@ -16,8 +16,8 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ activeTab, set
   ];
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 safe-bottom bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border-t border-slate-200/80 dark:border-slate-800/80 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.4)]">
-      <div className="grid grid-cols-5 h-14">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 safe-bottom bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border-t border-slate-200/80 dark:border-slate-800/80 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_24px_rgba(0,0,0,0.5)]">
+      <div className="grid grid-cols-5 h-15">
         {tabs.map(tab => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -25,19 +25,24 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ activeTab, set
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex flex-col items-center justify-center gap-1 transition-all ${
+              className={`relative flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer ${
                 isActive 
-                  ? 'text-indigo-600 dark:text-indigo-400 font-semibold scale-105' 
+                  ? 'text-indigo-600 dark:text-indigo-400 font-bold' 
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
               }`}
             >
-              <div className="relative">
-                <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5px]' : 'stroke-2'}`} />
+              {isActive && (
+                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-1 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 shadow-sm shadow-indigo-500/50" />
+              )}
+              <div className="relative mt-1">
+                <Icon className={`w-5 h-5 transition-transform ${isActive ? 'stroke-[2.5px] scale-110' : 'stroke-[1.8px]'}`} />
                 {tab.badge && (
-                  <span className="absolute -top-1 -right-2 w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                  <span className="absolute -top-1 -right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-slate-900 animate-pulse" />
                 )}
               </div>
-              <span className="text-[10px] tracking-tight">{tab.label}</span>
+              <span className={`text-[10px] tracking-tight ${isActive ? 'font-black' : 'font-medium'}`}>
+                {tab.label}
+              </span>
             </button>
           );
         })}

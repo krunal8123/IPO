@@ -131,9 +131,18 @@
 .animate-marquee {
   display: flex;
   width: max-content;
-  animation: marquee 60s linear infinite;
+  animation: marquee 120s linear infinite;
 }
 
 .animate-marquee:hover {
   animation-play-state: paused;
+}
+
+/* Hide scrollbar for Chrome, Safari, Opera, Edge, Firefox */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

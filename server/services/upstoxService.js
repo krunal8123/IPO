@@ -105,13 +105,51 @@ function generateLogoSvg(name) {
 }
 
 function resolveCompanyBranding(item, cleanName) {
+  // 1. Direct logo from Upstox API if available
+  const upstoxDirectLogo = item.logo_url || item.logo || item.icon_url || item.image_url || item.company_logo || item.company_logo_url || item.media?.logo_url || item.media?.logo;
+  if (upstoxDirectLogo && typeof upstoxDirectLogo === 'string' && upstoxDirectLogo.trim().length > 0) {
+    return {
+      logo: upstoxDirectLogo.trim(),
+      companyWebsite: item.company_website || item.website
+    };
+  }
+
   const knownDomains = {
-    'manika': 'manikaplastech.com',
     'veegaland': 'veegaland.in',
     'national-stock-exchange': 'nseindia.com',
     'nse': 'nseindia.com',
-    'ss-retail': 'ssmobile.com',
+    'manika': 'manikaplastech.com',
+    'maharaja': 'maharajaspeedex.com',
+    'om-galaxy': 'omgalaxy.in',
+    'panchatv': 'panchatvbharat.com',
+    'raksan': 'raksantransformers.com',
+    'century': 'centurybusinessmedia.com',
+    'injecto': 'injecto.in',
+    'apana': 'apanalogistics.com',
+    'pranav': 'pranavconstructions.com',
+    'glass-wall': 'glasswallsystems.in',
+    'kanohar': 'kanohar.com',
+    'prasol': 'prasolchem.com',
+    'amtech': 'amtechesters.com',
+    'asset-reconstruction': 'arcil.co.in',
+    'infrax': 'infrax.in',
+    'karamtara': 'karamtara.com',
+    'lcc': 'lccprojects.com',
+    'manipal': 'manipalgroup.info',
+    'rentomojo': 'rentomojo.com',
+    'steamhouse': 'steamhouse.in',
+    'vinod': 'vinodtexworld.com',
+    'quanto': 'quantoagroworld.com',
+    'shakti': 'shaktipolytarp.com',
+    'vama': 'vamawovenfab.com',
     'hero-motors': 'heromotors.com',
+    'jindal': 'jindalsupreme.com',
+    'ss-retail': 'ssmobile.com',
+    'sonaselection': 'sonaselection.com',
+    'kheria': 'kheriaautocomp.com',
+    'spectra': 'spectratechnology.com',
+    'axiom': 'axiomgas.com',
+    'a-one': 'aonesteels.com',
     'parle': 'parleproducts.com',
     'jio': 'jio.com',
     'flipkart': 'flipkart.com',
@@ -152,9 +190,11 @@ function resolveCompanyBranding(item, cleanName) {
     } catch {}
   }
 
+  // Try unavatar or clearbit based on sanitized company name domain
+  const cleanDomain = cleanName.toLowerCase().replace(/[^a-z0-9]/g, '');
   return {
-    logo: generateLogoSvg(cleanName),
-    companyWebsite: undefined
+    logo: `https://www.google.com/s2/favicons?domain=${cleanDomain}.com&sz=128`,
+    companyWebsite: `https://${cleanDomain}.com`
   };
 }
 

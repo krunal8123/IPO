@@ -1,21 +1,33 @@
 import React, { useState } from 'react';
 import { IpoItem } from '../../types/ipo';
-import { Flame, Calculator, TrendingUp, ArrowUpRight, Search, Sparkles, Minus, Plus } from 'lucide-react';
+import { Flame, Calculator, TrendingUp, ArrowUpRight, Search, Sparkles, Minus, Plus, ChevronRight } from 'lucide-react';
 import { Badge } from '../common/Badge';
 import { CompanyLogo } from '../common/CompanyLogo';
 
 interface GmpTrackerProps {
   ipos: IpoItem[];
   onSelectIpo: (ipo: IpoItem) => void;
+  searchQuery?: string;
 }
 
-export const GmpTracker: React.FC<GmpTrackerProps> = ({ ipos, onSelectIpo }) => {
+export const GmpTracker: React.FC<GmpTrackerProps> = ({ ipos, onSelectIpo, searchQuery = '' }) => {
   const [calcLots, setCalcLots] = useState<number>(1);
   const [selectedCalcIpo, setSelectedCalcIpo] = useState<string>(ipos[0]?.id || '');
   const [filterCat, setFilterCat] = useState<'all' | 'mainboard' | 'sme'>('all');
 
   const filtered = ipos
-    .filter(i => filterCat === 'all' || i.category === filterCat)
+    .filter(i => {
+      if (filterCat !== 'all' && i.category !== filterCat) return false;
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const match =
+          i.name.toLowerCase().includes(q) ||
+          i.symbol.toLowerCase().includes(q) ||
+          i.sector.toLowerCase().includes(q);
+        if (!match) return false;
+      }
+      return true;
+    })
     .sort((a, b) => b.gmp.gmpPercent - a.gmp.gmpPercent);
 
   const activeIpo = ipos.find(i => i.id === selectedCalcIpo) || ipos[0];
@@ -186,8 +198,79 @@ export const GmpTracker: React.FC<GmpTrackerProps> = ({ ipos, onSelectIpo }) => 
         </div>
       </div>
 
-      {/* GMP Data Table */}
-      <div className="glass-card rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
+      {/* Mobile Card View (md:hidden) */}
+      <div className="md:hidden space-y-3">
+        {filtered.map(ipo => {
+          const profitPerLot = ipo.gmp.gmpPrice * ipo.lotSize;
+          return (
+            <div
+              key={ipo.id}
+              onClick={() => onSelectIpo(ipo)}
+              className="glass-card rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800/80 hover:border-indigo-500/50 transition-all cursor-pointer space-y-3"
+            >
+              {/* Header: Company, Category, Close Date */}
+              <div className="flex items-start justify-between gap-2.5">
+                <div className="flex items-start gap-2.5 min-w-0">
+                  <CompanyLogo logo={ipo.logo} name={ipo.name} symbol={ipo.symbol} size="sm" />
+                  <div className="min-w-0">
+                    <h4 className="font-bold text-sm text-slate-900 dark:text-white truncate">
+                      {ipo.name}
+                    </h4>
+                    <div className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                      <span className="font-bold uppercase tracking-wider px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-[10px]">
+                        {ipo.category}
+                      </span>
+                      <span>•</span>
+                      <span>Lot: {ipo.lotSize} sh</span>
+                      <span>•</span>
+                      <span>Closes {ipo.closeDate}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* GMP Badge */}
+                <div className="inline-flex items-center gap-1 font-black text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/20 px-2.5 py-1 rounded-xl shrink-0">
+                  <TrendingUp className="w-3.5 h-3.5" />
+                  <span>+₹{ipo.gmp.gmpPrice}</span>
+                  <span className="text-[10px]">({ipo.gmp.gmpPercent}%)</span>
+                </div>
+              </div>
+
+              {/* 3-Column Metrics Grid */}
+              <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                  <span className="text-[10px] text-slate-400 block font-semibold">Issue Price</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200">₹{ipo.priceBandMax}</span>
+                </div>
+                <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                  <span className="text-[10px] text-slate-400 block font-semibold">Est. Listing</span>
+                  <span className="font-extrabold text-slate-900 dark:text-white">₹{ipo.gmp.estimatedListingPrice}</span>
+                </div>
+                <div className="p-2 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-900/40">
+                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 block font-semibold">Est. Profit/Lot</span>
+                  <span className="font-black text-emerald-600 dark:text-emerald-400">+₹{profitPerLot.toLocaleString('en-IN')}</span>
+                </div>
+              </div>
+
+              {/* Footer: Kostak / Subject to Sauda & Detail Link */}
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between text-xs">
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-2">
+                  <span>Kostak: <strong className="text-slate-700 dark:text-slate-300">₹{ipo.gmp.kostakRate}</strong></span>
+                  <span>•</span>
+                  <span>Sauda: <strong className="text-slate-700 dark:text-slate-300">₹{ipo.gmp.subjectToSauda}</strong></span>
+                </div>
+                <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-0.5">
+                  <span>View</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Desktop GMP Data Table (hidden md:block) */}
+      <div className="hidden md:block glass-card rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-100/90 dark:bg-slate-800/90 text-slate-600 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-700">

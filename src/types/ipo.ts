@@ -11,6 +11,7 @@ export interface SubscriptionBreakdown {
   total: number;      // Overall times
   day: number;        // Current bidding day (1, 2, 3)
   lastUpdated: string;
+  applications?: number; // Total applications received
 }
 
 export interface GmpDetail {
@@ -39,6 +40,7 @@ export interface IpoItem {
   status: IpoStatus;
   badge?: string;
   logo: string;
+  logo_url?: string;
   sector: string;
   priceBandMin: number;
   priceBandMax: number;

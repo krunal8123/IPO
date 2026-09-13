@@ -1,15 +1,15 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { IpoItem, AllotmentResult, KfinIssue, MufgIssue } from '../../types/ipo';
 import { liveIpoService } from '../../services/liveIpoService';
-import { 
-  CheckCircle2, 
-  Search, 
-  ExternalLink, 
-  ShieldCheck, 
-  AlertCircle, 
-  Clock, 
-  HelpCircle, 
-  RotateCcw, 
+import {
+  CheckCircle2,
+  Search,
+  ExternalLink,
+  ShieldCheck,
+  AlertCircle,
+  Clock,
+  HelpCircle,
+  RotateCcw,
   Sparkles,
   Building2,
   Calendar,
@@ -130,13 +130,6 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
 
   const [selectedIpoId, setSelectedIpoId] = useState<string>('');
 
-  // Auto-initialize selectedIpoId once issues load
-  useEffect(() => {
-    if (!selectedIpoId && allSearchableOptions.length > 0) {
-      setSelectedIpoId(allSearchableOptions[0].id);
-    }
-  }, [allSearchableOptions, selectedIpoId]);
-
   // Auto-select and focus input when navigated from IPO Detail Dialog
   useEffect(() => {
     if (!initialSelectedIpoId) return;
@@ -201,8 +194,8 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
   const filteredOptions = useMemo(() => {
     if (!filterQuery.trim()) return allSearchableOptions;
     const q = filterQuery.toLowerCase().trim();
-    return allSearchableOptions.filter(item => 
-      item.name.toLowerCase().includes(q) || 
+    return allSearchableOptions.filter(item =>
+      item.name.toLowerCase().includes(q) ||
       item.registrar.toLowerCase().includes(q) ||
       item.group.toLowerCase().includes(q)
     );
@@ -219,6 +212,8 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
 
   // Determine active IPO details directly from the selected ID
   const currentIpo = useMemo(() => {
+    if (!selectedIpoId) return null;
+
     // 1. Direct MUFG issue match
     const mufg = mufgIssues.find(m => m.clientId === selectedIpoId);
     if (mufg) {
@@ -257,7 +252,7 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
     const feed = eligibleIpos.find(i => i.id === selectedIpoId);
     if (feed) {
       const cleanFeedName = feed.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-      
+
       // Auto-attach MUFG clientId if feed item matches an MUFG registry issue
       const matchedMufg = mufgIssues.find(m => {
         const mClean = m.name.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -287,26 +282,8 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
       return feed;
     }
 
-    // 4. Fallback to top option
-    if (allSearchableOptions.length > 0) {
-      const first = allSearchableOptions[0];
-      return {
-        id: first.id,
-        name: first.name,
-        registrar: first.registrar,
-        mufgClientId: first.mufgClientId,
-        kfinClientId: first.kfinClientId,
-        status: 'listed' as const,
-        symbol: first.name.split(' ')[0],
-        allotmentDate: 'Declared',
-        lotSize: 100,
-        priceBandMax: 140,
-        category: 'mainboard' as const
-      };
-    }
-
-    return eligibleIpos[0];
-  }, [selectedIpoId, mufgIssues, kfinIssues, eligibleIpos, allSearchableOptions]);
+    return null;
+  }, [selectedIpoId, mufgIssues, kfinIssues, eligibleIpos]);
 
   const isKfinIssue = useMemo(() => {
     if (!currentIpo) return false;
@@ -331,10 +308,10 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
 
     try {
       const res = await liveIpoService.checkAllotment(
-        currentIpo.id, 
-        searchType, 
-        queryValue, 
-        ipos, 
+        currentIpo.id,
+        searchType,
+        queryValue,
+        ipos,
         currentIpo.kfinClientId,
         currentIpo.name,
         currentIpo.mufgClientId
@@ -397,6 +374,41 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
                 </span>
               </div>
 
+              {/* Quick Select Trending/Recent Issues Pills */}
+              {allSearchableOptions.length > 0 && (
+                <div className="mb-3">
+                  <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1.5 flex items-center gap-1">
+                    <Sparkles className="w-3 h-3 text-amber-500" />
+                    <span>Quick Select Recent Issues:</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 no-scrollbar -mx-1 px-1">
+                    {allSearchableOptions.slice(0, 8).map(opt => {
+                      const isSelected = opt.id === selectedIpoId;
+                      return (
+                        <button
+                          key={opt.id}
+                          type="button"
+                          onClick={() => selectIssue(opt.id)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0 transition-all cursor-pointer flex items-center gap-1.5 ${
+                            isSelected
+                              ? 'bg-indigo-600 text-white shadow-xs font-bold'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
+                          }`}
+                        >
+                          <span className="truncate max-w-[120px] sm:max-w-[160px]">{opt.name}</span>
+                          {opt.group === 'MUFG Intime' && (
+                            <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-blue-500'}`} />
+                          )}
+                          {opt.group === 'KFintech' && (
+                            <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-emerald-500'}`} />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Interactive Searchable Combobox */}
               <div ref={searchContainerRef} className="relative mb-2.5">
                 <div className="relative">
@@ -452,9 +464,8 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
                             key={item.id}
                             type="button"
                             onClick={() => selectIssue(item.id)}
-                            className={`w-full text-left px-3.5 py-2.5 flex items-center justify-between gap-2 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-colors ${
-                              isSelected ? 'bg-indigo-50/80 dark:bg-indigo-950/60 font-bold text-indigo-600 dark:text-indigo-400' : 'text-slate-800 dark:text-slate-200'
-                            }`}
+                            className={`w-full text-left px-3.5 py-2.5 flex items-center justify-between gap-2 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-colors ${isSelected ? 'bg-indigo-50/80 dark:bg-indigo-950/60 font-bold text-indigo-600 dark:text-indigo-400' : 'text-slate-800 dark:text-slate-200'
+                              }`}
                           >
                             <div className="min-w-0 pr-2">
                               <div className="text-xs font-semibold truncate flex items-center gap-1.5">
@@ -484,6 +495,7 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
                 onChange={(e) => selectIssue(e.target.value)}
                 className="w-full text-xs sm:text-sm font-semibold p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500/40 cursor-pointer"
               >
+                <option value="">-- Choose an IPO to Check Allotment --</option>
                 {/* 1. Official MUFG Intime Issues */}
                 {mufgIssues.length > 0 && (
                   <optgroup label={`MUFG Intime / Link Intime (${mufgIssues.length} Live Issues)`}>
@@ -517,45 +529,53 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
               </select>
             </div>
 
+            {/* Empty selection guide prompt */}
+            {!selectedIpoId && (
+              <div className="p-3.5 rounded-xl bg-slate-100/70 dark:bg-slate-800/50 border border-dashed border-slate-300 dark:border-slate-700 text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2.5">
+                <Info className="w-4 h-4 text-indigo-500 shrink-0" />
+                <span>Please select an IPO from the quick pills, search, or dropdown above to check allotment.</span>
+              </div>
+            )}
+
             {/* Selected IPO Highlights */}
             {currentIpo && (
-              <div className="p-3.5 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200/60 dark:border-indigo-800/40 flex flex-wrap items-center justify-between gap-3 text-xs">
+              <div className="p-3.5 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200/60 dark:border-indigo-800/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                 <div className="flex items-center gap-2.5">
                   {'logo' in currentIpo && currentIpo.logo ? (
-                    <img src={currentIpo.logo} alt={currentIpo.name} className="w-8 h-8 rounded-lg object-contain bg-white p-1 border border-slate-200" />
+                    <img src={currentIpo.logo} alt={currentIpo.name} className="w-9 h-9 rounded-xl object-contain bg-white p-1 border border-slate-200 shadow-xs shrink-0" />
                   ) : (
-                    <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-black text-xs">
+                    <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black text-xs shrink-0 shadow-xs">
                       {currentIpo.name.slice(0, 2).toUpperCase()}
                     </div>
                   )}
-                  <div>
-                    <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                      <span>{currentIpo.name}</span>
+                  <div className="min-w-0">
+                    <div className="font-bold text-slate-900 dark:text-white flex flex-wrap items-center gap-1.5">
+                      <span className="truncate">{currentIpo.name}</span>
                       {isMufgIssue && (
-                        <span className="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-blue-600 text-white inline-flex items-center gap-0.5 shadow-sm">
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-blue-600 text-white inline-flex items-center gap-0.5 shadow-xs shrink-0">
                           <Zap className="w-2.5 h-2.5" /> MUFG Live API
                         </span>
                       )}
                       {isKfinIssue && !isMufgIssue && (
-                        <span className="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-emerald-500 text-white inline-flex items-center gap-0.5 shadow-sm">
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-emerald-500 text-white inline-flex items-center gap-0.5 shadow-xs shrink-0">
                           <Zap className="w-2.5 h-2.5" /> KFin Live API
                         </span>
                       )}
                     </div>
-                    <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
                       Registrar: <span className="font-semibold text-indigo-600 dark:text-indigo-400">{currentIpo.registrar}</span>
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 text-[11px] font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                    <Calendar className="w-3 h-3 text-slate-400" /> Allotment: {currentIpo.allotmentDate || 'Declared'}
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 text-[11px] font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                    <Calendar className="w-3 h-3 text-slate-400" /> {currentIpo.allotmentDate || 'Declared'}
                   </span>
                   <a
                     href={isMufgIssue ? 'https://in.mpms.mufg.com/Initial_Offer/public-issues.html' : isKfinIssue ? 'https://ipostatus.kfintech.com/' : (currentIpo.registrar || '').toLowerCase().includes('bigshare') ? 'https://ipo.bigshareonline.com/' : 'https://in.mpms.mufg.com/Initial_Offer/public-issues.html'}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold transition-colors"
+                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold transition-colors"
                   >
                     <span>Portal</span>
                     <ExternalLink className="w-3 h-3" />
@@ -571,25 +591,32 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
               </label>
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { id: 'pan', label: 'PAN Card Number' },
-                  { id: 'appNo', label: 'Application Number' },
-                  { id: 'dpId', label: 'DP / Client ID' }
-                ].map(type => (
-                  <button
-                    key={type.id}
-                    type="button"
-                    onClick={() => {
-                      setSearchType(type.id as any);
-                      setResult(null);
-                    }}
-                    className={`py-2 text-xs font-bold rounded-xl border transition-all cursor-pointer ${searchType === type.id
-                        ? 'bg-indigo-600 text-white border-transparent shadow-xs'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  { id: 'pan', label: 'PAN Card', shortLabel: 'PAN', icon: CreditCard },
+                  { id: 'appNo', label: 'Application No', shortLabel: 'App No', icon: Hash },
+                  { id: 'dpId', label: 'DP / Client ID', shortLabel: 'DP ID', icon: User }
+                ].map(type => {
+                  const Icon = type.icon;
+                  const isSelected = searchType === type.id;
+                  return (
+                    <button
+                      key={type.id}
+                      type="button"
+                      onClick={() => {
+                        setSearchType(type.id as any);
+                        setResult(null);
+                      }}
+                      className={`py-2 px-2 text-xs font-bold rounded-xl border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                        isSelected
+                          ? 'bg-indigo-600 text-white border-transparent shadow-xs'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
                       }`}
-                  >
-                    {type.label}
-                  </button>
-                ))}
+                    >
+                      <Icon className="w-3.5 h-3.5 shrink-0" />
+                      <span className="hidden sm:inline">{type.label}</span>
+                      <span className="sm:hidden">{type.shortLabel}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -598,49 +625,59 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
                 Enter {searchType === 'pan' ? 'Permanent Account Number (PAN)' : searchType === 'appNo' ? 'Application Number' : 'DP / Client ID (16 digits)'}
               </label>
-              <input
-                ref={queryInputRef}
-                type="text"
-                placeholder={
-                  searchType === 'pan'
-                    ? 'e.g. ABCDE1234F'
-                    : searchType === 'appNo'
-                      ? 'e.g. 10982348'
-                      : 'e.g. 1208160012345678'
-                }
-                value={queryValue}
-                onChange={(e) => setQueryValue(e.target.value)}
-                required
-                className="w-full text-xs sm:text-sm font-semibold p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 uppercase placeholder-slate-400 focus:ring-2 focus:ring-indigo-500/40"
-              />
-            </div>
-
-            {/* Test Simulation Samples */}
-            <div className="space-y-1.5 pt-1">
-              <div className="text-[11px] font-bold text-slate-400">Quick Test Samples:</div>
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => { setSearchType('pan'); setQueryValue('ALLOT1234F'); }}
-                  className="px-2.5 py-1.5 text-[10px] font-bold rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30 flex items-center gap-1 hover:bg-emerald-100 cursor-pointer"
-                >
-                  <Sparkles className="w-3 h-3" /> Sample Allotted Bid
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setSearchType('pan'); setQueryValue('NONAL1234F'); }}
-                  className="px-2.5 py-1.5 text-[10px] font-bold rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-300 border border-rose-500/30 hover:bg-rose-100 cursor-pointer"
-                >
-                  Sample Non-Allotted Bid
-                </button>
+              <div className="relative">
+                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+                  {searchType === 'pan' ? (
+                    <CreditCard className="w-4 h-4" />
+                  ) : searchType === 'appNo' ? (
+                    <Hash className="w-4 h-4" />
+                  ) : (
+                    <User className="w-4 h-4" />
+                  )}
+                </div>
+                <input
+                  ref={queryInputRef}
+                  type="text"
+                  placeholder={
+                    searchType === 'pan'
+                      ? 'e.g. ABCDE1234F'
+                      : searchType === 'appNo'
+                        ? 'e.g. 10982348'
+                        : 'e.g. 1208160012345678'
+                  }
+                  value={queryValue}
+                  onChange={(e) => {
+                    const val = searchType === 'pan' ? e.target.value.toUpperCase() : e.target.value;
+                    setQueryValue(val);
+                  }}
+                  required
+                  className="w-full text-xs sm:text-sm font-semibold pl-10 pr-9 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-indigo-500/40 tracking-wider"
+                />
+                {queryValue && (
+                  <button
+                    type="button"
+                    onClick={() => setQueryValue('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                    title="Clear input"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
               </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                {searchType === 'pan'
+                  ? 'Standard 10-character alphanumeric PAN issued by Income Tax Dept.'
+                  : searchType === 'appNo'
+                    ? 'Numeric or alphanumeric application number received via email/SMS from broker.'
+                    : '16-digit CDSL (16 numbers) or NSDL (IN + 14 numbers) Demat account ID.'}
+              </p>
             </div>
 
             {/* Submit Button */}
-            <div className="pt-2 flex items-center gap-3">
+            <div className="pt-1 flex items-center gap-3">
               <button
                 type="submit"
-                disabled={loading || !queryValue}
+                disabled={loading || !queryValue.trim() || !selectedIpoId}
                 className="flex-1 py-3 px-6 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-xs sm:text-sm shadow-md hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
               >
                 {loading ? (
@@ -655,11 +692,11 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
                 )}
               </button>
 
-              {searched && (
+              {(searched || queryValue) && (
                 <button
                   type="button"
                   onClick={() => { setResult(null); setSearched(false); setQueryValue(''); }}
-                  className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+                  className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer border border-slate-200 dark:border-slate-700"
                   title="Reset"
                 >
                   <RotateCcw className="w-4 h-4" />
@@ -672,12 +709,12 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
           {/* Result Card */}
           {result && (
             <div className={`mt-6 p-5 rounded-2xl border transition-all animate-fade-in ${result.status === 'Allotted'
-                ? 'bg-emerald-500/10 border-emerald-500/30 text-slate-900 dark:text-white'
-                : result.status === 'Not Allotted'
-                  ? 'bg-rose-500/10 border-rose-500/30 text-slate-900 dark:text-white'
-                  : result.status === 'Under Process'
-                    ? 'bg-amber-500/10 border-amber-500/30 text-slate-900 dark:text-white'
-                    : 'bg-slate-100 dark:bg-slate-800/80 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white'
+              ? 'bg-emerald-500/10 border-emerald-500/30 text-slate-900 dark:text-white'
+              : result.status === 'Not Allotted'
+                ? 'bg-rose-500/10 border-rose-500/30 text-slate-900 dark:text-white'
+                : result.status === 'Under Process'
+                  ? 'bg-amber-500/10 border-amber-500/30 text-slate-900 dark:text-white'
+                  : 'bg-slate-100 dark:bg-slate-800/80 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white'
               }`}>
 
               {/* Result Card Header */}
@@ -701,12 +738,12 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
                 </div>
 
                 <span className={`text-xs font-black uppercase px-3 py-1 rounded-full shrink-0 ${result.status === 'Allotted'
-                    ? 'bg-emerald-500 text-white'
-                    : result.status === 'Not Allotted'
-                      ? 'bg-rose-500 text-white'
-                      : result.status === 'Under Process'
-                        ? 'bg-amber-500 text-white'
-                        : 'bg-slate-600 text-white'
+                  ? 'bg-emerald-500 text-white'
+                  : result.status === 'Not Allotted'
+                    ? 'bg-rose-500 text-white'
+                    : result.status === 'Under Process'
+                      ? 'bg-amber-500 text-white'
+                      : 'bg-slate-600 text-white'
                   }`}>
                   {result.status === 'Not Found' ? 'Record Not Found' : result.status}
                 </span>

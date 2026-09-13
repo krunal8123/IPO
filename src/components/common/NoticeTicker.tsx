@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { IpoItem } from '../../types/ipo';
 import { mockIpoList } from '../../data/mockIpoData';
-import { Megaphone, Sparkles, TrendingUp, Clock, X } from 'lucide-react';
+import { Megaphone, Sparkles, TrendingUp, Clock, X, Radio } from 'lucide-react';
 
 interface NoticeTickerProps {
   ipos?: IpoItem[];
@@ -9,17 +9,26 @@ interface NoticeTickerProps {
   onSelectIpo?: (ipo: IpoItem) => void;
 }
 
-export const NoticeTicker: React.FC<NoticeTickerProps> = ({ 
-  ipos = mockIpoList, 
+export const NoticeTicker: React.FC<NoticeTickerProps> = ({
+  ipos = mockIpoList,
   isLive = true,
-  onSelectIpo 
+  onSelectIpo
 }) => {
   const [visible, setVisible] = React.useState(true);
 
   // Generate dynamic live ticker items from real dataset
   const tickerItems = useMemo(() => {
     const list = ipos && ipos.length > 0 ? ipos : mockIpoList;
-    const items: { id: string; ipo: IpoItem; title: string; detail: string; tag: string; icon: 'trending' | 'sparkles' | 'clock' }[] = [];
+    const items: {
+      id: string;
+      ipo: IpoItem;
+      title: string;
+      detail: string;
+      tag: string;
+      tagBg: string;
+      tagText: string;
+      icon: 'trending' | 'sparkles' | 'clock';
+    }[] = [];
 
     // 1. Ongoing live issues (Bidding active)
     const liveIpos = list.filter(i => i.status === 'live');
@@ -27,9 +36,11 @@ export const NoticeTicker: React.FC<NoticeTickerProps> = ({
       items.push({
         id: `live-${i.id}`,
         ipo: i,
-        title: `${i.name}:`,
-        detail: `Bidding Active (Closes ${i.closeDate}) • GMP +₹${i.gmp.gmpPrice} (+${i.gmp.gmpPercent}%)`,
-        tag: 'LIVE BIDDING',
+        title: i.name,
+        detail: `Bidding Live (Closes ${i.closeDate}) • GMP +₹${i.gmp.gmpPrice} (+${i.gmp.gmpPercent}%)`,
+        tag: 'LIVE',
+        tagBg: 'bg-emerald-500/15 border-emerald-500/30',
+        tagText: 'text-emerald-400',
         icon: 'trending'
       });
     });
@@ -45,24 +56,28 @@ export const NoticeTicker: React.FC<NoticeTickerProps> = ({
         items.push({
           id: `gmp-${i.id}`,
           ipo: i,
-          title: `${i.name}:`,
-          detail: `GMP surges to +₹${i.gmp.gmpPrice} (+${i.gmp.gmpPercent}%) • Est. Listing ₹${i.gmp.estimatedListingPrice}`,
+          title: i.name,
+          detail: `GMP +₹${i.gmp.gmpPrice} (+${i.gmp.gmpPercent}%) • Est. Listing ₹${i.gmp.estimatedListingPrice}`,
           tag: 'TOP GMP',
+          tagBg: 'bg-purple-500/15 border-purple-500/30',
+          tagText: 'text-purple-300',
           icon: 'sparkles'
         });
       }
     });
 
     // 3. Allotment / Closed issues
-    const closedIpos = list.filter(i => i.status === 'closed' || i.status === 'listed').slice(0, 3);
+    const closedIpos = list.filter(i => i.status === 'closed' || i.status === 'listed').slice(0, 4);
     closedIpos.forEach(i => {
       if (!items.some(it => it.ipo.id === i.id)) {
         items.push({
           id: `allot-${i.id}`,
           ipo: i,
-          title: `${i.name}:`,
-          detail: `Allotment ${i.allotmentDate} • Registrar: ${i.registrar}`,
+          title: i.name,
+          detail: `Allotment ${i.allotmentDate} • ${i.registrar.split(' ')[0]}`,
           tag: 'ALLOTMENT',
+          tagBg: 'bg-amber-500/15 border-amber-500/30',
+          tagText: 'text-amber-300',
           icon: 'clock'
         });
       }
@@ -74,43 +89,51 @@ export const NoticeTicker: React.FC<NoticeTickerProps> = ({
   if (!visible || tickerItems.length === 0) return null;
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 text-white text-xs font-medium py-1.5 px-4 shadow-sm flex items-center justify-between select-none">
-      <div className="flex items-center gap-2 shrink-0 z-10 mr-3">
-        <span className="flex items-center gap-1.5 bg-white/20 backdrop-blur-md px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider">
-          <Megaphone className="w-3 h-3 text-amber-300 animate-bounce" />
-          <span>{isLive ? 'Real-Time Feed' : 'Live Updates'}</span>
+    <div className="relative overflow-hidden bg-slate-900 dark:bg-[#0b101d] text-slate-100 text-[11px] sm:text-xs font-medium py-1.5 px-3 sm:px-4 border-b border-indigo-500/20 shadow-xs flex items-center justify-between select-none">
+      
+      {/* Left Badge: Compact on mobile, rich on desktop */}
+      <div className="flex items-center gap-1.5 shrink-0 z-10 mr-2 sm:mr-3">
+        {/* Mobile Badge */}
+        <span className="sm:hidden flex items-center gap-1 bg-rose-500/20 border border-rose-500/30 text-rose-400 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider">
+          <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+          <span>LIVE</span>
+        </span>
+
+        {/* Desktop Badge */}
+        <span className="hidden sm:flex items-center gap-1.5 bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider">
+          <Radio className="w-3 h-3 text-indigo-400 animate-pulse" />
+          <span>{isLive ? 'Market Feed' : 'Live Ticker'}</span>
         </span>
       </div>
 
-      <div className="overflow-hidden whitespace-nowrap flex-1 relative mask-linear">
-        <div className="animate-marquee flex items-center gap-8">
-          {/* Render twice for seamless continuous infinite marquee loop */}
+      {/* Marquee Body with edge gradient fade */}
+      <div className="overflow-hidden whitespace-nowrap flex-1 relative [mask-image:linear-gradient(to_right,transparent,black_16px,black_calc(100%-16px),transparent)]">
+        <div className="animate-marquee flex items-center gap-6 sm:gap-8">
+          {/* Render twice for continuous seamless infinite marquee loop */}
           {[...tickerItems, ...tickerItems].map((item, idx) => (
-            <div 
-              key={`${item.id}-${idx}`} 
+            <div
+              key={`${item.id}-${idx}`}
               onClick={() => onSelectIpo && onSelectIpo(item.ipo)}
-              className="inline-flex items-center gap-2 cursor-pointer hover:underline hover:text-amber-200 transition-colors"
+              className="inline-flex items-center gap-2 cursor-pointer hover:text-indigo-300 transition-colors group py-0.5"
             >
-              {item.icon === 'trending' ? (
-                <TrendingUp className="w-3.5 h-3.5 text-emerald-300 shrink-0" />
-              ) : item.icon === 'sparkles' ? (
-                <Sparkles className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-              ) : (
-                <Clock className="w-3.5 h-3.5 text-cyan-300 shrink-0" />
-              )}
-              <span>
-                <strong>{item.title}</strong> {item.detail}
+              <span className={`text-[9px] sm:text-[10px] font-black uppercase px-1.5 py-0.2 rounded border ${item.tagBg} ${item.tagText}`}>
+                {item.tag}
               </span>
-              <span className="text-white/30 ml-4">•</span>
+              <span className="flex items-center gap-1">
+                <strong className="text-white group-hover:underline font-bold">{item.title}:</strong>
+                <span className="text-slate-300">{item.detail}</span>
+              </span>
+              <span className="text-slate-600 ml-3 sm:ml-4 select-none">•</span>
             </div>
           ))}
         </div>
       </div>
 
+      {/* Close button */}
       <button
         onClick={() => setVisible(false)}
-        className="ml-2 p-1 hover:bg-white/20 rounded-full transition-colors shrink-0 z-10 cursor-pointer"
-        title="Dismiss marquee"
+        className="ml-2 p-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-colors shrink-0 z-10 cursor-pointer"
+        title="Dismiss ticker"
       >
         <X className="w-3.5 h-3.5" />
       </button>

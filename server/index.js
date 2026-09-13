@@ -16,6 +16,7 @@ import express from 'express';
 import cors from 'cors';
 import { fetchLiveGmp } from './services/gmpService.js';
 import { fetchLiveExchangeIpos, fetchLiveBidding } from './services/nseService.js';
+import { fetchLiveSubscription } from './services/subscriptionService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -172,12 +173,13 @@ app.get('/api/upstox/callback', async (req, res) => {
   }
 });
 
-// GET /api/ipos - Primary Hybrid Feed (Upstox Official + Live GMP + KFintech)
+// GET /api/ipos - Primary Hybrid Feed (Upstox Official + Live GMP + KFintech + Live Subscription)
 app.get('/api/ipos', async (req, res) => {
   try {
-    const [liveGmpList, kfinIssues] = await Promise.all([
+    const [liveGmpList, kfinIssues, liveSubscriptions] = await Promise.all([
       fetchLiveGmp(),
-      fetchKfinIssues()
+      fetchKfinIssues(),
+      fetchLiveSubscription()
     ]);
 
     // Try official Upstox API first
@@ -188,7 +190,7 @@ app.get('/api/ipos', async (req, res) => {
       currentLiveIpos = overlayGmp(upstoxList, liveGmpList);
       source = 'Live Real-Time Market Feed';
     } else if (Array.isArray(liveGmpList) && liveGmpList.length > 0) {
-      currentLiveIpos = liveGmpList.map(scraped => buildDynamicIpoFromScraped(scraped, kfinIssues));
+      currentLiveIpos = liveGmpList.map(scraped => buildDynamicIpoFromScraped(scraped, kfinIssues, liveSubscriptions));
     }
 
     res.json({
@@ -201,6 +203,16 @@ app.get('/api/ipos', async (req, res) => {
   } catch (error) {
     console.error('[API Error /api/ipos]:', error.message);
     res.status(500).json({ success: false, error: error.message, data: currentLiveIpos });
+  }
+});
+
+// GET /api/subscription - Direct Live Subscription table
+app.get('/api/subscription', async (req, res) => {
+  try {
+    const subs = await fetchLiveSubscription();
+    res.json({ success: true, count: subs.length, data: subs });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 

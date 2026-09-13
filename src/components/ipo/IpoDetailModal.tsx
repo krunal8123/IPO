@@ -272,28 +272,28 @@ export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
       <div 
-        className="w-full max-w-3xl max-h-[92vh] rounded-3xl overflow-hidden flex flex-col shadow-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800"
+        className="w-full max-w-3xl max-h-[92vh] sm:max-h-[90vh] rounded-2xl sm:rounded-3xl overflow-hidden flex flex-col shadow-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Top Header with Logo and Company Identity */}
-        <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 flex items-start justify-between gap-4 bg-slate-50/90 dark:bg-slate-950/90">
-          <div className="flex items-center gap-3.5 min-w-0">
+        <div className="p-3.5 sm:p-5 border-b border-slate-200 dark:border-slate-800 flex items-start justify-between gap-3 sm:gap-4 bg-slate-50/90 dark:bg-slate-950/90">
+          <div className="flex items-center gap-3 min-w-0">
             <CompanyLogo 
               logo={activeIpo.logo} 
               name={activeIpo.name} 
               symbol={activeIpo.symbol} 
-              size="lg" 
-              className="ring-2 ring-indigo-500/20"
+              size="md" 
+              className="ring-2 ring-indigo-500/20 shrink-0"
             />
             <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-tight truncate">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <h2 className="text-sm sm:text-lg font-black text-slate-900 dark:text-white leading-tight truncate">
                   {activeIpo.name}
                 </h2>
-                <Badge variant={activeIpo.category === 'mainboard' ? 'primary' : 'purple'}>
+                <Badge variant={activeIpo.category === 'mainboard' ? 'primary' : 'purple'} size="sm">
                   {activeIpo.category.toUpperCase()}
                 </Badge>
-                <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
+                <span className={`text-[9px] sm:text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
                   activeIpo.status === 'live' 
                     ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 animate-pulse' 
                     : activeIpo.status === 'upcoming'
@@ -304,17 +304,17 @@ export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({
                 </span>
 
                 {isFetchingDetail ? (
-                  <span className="inline-flex items-center gap-1 text-[10px] text-indigo-500 bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded-full border border-indigo-200/50 dark:border-indigo-800/50">
-                    <RefreshCw className="w-2.5 h-2.5 animate-spin" /> Upstox Live Sync
+                  <span className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] text-indigo-500 bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded-full border border-indigo-200/50 dark:border-indigo-800/50">
+                    <RefreshCw className="w-2.5 h-2.5 animate-spin" /> Live Sync
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-200/50 dark:border-emerald-800/50">
-                    <CheckCircle2 className="w-2.5 h-2.5" /> Upstox Official API
+                  <span className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-200/50 dark:border-emerald-800/50">
+                    <CheckCircle2 className="w-2.5 h-2.5" /> Verified API
                   </span>
                 )}
               </div>
 
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
                 <span>{activeIpo.sector}</span>
                 <span>•</span>
                 <span>Symbol: <strong className="text-slate-800 dark:text-slate-200 font-mono">{activeIpo.symbol}</strong></span>
@@ -323,11 +323,11 @@ export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({
                 
                 {activeIpo.isin && (
                   <>
-                    <span>•</span>
+                    <span className="hidden sm:inline">•</span>
                     <button
                       type="button"
                       onClick={handleCopyIsin}
-                      className="inline-flex items-center gap-1 font-mono text-[11px] text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-md border border-indigo-200/60 dark:border-indigo-800/60 cursor-pointer transition-colors"
+                      className="inline-flex items-center gap-1 font-mono text-[10px] sm:text-[11px] text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 px-1.5 py-0.5 rounded-md border border-indigo-200/60 dark:border-indigo-800/60 cursor-pointer transition-colors"
                       title="Click to copy ISIN"
                     >
                       <span>ISIN: {activeIpo.isin}</span>
@@ -338,7 +338,7 @@ export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({
 
                 {activeIpo.companyWebsite && (
                   <>
-                    <span>•</span>
+                    <span className="hidden sm:inline">•</span>
                     <a
                       href={activeIpo.companyWebsite}
                       target="_blank"
@@ -354,10 +354,10 @@ export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               onClick={() => toggleWatchlist(activeIpo.id)}
-              className={`p-2.5 rounded-xl transition-colors cursor-pointer ${
+              className={`p-2 sm:p-2.5 rounded-xl transition-colors cursor-pointer ${
                 bookmarked
                   ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
@@ -368,34 +368,40 @@ export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({
             </button>
             <button
               onClick={onClose}
-              className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer"
+              className="p-2 sm:p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* Navigation Tabs Bar */}
-        <div className="flex items-center px-4 sm:px-6 border-b border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 overflow-x-auto">
-          {[
-            { id: 'overview', label: 'Overview' },
-            { id: 'bidding', label: 'Lots & Bidding' },
-            { id: 'financials', label: 'Financials' },
-            { id: 'timeline', label: 'Timeline & Schedule' },
-            { id: 'gmp', label: 'GMP Details' }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveSubTab(tab.id as any)}
-              className={`py-3 px-4 text-xs font-bold uppercase tracking-wider transition-all border-b-2 whitespace-nowrap cursor-pointer ${
-                activeSubTab === tab.id
-                  ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
-                  : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+        {/* Navigation Tabs Bar with Generous Spacing and Zero Horizontal Overflow */}
+        <div className="px-3 sm:px-6 py-2.5 sm:py-3 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/70 dark:bg-slate-900/70">
+          <div className="flex items-center justify-between p-1 sm:p-1.5 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 gap-1 no-scrollbar overflow-x-auto">
+            {[
+              { id: 'overview', short: 'Overview', full: 'Overview' },
+              { id: 'bidding', short: 'Lots', full: 'Lots & Bidding' },
+              { id: 'financials', short: 'Financials', full: 'Financials' },
+              { id: 'timeline', short: 'Timeline', full: 'Timeline & Schedule' },
+              { id: 'gmp', short: 'GMP', full: 'GMP Details' }
+            ].map(tab => {
+              const isActive = activeSubTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveSubTab(tab.id as any)}
+                  className={`flex-1 py-2 sm:py-2.5 px-2 sm:px-3 text-center text-xs font-bold rounded-xl transition-all whitespace-nowrap cursor-pointer select-none ${
+                    isActive
+                      ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <span className="sm:hidden">{tab.short}</span>
+                  <span className="hidden sm:inline">{tab.full}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Modal Scrollable Body */}

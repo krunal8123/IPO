@@ -19,8 +19,59 @@ import { BuybackTracker } from './components/buyback/BuybackTracker';
 import { ServerSettingsModal } from './components/common/ServerSettingsModal';
 import { RefreshCw, Radio, Sparkles, Settings } from 'lucide-react';
 
+const VALID_TABS = ['ipos', 'gmp', 'subscription', 'allotment', 'calendar', 'buyback'] as const;
+type TabType = typeof VALID_TABS[number];
+
+function getInitialTab(): TabType {
+  if (typeof window !== 'undefined') {
+    const hash = window.location.hash.replace(/^#\/?/, '').toLowerCase() as TabType;
+    if (VALID_TABS.includes(hash)) {
+      return hash;
+    }
+    const saved = localStorage.getItem('iporadar_active_tab') as TabType;
+    if (saved && VALID_TABS.includes(saved)) {
+      return saved;
+    }
+  }
+  return 'ipos';
+}
+
 export const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>('ipos');
+  const [activeTab, setActiveTabState] = useState<string>(getInitialTab);
+
+  const setActiveTab = (tab: string) => {
+    setActiveTabState(tab);
+    if (typeof window !== 'undefined') {
+      window.location.hash = tab;
+      try {
+        localStorage.setItem('iporadar_active_tab', tab);
+      } catch {
+        // ignore
+      }
+    }
+  };
+
+  // Sync route on hashchange (browser Back/Forward navigation)
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace(/^#\/?/, '').toLowerCase();
+      if (VALID_TABS.includes(hash as TabType) && hash !== activeTab) {
+        setActiveTabState(hash);
+        try {
+          localStorage.setItem('iporadar_active_tab', hash);
+        } catch {
+          // ignore
+        }
+      }
+    };
+
+    if (!window.location.hash && activeTab) {
+      window.location.hash = activeTab;
+    }
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [activeTab]);
   const [categoryFilter, setCategoryFilter] = useState<'all' | IpoCategory>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | IpoStatus>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -150,25 +201,33 @@ export const App: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-[#070b14] text-slate-900 dark:text-slate-100 selection:bg-indigo-500 selection:text-white pb-16 md:pb-8 transition-colors duration-200">
       
-      {/* 1. Live Breaking Notice Ticker */}
-      <NoticeTicker ipos={ipos} isLive={isLive} onSelectIpo={(ipo) => setSelectedIpo(ipo)} />
-
-      {/* 2. Top Desktop Navigation */}
+      {/* 1. Desktop Layout: Top Ticker followed by Desktop Navbar */}
       <div className="hidden md:block">
+        <NoticeTicker ipos={ipos} isLive={isLive} onSelectIpo={(ipo) => setSelectedIpo(ipo)} />
         <Navbar 
           activeTab={activeTab} 
           setActiveTab={setActiveTab} 
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           onOpenWatchlist={handleOpenWatchlist}
+          ipos={ipos}
+          onSelectIpo={(ipo) => setSelectedIpo(ipo)}
         />
       </div>
 
-      {/* 3. Mobile Header */}
-      <MobileHeader 
-        activeTab={activeTab} 
-        onOpenWatchlist={handleOpenWatchlist} 
-      />
+      {/* 2. Mobile Layout: MobileHeader with safe-top first, then NoticeTicker cleanly below it */}
+      <div className="md:hidden">
+        <MobileHeader 
+          activeTab={activeTab} 
+          onOpenWatchlist={handleOpenWatchlist} 
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          ipos={ipos}
+          onSelectIpo={(ipo) => setSelectedIpo(ipo)}
+          onNavigateToIpos={() => setActiveTab('ipos')}
+        />
+        <NoticeTicker ipos={ipos} isLive={isLive} onSelectIpo={(ipo) => setSelectedIpo(ipo)} />
+      </div>
 
       {/* 4. Main Body Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
@@ -314,6 +373,7 @@ export const App: React.FC = () => {
           <GmpTracker 
             ipos={ipos} 
             onSelectIpo={(i) => setSelectedIpo(i)} 
+            searchQuery={searchQuery}
           />
         )}
 
@@ -322,6 +382,7 @@ export const App: React.FC = () => {
           <SubscriptionView 
             ipos={ipos} 
             onSelectIpo={(i) => setSelectedIpo(i)} 
+            searchQuery={searchQuery}
           />
         )}
 
@@ -381,7 +442,7 @@ export const App: React.FC = () => {
       />
 
       {/* 7. Footer */}
-      <footer className="mt-16 border-t border-slate-200/80 dark:border-slate-800/80 py-8 px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-500 dark:text-slate-400">
+      <footer className="mt-16 border-t border-slate-200/80 dark:border-slate-800/80 pt-8 pb-24 md:pb-8 px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-500 dark:text-slate-400">
         <div className="max-w-7xl mx-auto space-y-2">
           <p className="font-semibold text-slate-700 dark:text-slate-300">
             IPORadar • India's Comprehensive IPO & GMP Tracking Platform
