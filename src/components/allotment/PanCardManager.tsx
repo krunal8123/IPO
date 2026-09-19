@@ -143,8 +143,8 @@ export const PanCardManager: React.FC<PanCardManagerProps> = ({ compact = false 
                 >
                   {editState?.id === card.id ? (
                     // Inline Edit Form
-                    <form onSubmit={handleEditSubmit} className="p-3 space-y-2">
-                      <div className="grid grid-cols-2 gap-2">
+                    <form onSubmit={handleEditSubmit} className="p-3.5 space-y-2.5">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <div>
                           <label className="text-[10px] font-bold text-slate-500 block mb-0.5">PAN</label>
                           <input
@@ -152,7 +152,8 @@ export const PanCardManager: React.FC<PanCardManagerProps> = ({ compact = false 
                             value={editState.pan}
                             onChange={e => setEditState(s => s ? { ...s, pan: e.target.value.toUpperCase() } : null)}
                             maxLength={10}
-                            className="w-full text-xs font-mono px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                            autoCapitalize="characters"
+                            className="w-full text-base sm:text-xs font-mono px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
                             placeholder="ABCDE1234F"
                           />
                         </div>
@@ -162,7 +163,7 @@ export const PanCardManager: React.FC<PanCardManagerProps> = ({ compact = false 
                             type="text"
                             value={editState.nickname}
                             onChange={e => setEditState(s => s ? { ...s, nickname: e.target.value } : null)}
-                            className="w-full text-xs px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                            className="w-full text-base sm:text-xs px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
                             placeholder="e.g. Dad"
                           />
                         </div>
@@ -173,16 +174,16 @@ export const PanCardManager: React.FC<PanCardManagerProps> = ({ compact = false 
                           type="text"
                           value={editState.name}
                           onChange={e => setEditState(s => s ? { ...s, name: e.target.value } : null)}
-                          className="w-full text-xs px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                          className="w-full text-base sm:text-xs px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
                           placeholder="e.g. Full name (optional)"
                         />
                       </div>
-                      <div className="flex gap-2 pt-0.5">
-                        <button type="submit" className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-colors cursor-pointer">
-                          <Check className="w-3 h-3" /> Save
+                      <div className="flex gap-2 pt-1">
+                        <button type="submit" className="flex items-center justify-center gap-1 px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-colors cursor-pointer min-h-[38px]">
+                          <Check className="w-3.5 h-3.5" /> Save
                         </button>
-                        <button type="button" onClick={() => setEditState(null)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold transition-colors cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700">
-                          <X className="w-3 h-3" /> Cancel
+                        <button type="button" onClick={() => setEditState(null)} className="flex items-center justify-center gap-1 px-3.5 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold transition-colors cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 min-h-[38px]">
+                          <X className="w-3.5 h-3.5" /> Cancel
                         </button>
                       </div>
                     </form>
@@ -190,7 +191,7 @@ export const PanCardManager: React.FC<PanCardManagerProps> = ({ compact = false 
                     // Display Row
                     <div className="flex items-center justify-between px-3 py-2.5">
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center text-xs font-black shrink-0">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center text-xs font-black shrink-0 shadow-xs">
                           {(card.nickname || card.name || card.pan).slice(0, 1).toUpperCase()}
                         </div>
                         <div className="min-w-0">
@@ -203,7 +204,7 @@ export const PanCardManager: React.FC<PanCardManagerProps> = ({ compact = false 
                             )}
                           </div>
                           <div className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 font-mono">
-                            <ShieldCheck className="w-2.5 h-2.5 text-emerald-500 shrink-0" />
+                            <ShieldCheck className="w-3 h-3 text-emerald-500 shrink-0" />
                             <span>{maskPan(card.pan)}</span>
                           </div>
                         </div>
@@ -214,16 +215,17 @@ export const PanCardManager: React.FC<PanCardManagerProps> = ({ compact = false 
                             <button
                               type="button"
                               onClick={() => { removePan(card.id); setDeleteConfirm(null); }}
-                              className="px-2 py-1 rounded-lg bg-red-600 text-white text-[10px] font-bold cursor-pointer hover:bg-red-700 transition-colors"
+                              className="px-2.5 py-1.5 rounded-lg bg-red-600 text-white text-[11px] font-bold cursor-pointer hover:bg-red-700 transition-colors min-h-[36px]"
                             >
                               Confirm
                             </button>
                             <button
                               type="button"
                               onClick={() => setDeleteConfirm(null)}
-                              className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                              className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
+                              aria-label="Cancel delete"
                             >
-                              <X className="w-3 h-3" />
+                              <X className="w-3.5 h-3.5" />
                             </button>
                           </>
                         ) : (
@@ -231,18 +233,20 @@ export const PanCardManager: React.FC<PanCardManagerProps> = ({ compact = false 
                             <button
                               type="button"
                               onClick={() => startEdit(card)}
-                              className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-colors cursor-pointer opacity-0 group-hover:opacity-100"
+                              className="p-2 sm:p-1.5 rounded-lg text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-colors cursor-pointer opacity-100 sm:opacity-0 sm:group-hover:opacity-100 min-h-[36px] min-w-[36px] flex items-center justify-center"
                               title="Edit"
+                              aria-label="Edit PAN"
                             >
-                              <Edit3 className="w-3.5 h-3.5" />
+                              <Edit3 className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
                             </button>
                             <button
                               type="button"
                               onClick={() => setDeleteConfirm(card.id)}
-                              className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer opacity-0 group-hover:opacity-100"
+                              className="p-2 sm:p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer opacity-100 sm:opacity-0 sm:group-hover:opacity-100 min-h-[36px] min-w-[36px] flex items-center justify-center"
                               title="Remove"
+                              aria-label="Remove PAN"
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              <Trash2 className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
                             </button>
                           </>
                         )}
@@ -256,20 +260,20 @@ export const PanCardManager: React.FC<PanCardManagerProps> = ({ compact = false 
 
           {/* Add Form */}
           {showAddForm ? (
-            <form onSubmit={handleAddSubmit} className="rounded-xl bg-white dark:bg-slate-900 border border-indigo-200 dark:border-indigo-800/50 p-3.5 space-y-3">
+            <form onSubmit={handleAddSubmit} className="rounded-xl bg-white dark:bg-slate-900 border border-indigo-200 dark:border-indigo-800/50 p-3.5 sm:p-4 space-y-3">
               <div className="text-xs font-black text-slate-900 dark:text-white flex items-center gap-1.5">
-                <Plus className="w-3.5 h-3.5 text-indigo-500" /> Add New PAN Card
+                <Plus className="w-4 h-4 text-indigo-500" /> Add New PAN Card
               </div>
 
               {addError && (
                 <div className="flex items-center gap-1.5 text-[11px] text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 px-2.5 py-1.5 rounded-lg">
-                  <AlertCircle className="w-3 h-3 shrink-0" /> {addError}
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {addError}
                 </div>
               )}
 
               <div>
-                <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1 mb-1">
-                  <CreditCard className="w-3 h-3" /> PAN Number *
+                <label className="text-[10px] sm:text-xs font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1 mb-1">
+                  <CreditCard className="w-3.5 h-3.5" /> PAN Number *
                 </label>
                 <input
                   type="text"
@@ -277,49 +281,52 @@ export const PanCardManager: React.FC<PanCardManagerProps> = ({ compact = false 
                   onChange={e => { setNewPan(e.target.value.toUpperCase()); setAddError(''); }}
                   maxLength={10}
                   autoFocus
+                  autoCapitalize="characters"
+                  autoComplete="off"
+                  spellCheck={false}
                   placeholder="ABCDE1234F"
-                  className="w-full text-sm font-mono font-bold tracking-widest px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 placeholder-slate-400 placeholder:tracking-normal placeholder:font-normal placeholder:text-xs"
+                  className="w-full text-base sm:text-sm font-mono font-bold tracking-widest px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 placeholder-slate-400 placeholder:tracking-normal placeholder:font-normal placeholder:text-xs"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <div>
-                  <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1 mb-1">
-                    <User className="w-3 h-3" /> Applicant Name (Optional)
+                  <label className="text-[10px] sm:text-xs font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1 mb-1">
+                    <User className="w-3.5 h-3.5" /> Applicant Name (Optional)
                   </label>
                   <input
                     type="text"
                     value={newName}
                     onChange={e => { setNewName(e.target.value); setAddError(''); }}
-                    placeholder="e.g. Full name (optional)"
-                    className="w-full text-xs px-2.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                    placeholder="e.g. Full name"
+                    className="w-full text-base sm:text-xs px-3 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1 mb-1">
-                    <Tag className="w-3 h-3" /> Nickname (Optional)
+                  <label className="text-[10px] sm:text-xs font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1 mb-1">
+                    <Tag className="w-3.5 h-3.5" /> Nickname (Optional)
                   </label>
                   <input
                     type="text"
                     value={newNickname}
                     onChange={e => setNewNickname(e.target.value)}
                     placeholder="e.g. Dad, Wife, Self"
-                    className="w-full text-xs px-2.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                    className="w-full text-base sm:text-xs px-3 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
                   />
                 </div>
               </div>
 
-              <div className="flex gap-2 pt-0.5">
+              <div className="flex items-center gap-2 pt-1">
                 <button
                   type="submit"
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-colors cursor-pointer shadow-xs"
+                  className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-colors cursor-pointer shadow-xs min-h-[42px]"
                 >
-                  <Plus className="w-3.5 h-3.5" /> Add PAN
+                  <Plus className="w-4 h-4" /> Save PAN
                 </button>
                 <button
                   type="button"
                   onClick={() => { setShowAddForm(false); setAddError(''); setNewPan(''); setNewName(''); setNewNickname(''); }}
-                  className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer min-h-[42px]"
                 >
                   Cancel
                 </button>
@@ -329,9 +336,9 @@ export const PanCardManager: React.FC<PanCardManagerProps> = ({ compact = false 
             <button
               type="button"
               onClick={() => { setShowAddForm(true); setEditState(null); }}
-              className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border-2 border-dashed border-indigo-300 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400 text-xs font-bold hover:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-all cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 px-3 py-3 rounded-xl border-2 border-dashed border-indigo-300 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400 text-xs font-bold hover:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-all cursor-pointer min-h-[44px]"
             >
-              <Plus className="w-3.5 h-3.5" />
+              <Plus className="w-4 h-4" />
               {pans.length === 0 ? 'Add Your First PAN Card' : 'Add Another PAN'}
             </button>
           )}

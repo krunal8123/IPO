@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { liveIpoService } from '../../services/liveIpoService';
-import { X, RefreshCw, ShieldCheck, AlertCircle, ArrowRight, Loader2, CheckCircle2, SkipForward } from 'lucide-react';
+import { X, RefreshCw, ShieldCheck, AlertCircle, ArrowRight, Loader2, SkipForward } from 'lucide-react';
 
 interface BigshareCaptchaModalProps {
   isOpen: boolean;
@@ -44,18 +44,17 @@ export const BigshareCaptchaModal: React.FC<BigshareCaptchaModalProps> = ({
       if (res && res.token && res.image) {
         setCaptchaToken(res.token);
         setCaptchaImage(res.image);
-        setTimeout(() => inputRef.current?.focus(), 100);
+        setTimeout(() => inputRef.current?.focus(), 150);
       } else {
-        setErrorMsg('Failed to load CAPTCHA from Bigshare. Please click reload.');
+        setErrorMsg('Failed to load CAPTCHA from Bigshare. Tap reload.');
       }
     } catch {
-      setErrorMsg('Network error fetching CAPTCHA. Please check your connection.');
+      setErrorMsg('Network error fetching challenge. Tap reload.');
     } finally {
       setLoadingCaptcha(false);
     }
   };
 
-  // Trigger fresh CAPTCHA on open or when advancing to next PAN in batch
   useEffect(() => {
     if (isOpen) {
       loadFreshCaptcha();
@@ -79,11 +78,10 @@ export const BigshareCaptchaModal: React.FC<BigshareCaptchaModalProps> = ({
         setErrorMsg(res.error || 'Invalid CAPTCHA code. Please try again with the new code.');
         await loadFreshCaptcha();
       } else if (res.hasMore) {
-        // Next PAN in queue will automatically trigger useEffect via currentPanIndex
         setCaptchaInput('');
       }
     } catch (err: any) {
-      setErrorMsg(err?.message || 'Verification failed. Please try again.');
+      setErrorMsg(err?.message || 'Verification failed. Tap reload.');
       await loadFreshCaptcha();
     } finally {
       setSubmitting(false);
@@ -95,7 +93,7 @@ export const BigshareCaptchaModal: React.FC<BigshareCaptchaModalProps> = ({
     await executeSubmit(captchaInput);
   };
 
-  // Auto-submit when user finishes typing the 6 digits
+  // Instant auto-submit when exactly 6 digits are typed on numeric keypad
   const handleInputChange = (val: string) => {
     const digitsOnly = val.replace(/\D/g, '').slice(0, 6);
     setCaptchaInput(digitsOnly);
@@ -109,39 +107,42 @@ export const BigshareCaptchaModal: React.FC<BigshareCaptchaModalProps> = ({
   const progressPercent = isBatch ? Math.round(((currentPanIndex + 1) / batchCount) * 100) : 100;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-md transition-opacity animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/75 backdrop-blur-md transition-opacity animate-in fade-in duration-200">
       <div 
-        className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-in zoom-in-95 duration-200"
+        className="w-full sm:max-w-md bg-white dark:bg-slate-900 rounded-t-[28px] sm:rounded-3xl shadow-2xl border-t sm:border border-slate-200 dark:border-slate-800 overflow-hidden animate-in slide-in-from-bottom-8 sm:zoom-in-95 duration-200 max-h-[92vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
+        {/* Mobile drag handle */}
+        <div className="sm:hidden w-12 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto my-2.5 shrink-0" />
+
         {/* Progress Bar for Batch Mode */}
         {isBatch && (
-          <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800">
+          <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 shrink-0">
             <div 
-              className="h-full bg-gradient-to-r from-indigo-500 to-violet-600 transition-all duration-300 ease-out"
+              className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500 transition-all duration-300 ease-out"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
         )}
 
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-800/30">
-          <div className="flex items-center gap-2.5">
-            <span className="p-2 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800/80 bg-slate-50/60 dark:bg-slate-800/40 shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="p-2 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 shrink-0">
               <ShieldCheck className="w-5 h-5" />
             </span>
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-black text-slate-900 dark:text-white leading-tight">
-                  Bigshare Verification
+                <h3 className="text-sm sm:text-base font-black text-slate-900 dark:text-white leading-tight">
+                  Bigshare Security
                 </h3>
                 {isBatch && (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
-                    PAN {currentPanIndex + 1} of {batchCount}
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 shrink-0">
+                    {currentPanIndex + 1}/{batchCount}
                   </span>
                 )}
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-[240px]">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-[200px] sm:max-w-[260px]">
                 {ipoName}
               </p>
             </div>
@@ -149,26 +150,26 @@ export const BigshareCaptchaModal: React.FC<BigshareCaptchaModalProps> = ({
           <button
             onClick={onClose}
             disabled={submitting}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors shrink-0 touch-manipulation"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        {/* Form Body - Scrollable on small landscape/phones */}
+        <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4 overflow-y-auto">
           {/* Active PAN Identity Card in Batch Mode */}
           {isBatch && currentPanNumber && (
-            <div className="p-3 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-between">
-              <div>
+            <div className="p-3 rounded-2xl bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-between gap-2">
+              <div className="min-w-0">
                 <span className="text-[10px] uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-bold block">
-                  Verifying Applicant
+                  Checking Investor
                 </span>
-                <span className="text-xs font-black text-slate-800 dark:text-slate-200">
+                <span className="text-xs font-black text-slate-900 dark:text-white truncate block">
                   {currentPanName || 'Applicant'}
                 </span>
               </div>
-              <span className="font-mono text-xs font-bold px-2 py-1 rounded-lg bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800">
+              <span className="font-mono text-xs font-black px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-800 shrink-0 shadow-2xs">
                 {currentPanNumber}
               </span>
             </div>
@@ -177,31 +178,31 @@ export const BigshareCaptchaModal: React.FC<BigshareCaptchaModalProps> = ({
           <div className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
             {isBatch ? (
               <span>
-                Each query requires a fresh CAPTCHA code from Bigshare. Enter the <strong>6 digits</strong> below (auto-submits instantly):
+                Enter the <strong>6 digits</strong> below. It <strong>submits automatically</strong> once all 6 digits are typed:
               </span>
             ) : (
               <span>
-                Bigshare Services requires image verification to query live allotment records. Enter the <strong>6 digits</strong> shown below:
+                Bigshare requires verification to view live status. Enter the <strong>6 digits</strong> shown below:
               </span>
             )}
           </div>
 
-          {/* CAPTCHA Image Container */}
-          <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80">
-            <div className="flex items-center justify-center min-h-[52px] flex-1">
+          {/* CAPTCHA Image Container with large touch reload */}
+          <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80">
+            <div className="flex items-center justify-center min-h-[56px] flex-1">
               {loadingCaptcha ? (
                 <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
                   <Loader2 className="w-4 h-4 animate-spin text-indigo-500" />
-                  Fetching fresh CAPTCHA...
+                  Generating challenge...
                 </div>
               ) : captchaImage ? (
                 <img
                   src={captchaImage}
                   alt="Bigshare CAPTCHA Challenge"
-                  className="max-h-12 object-contain rounded-lg shadow-sm select-none"
+                  className="max-h-14 object-contain rounded-lg shadow-xs select-none"
                 />
               ) : (
-                <span className="text-xs text-rose-500">Failed to load challenge</span>
+                <span className="text-xs text-rose-500 font-medium">Challenge failed to load</span>
               )}
             </div>
 
@@ -209,21 +210,25 @@ export const BigshareCaptchaModal: React.FC<BigshareCaptchaModalProps> = ({
               type="button"
               onClick={loadFreshCaptcha}
               disabled={loadingCaptcha || submitting}
-              className="p-2.5 ml-2 rounded-xl text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-slate-700 shadow-sm border border-slate-200/60 dark:border-slate-700 transition-all disabled:opacity-50"
+              className="p-3 ml-2 rounded-xl text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400 bg-white dark:bg-slate-700 shadow-sm border border-slate-200/80 dark:border-slate-600 transition-all disabled:opacity-50 touch-manipulation active:scale-95"
               title="Reload new CAPTCHA"
             >
               <RefreshCw className={`w-4 h-4 ${loadingCaptcha ? 'animate-spin' : ''}`} />
             </button>
           </div>
 
-          {/* Input Field */}
+          {/* Large, Mobile-Optimized Input Field */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                Enter 6-Digit Code
+                6-Digit Security Code
               </label>
-              <span className="text-[10px] text-slate-400 font-medium">
-                {captchaInput.length}/6 Digits
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                captchaInput.length === 6 
+                  ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' 
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
+              }`}>
+                {captchaInput.length} / 6
               </span>
             </div>
             <input
@@ -233,11 +238,11 @@ export const BigshareCaptchaModal: React.FC<BigshareCaptchaModalProps> = ({
               pattern="[0-9]*"
               value={captchaInput}
               onChange={e => handleInputChange(e.target.value)}
-              placeholder="• • • • • •"
+              placeholder="••••••"
               maxLength={6}
               autoComplete="off"
               disabled={submitting || loadingCaptcha}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-900 dark:text-white placeholder:text-slate-400 font-black tracking-[0.35em] text-center text-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+              className="w-full h-14 px-4 rounded-2xl border-2 border-indigo-500/30 focus:border-indigo-600 bg-slate-50 dark:bg-slate-800/70 text-slate-900 dark:text-white placeholder:text-slate-300 dark:placeholder:text-slate-600 font-mono font-black tracking-[0.45em] text-center text-2xl sm:text-3xl focus:outline-none focus:ring-4 focus:ring-indigo-500/20 transition-all shadow-inner"
             />
           </div>
 
@@ -245,22 +250,22 @@ export const BigshareCaptchaModal: React.FC<BigshareCaptchaModalProps> = ({
           {errorMsg && (
             <div className="flex items-center gap-2 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs animate-shake">
               <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>{errorMsg}</span>
+              <span className="font-medium">{errorMsg}</span>
             </div>
           )}
 
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2.5 pt-1">
+          {/* Action Buttons with high touch targets */}
+          <div className="flex items-center gap-2.5 pt-2 pb-2 sm:pb-0">
             {isBatch && onSkipCurrentPan && currentPanIndex < batchCount - 1 && (
               <button
                 type="button"
                 onClick={onSkipCurrentPan}
                 disabled={submitting}
-                className="py-3 px-3 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 shrink-0"
+                className="h-12 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center justify-center gap-1.5 shrink-0 touch-manipulation active:scale-95"
                 title="Skip this PAN"
               >
-                <SkipForward className="w-3.5 h-3.5" />
-                Skip
+                <SkipForward className="w-4 h-4" />
+                <span className="hidden sm:inline">Skip PAN</span>
               </button>
             )}
             
@@ -268,7 +273,7 @@ export const BigshareCaptchaModal: React.FC<BigshareCaptchaModalProps> = ({
               type="button"
               onClick={onClose}
               disabled={submitting}
-              className="flex-1 py-3 px-3 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="h-12 flex-1 px-4 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors touch-manipulation active:scale-95 flex items-center justify-center"
             >
               Cancel
             </button>
@@ -276,16 +281,16 @@ export const BigshareCaptchaModal: React.FC<BigshareCaptchaModalProps> = ({
             <button
               type="submit"
               disabled={captchaInput.length < 4 || submitting || loadingCaptcha}
-              className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-bold shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="h-12 flex-1 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-bold shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation active:scale-95 cursor-pointer"
             >
               {submitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Verifying...
+                  <span>Verifying...</span>
                 </>
               ) : (
                 <>
-                  {isBatch && currentPanIndex < batchCount - 1 ? 'Next PAN' : 'Verify Allotment'}
+                  <span>{isBatch && currentPanIndex < batchCount - 1 ? 'Next PAN' : 'Verify'}</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
