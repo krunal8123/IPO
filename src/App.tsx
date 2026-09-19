@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { IpoItem, IpoCategory, IpoStatus, BuybackItem } from './types/ipo';
 import { useWatchlist } from './context/WatchlistContext';
 import { liveIpoService } from './services/liveIpoService';
+import { getCachedUpstoxIpos } from './services/upstoxDirectService';
 import { NoticeTicker } from './components/common/NoticeTicker';
 import { Navbar } from './components/common/Navbar';
 import { MobileHeader } from './components/common/MobileHeader';
@@ -80,8 +81,8 @@ export const App: React.FC = () => {
   const [allotmentTarget, setAllotmentTarget] = useState<{ id: string; timestamp: number } | null>(null);
   const [showServerModal, setShowServerModal] = useState<boolean>(false);
 
-  // Live real-time state directly from backend / Upstox API
-  const [ipos, setIpos] = useState<IpoItem[]>([]);
+  // Live real-time state directly from Upstox API
+  const [ipos, setIpos] = useState<IpoItem[]>(() => getCachedUpstoxIpos());
   const [buybacks, setBuybacks] = useState<BuybackItem[]>([]);
   const [isLive, setIsLive] = useState<boolean>(false);
   const [lastSyncTime, setLastSyncTime] = useState<string>('');
@@ -94,15 +95,14 @@ export const App: React.FC = () => {
   const syncLiveData = async () => {
     setIsSyncing(true);
     try {
-      const [ipoRes, buybackRes] = await Promise.all([
-        liveIpoService.getLiveIpos(),
-        liveIpoService.fetchBuybacks()
-      ]);
+      // Temporarily disabled buybacks API call
+      // const buybackRes = await liveIpoService.fetchBuybacks();
+      const ipoRes = await liveIpoService.getLiveIpos();
       setIpos(ipoRes.ipos);
       setIsLive(ipoRes.isLive);
       setLastSyncTime(ipoRes.timestamp);
       setDataSource(ipoRes.source);
-      if (buybackRes.length > 0) setBuybacks(buybackRes);
+      // if (buybackRes.length > 0) setBuybacks(buybackRes);
     } catch (e) {
       console.warn('Failed to sync live data:', e);
     } finally {
@@ -301,34 +301,8 @@ export const App: React.FC = () => {
                   Connecting to Live Upstox API
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Fetching live bidding, upcoming issues, and real-time subscription data...
+                  Streaming real-time IPO and market data directly from Upstox...
                 </p>
-              </div>
-            ) : ipos.length === 0 ? (
-              <div className="glass-card rounded-3xl p-10 text-center border border-slate-200 dark:border-slate-800 my-8 max-w-md mx-auto animate-fade-in">
-                <div className="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center mx-auto mb-4 text-2xl font-black">
-                  📡
-                </div>
-                <h3 className="text-base font-black text-slate-900 dark:text-white mb-1.5">
-                  No Live IPOs Loaded
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mb-5 leading-relaxed">
-                  Start the backend server (<code className="font-mono bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-indigo-500 font-bold">npm run dev</code>) to stream live data directly from the integrated Upstox API.
-                </p>
-                <div className="flex items-center justify-center gap-2.5">
-                  <button
-                    onClick={syncLiveData}
-                    className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" /> Retry Fetch
-                  </button>
-                  <button
-                    onClick={() => setShowServerModal(true)}
-                    className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition-colors flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Settings className="w-3.5 h-3.5" /> API Settings
-                  </button>
-                </div>
               </div>
             ) : filteredIpos.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">

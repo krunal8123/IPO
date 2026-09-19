@@ -44,9 +44,15 @@ jobs:
         run: npm ci --legacy-peer-deps || npm install --legacy-peer-deps
 
       - name: Run Market Data Scraper
+        env:
+          UPSTOX_ACCESS_TOKEN: ${{ secrets.UPSTOX_ACCESS_TOKEN }}
+          UPSTOX_API_KEY: ${{ secrets.UPSTOX_API_KEY }}
         run: node server/buildStaticData.js
 
       - name: Build Web Application
+        env:
+          VITE_UPSTOX_ACCESS_TOKEN: ${{ secrets.UPSTOX_ACCESS_TOKEN }}
+          VITE_UPSTOX_API_KEY: ${{ secrets.UPSTOX_API_KEY }}
         run: npm run build
 
       - name: Setup GitHub Pages

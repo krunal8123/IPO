@@ -1,7 +1,16 @@
 import { Capacitor } from '@capacitor/core';
 import { IpoItem, AllotmentResult, KfinIssue, MufgIssue, BigshareIssue, IpoStatus } from '../types/ipo';
+import {
+  getStoredUpstoxToken,
+  setStoredUpstoxToken,
+  getStoredUpstoxApiKey,
+  setStoredUpstoxApiKey,
+  fetchUpstoxDirectIpos,
+  getCachedUpstoxIpos,
+  setCachedUpstoxIpos,
+  testUpstoxToken
+} from './upstoxDirectService';
 
-export const DEFAULT_SERVER = 'https://ipo-wire.onrender.com';
 export const DEFAULT_LAN_SERVER = 'http://10.202.144.96:5001';
 
 export function getApiBaseUrl(): string {
@@ -19,18 +28,9 @@ export function getApiBaseUrl(): string {
     return import.meta.env.VITE_API_URL.replace(/\/+$/, '');
   }
 
-  // 3. Detect if running inside native Android/iOS Capacitor WebView
-  if (typeof window !== 'undefined') {
-    const isCapacitorNative = 
-      Capacitor.isNativePlatform() ||
-      !!(window as any).Capacitor?.isNativePlatform?.() ||
-      window.location.protocol === 'capacitor:' ||
-      window.location.protocol === 'file:' ||
-      (!window.location.port && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'));
-
-    if (isCapacitorNative) {
-      return `${DEFAULT_SERVER}/api`;
-    }
+  // 3. Localhost dev server
+  if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+    return '/api';
   }
 
   return '/api';
@@ -48,9 +48,19 @@ export function setCustomServerHost(hostUrl: string): void {
 
 export function getCustomServerHost(): string {
   if (typeof window !== 'undefined') {
-    return localStorage.getItem('iporadar_api_url') || DEFAULT_SERVER;
+    return localStorage.getItem('iporadar_api_url') || DEFAULT_LAN_SERVER;
   }
-  return DEFAULT_SERVER;
+  return DEFAULT_LAN_SERVER;
+}
+
+export function getStaticDataUrl(filename: string): string {
+  if (typeof window === 'undefined') return `./data/${filename}`;
+  if (window.location.protocol === 'capacitor:' || window.location.protocol === 'file:') {
+    return `./data/${filename}`;
+  }
+  const pathname = window.location.pathname;
+  const basePath = pathname.endsWith('/') ? pathname : (pathname + '/');
+  return `${window.location.origin}${basePath}data/${filename}`;
 }
 
 export async function testServerHost(hostUrl: string): Promise<boolean> {
@@ -405,131 +415,87 @@ async function evaluateLocalAllotment(
   };
 }
 
-function parseDateBoundary(dateStr?: string, defaultHour: number = 0, defaultMin: number = 0): Date | null {
-  if (!dateStr || dateStr === 'Active' || dateStr.includes('T+') || dateStr === 'N/A') return null;
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return null;
-  d.setHours(defaultHour, defaultMin, 0, 0);
-  return d;
-}
-
-/**
- * Dynamically computes an IPO's status based on real current date & time:
- * - If listingDate <= now -> 'listed'
- * - If closeDate < now (after 17:00 IST cutoff) -> 'closed'
- * - If openDate <= now <= closeDate -> 'live' (Bidding Live)
- * - If openDate > now -> 'upcoming'
- */
-export function evaluateIpoStatus(
-  openStr?: string,
-  closeStr?: string,
-  listingStr?: string,
-  dailyEndTime?: string,
-  rawStatus?: string
-): { status: IpoStatus; badge: string } {
-  const now = new Date();
-  const openDate = parseDateBoundary(openStr, 10, 0);
-
-  let closeH = 17, closeM = 0;
-  if (dailyEndTime) {
-    const parts = dailyEndTime.split(':').map(Number);
-    if (!isNaN(parts[0])) closeH = parts[0];
-    if (!isNaN(parts[1])) closeM = parts[1];
-  }
-  const closeDate = parseDateBoundary(closeStr, closeH, closeM);
-  const listingDate = parseDateBoundary(listingStr, 10, 0);
-
-  if (listingDate && now >= listingDate) {
-    return { status: 'listed', badge: 'Listed' };
-  }
-  if (closeDate && now > closeDate) {
-    return { status: 'closed', badge: 'Closed / Allotment' };
-  }
-  if (openDate && closeDate && now >= openDate && now <= closeDate) {
-    return { status: 'live', badge: 'Bidding Live' };
-  }
-  if (openDate && now < openDate) {
-    return { status: 'upcoming', badge: 'Upcoming' };
-  }
-
-  const fallback = (rawStatus === 'open' || rawStatus === 'live') ? 'live' : rawStatus === 'upcoming' ? 'upcoming' : 'closed';
-  return {
-    status: fallback as IpoStatus,
-    badge: fallback === 'live' ? 'Bidding Live' : fallback === 'upcoming' ? 'Upcoming' : 'Closed'
-  };
-}
-
-/**
- * Normalizes and validates IPO data in accordance with statutory regulations:
- * 1. SEBI ICDR Regulation Mandate: For Mainboard IPOs, 1 Lot Retail Bid MUST NOT exceed ₹15,000.
- *    Statutory retail application size is strictly between ₹10,000 and ₹15,000.
- *    If lotSize * priceBandMax > 15,000, lotSize is automatically clamped to Math.floor(15000 / price).
- * 2. Synchronizes minInvestment = lotSize * priceBandMax.
- * 3. Dynamically re-evaluates bidding status against current date/time.
- */
-export function sanitizeIpoData(ipo: IpoItem): IpoItem {
-  if (!ipo) return ipo;
-  const isSme = ipo.category === 'sme';
-  const price = ipo.priceBandMax || ipo.cutOffPrice || ipo.priceBandMin || 100;
-  let lot = ipo.lotSize;
-
-  if (!isSme && price > 0) {
-    const maxAllowedLot = Math.max(1, Math.floor(15000 / price));
-    // If lot is invalid, or if 1 lot retail bid exceeds the SEBI ₹15,000 threshold
-    if (!lot || lot <= 0 || (lot * price > 15000)) {
-      lot = maxAllowedLot;
-    }
-  }
-
-  const minInvestment = lot * price;
-  const minQty = (!isSme && ipo.minimumQuantity && ipo.minimumQuantity * price > 15000)
-    ? lot
-    : (ipo.minimumQuantity || lot);
-
-  const { status, badge } = evaluateIpoStatus(
-    ipo.openDate,
-    ipo.closeDate,
-    ipo.listingDate,
-    ipo.dailyEndTime,
-    ipo.status
-  );
-
-  return {
-    ...ipo,
-    lotSize: lot,
-    minInvestment,
-    minimumQuantity: minQty,
-    status,
-    badge
-  };
-}
+// Re-export shared SEBI sanitizer and status evaluators
+export { parseDateBoundary, evaluateIpoStatus, sanitizeIpoData } from './ipoSanitizer';
+import { sanitizeIpoData } from './ipoSanitizer';
 
 export const liveIpoService = {
-  // Fetch real-time IPOs directly from backend API / Upstox API
+  // Fetch real-time IPOs directly from Upstox API / backend
   async getLiveIpos(): Promise<LiveFetchResult> {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 7000);
-
-      const res = await fetch(`${getApiBaseUrl()}/ipos`, { 
-        signal: controller.signal,
-        headers: { 'Accept': 'application/json' }
-      });
-      clearTimeout(timeoutId);
-
-      if (res.ok) {
-        const json = await res.json();
-        if (json.success && Array.isArray(json.data)) {
+    // 1. Direct browser fetch to api.upstox.com if Upstox token is present (zero server in between)
+    const storedToken = getStoredUpstoxToken();
+    if (storedToken) {
+      try {
+        const directResult = await fetchUpstoxDirectIpos(storedToken);
+        if (directResult.success && directResult.data.length > 0) {
           return {
-            ipos: json.data.map(sanitizeIpoData),
+            ipos: directResult.data,
             isLive: true,
-            timestamp: new Date(json.timestamp || Date.now()).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-            source: json.source || 'Upstox Live API'
+            timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+            source: directResult.source
           };
+        }
+      } catch (err) {
+        console.warn('[LiveService] Direct Upstox API fetch failed, falling back:', err);
+      }
+    }
+
+    // 2. Try primary API endpoint (local dev server on localhost or configured backend)
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/ipos`, { signal: AbortSignal.timeout(4000) });
+      if (res.ok) {
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          const json = await res.json();
+          if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+            const sanitized = json.data.map(sanitizeIpoData);
+            setCachedUpstoxIpos(sanitized);
+            return {
+              ipos: sanitized,
+              isLive: true,
+              timestamp: new Date(json.timestamp || Date.now()).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+              source: json.source || 'Live Upstox Feed'
+            };
+          }
         }
       }
     } catch (err) {
-      console.warn('[LiveService] Backend API unreachable:', err);
+      // Direct API unreachable, fall through to static / cached
+    }
+
+    // 3. Try static data on GitHub Pages / mobile assets (built by GitHub Actions scraper with real Upstox/GMP data)
+    try {
+      const staticRes = await fetch(getStaticDataUrl('ipos.json'), { cache: 'no-cache' });
+      if (staticRes.ok) {
+        const contentType = staticRes.headers.get('content-type') || '';
+        // Guard against Vite index.html SPA fallback
+        if (contentType.includes('application/json') || !contentType.includes('text/html')) {
+          const json = await staticRes.json();
+          if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+            const sanitized = json.data.map(sanitizeIpoData);
+            setCachedUpstoxIpos(sanitized);
+            return {
+              ipos: sanitized,
+              isLive: true,
+              timestamp: new Date(json.timestamp || Date.now()).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+              source: json.source || 'Upstox Verified Market Feed'
+            };
+          }
+        }
+      }
+    } catch {
+      // Fall through
+    }
+
+    // 4. Try local cached IPOs from previous fetch
+    const cached = getCachedUpstoxIpos();
+    if (cached.length > 0) {
+      return {
+        ipos: cached,
+        isLive: true,
+        timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+        source: 'Cached Market Feed'
+      };
     }
 
     return {
@@ -540,8 +506,23 @@ export const liveIpoService = {
     };
   },
 
-  // Fetch all active KFintech issues directly from backend API
+  // Fetch all active KFintech issues (static cache first for mobile/web, then backend)
   async getKfinIssues(): Promise<KfinIssue[]> {
+    // 1. Try static data on GitHub Pages / app assets
+    try {
+      const staticRes = await fetch(getStaticDataUrl('kfin.json'), { cache: 'no-cache' });
+      if (staticRes.ok) {
+        const contentType = staticRes.headers.get('content-type') || '';
+        if (contentType.includes('application/json') || !contentType.includes('text/html')) {
+          const json = await staticRes.json();
+          if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+            return json.data;
+          }
+        }
+      }
+    } catch {}
+
+    // 2. Try backend API
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 4000);
@@ -561,8 +542,23 @@ export const liveIpoService = {
     return BASELINE_KFIN_ISSUES;
   },
 
-  // Fetch all active MUFG Intime issues directly from backend API
+  // Fetch all active MUFG Intime issues (static cache first for mobile/web, then backend)
   async getMufgIssues(): Promise<MufgIssue[]> {
+    // 1. Try static data on GitHub Pages / app assets
+    try {
+      const staticRes = await fetch(getStaticDataUrl('mufg.json'), { cache: 'no-cache' });
+      if (staticRes.ok) {
+        const contentType = staticRes.headers.get('content-type') || '';
+        if (contentType.includes('application/json') || !contentType.includes('text/html')) {
+          const json = await staticRes.json();
+          if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+            return json.data;
+          }
+        }
+      }
+    } catch {}
+
+    // 2. Try backend API
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 4000);
@@ -693,30 +689,40 @@ export const liveIpoService = {
 
   // Check Upstox API credentials status
   async getUpstoxStatus(): Promise<{ success: boolean; hasAccessToken: boolean; hasApiKey: boolean; hasApiSecret: boolean; source: string }> {
-    try {
-      const res = await fetch(`${getApiBaseUrl()}/upstox/status`, { signal: AbortSignal.timeout(3000) });
-      if (res.ok) return await res.json();
-    } catch {}
-    return { success: false, hasAccessToken: false, hasApiKey: false, hasApiSecret: false, source: 'Offline' };
-  },
-
-  // Save Upstox credentials to backend
-  async saveUpstoxCredentials(creds: { accessToken?: string; apiKey?: string; apiSecret?: string }): Promise<boolean> {
-    try {
-      const res = await fetch(`${getApiBaseUrl()}/upstox/token`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(creds),
-        signal: AbortSignal.timeout(4000)
-      });
-      return res.ok;
-    } catch {
-      return false;
+    const token = getStoredUpstoxToken();
+    const apiKey = getStoredUpstoxApiKey();
+    if (token) {
+      return { success: true, hasAccessToken: true, hasApiKey: !!apiKey, hasApiSecret: false, source: 'Upstox Official Direct API' };
     }
+    if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+      try {
+        const res = await fetch(`${getApiBaseUrl()}/upstox/status`, { signal: AbortSignal.timeout(2000) });
+        if (res.ok) return await res.json();
+      } catch {}
+    }
+    return { success: false, hasAccessToken: false, hasApiKey: false, hasApiSecret: false, source: 'Token Required' };
   },
 
-  // Fetch live buyback data from backend API
+  // Save Upstox credentials directly into browser localStorage (and local dev server if on localhost)
+  async saveUpstoxCredentials(creds: { accessToken?: string; apiKey?: string; apiSecret?: string }): Promise<boolean> {
+    if (creds.accessToken) setStoredUpstoxToken(creds.accessToken);
+    if (creds.apiKey) setStoredUpstoxApiKey(creds.apiKey);
+    if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+      try {
+        await fetch(`${getApiBaseUrl()}/upstox/token`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(creds),
+          signal: AbortSignal.timeout(2000)
+        });
+      } catch {}
+    }
+    return true;
+  },
+
+  // Fetch live buyback data (temporarily commented out)
   async fetchBuybacks(): Promise<import('../types/ipo').BuybackItem[]> {
+    /*
     try {
       const res = await fetch(`${getApiBaseUrl()}/buybacks`, {
         headers: { 'Accept': 'application/json' },
@@ -731,6 +737,7 @@ export const liveIpoService = {
     } catch (err) {
       console.warn('[LiveService] Buyback fetch failed:', err);
     }
+    */
     return [];
   }
 };

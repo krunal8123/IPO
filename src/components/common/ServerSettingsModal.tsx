@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Server, CheckCircle2, AlertCircle, RefreshCw, Wifi, ShieldCheck, ExternalLink } from 'lucide-react';
-import { DEFAULT_SERVER, DEFAULT_LAN_SERVER, getCustomServerHost, setCustomServerHost, testServerHost, liveIpoService, getApiBaseUrl } from '../../services/liveIpoService';
+import { DEFAULT_LAN_SERVER, getCustomServerHost, setCustomServerHost, testServerHost, liveIpoService, getApiBaseUrl } from '../../services/liveIpoService';
+import { testUpstoxToken, getStoredUpstoxToken } from '../../services/upstoxDirectService';
 
 interface ServerSettingsModalProps {
   isOpen: boolean;
@@ -12,7 +13,7 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({ isOpen
   const [hostInput, setHostInput] = useState<string>(() => getCustomServerHost());
   const [testing, setTesting] = useState<boolean>(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
-  const [upstoxToken, setUpstoxToken] = useState<string>('');
+  const [upstoxToken, setUpstoxToken] = useState<string>(() => getStoredUpstoxToken());
   const [upstoxStatus, setUpstoxStatus] = useState<{ hasAccessToken?: boolean; hasApiKey?: boolean } | null>(null);
   const [savingToken, setSavingToken] = useState<boolean>(false);
   const [tokenSaveMessage, setTokenSaveMessage] = useState<string>('');
@@ -20,6 +21,7 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({ isOpen
   useEffect(() => {
     if (isOpen) {
       liveIpoService.getUpstoxStatus().then(st => setUpstoxStatus(st));
+      setUpstoxToken(getStoredUpstoxToken());
     }
   }, [isOpen]);
 
@@ -27,14 +29,23 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({ isOpen
     if (!upstoxToken.trim()) return;
     setSavingToken(true);
     setTokenSaveMessage('');
+
+    // Test token directly with api.upstox.com
+    const test = await testUpstoxToken(upstoxToken.trim());
+    if (!test.success) {
+      setSavingToken(false);
+      setTokenSaveMessage(`❌ ${test.message}`);
+      return;
+    }
+
     const ok = await liveIpoService.saveUpstoxCredentials({ accessToken: upstoxToken.trim() });
     setSavingToken(false);
     if (ok) {
-      setTokenSaveMessage('✓ Access Token saved! Re-fetching live data directly from Upstox API.');
+      setTokenSaveMessage('✓ Upstox Access Token verified & saved! Re-fetching live market data directly.');
       setUpstoxStatus(prev => ({ ...(prev || {}), hasAccessToken: true }));
       onSaved();
     } else {
-      setTokenSaveMessage('Could not save token to server. Check server connection.');
+      setTokenSaveMessage('Could not save token.');
     }
   };
 
@@ -212,25 +223,9 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({ isOpen
           {/* Help Info & Presets */}
           <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60 space-y-2 text-[11px] text-slate-500 dark:text-slate-400">
             <span className="font-bold text-slate-700 dark:text-slate-300 block">
-              Quick Preset Servers:
+              Optional Local PC Backend:
             </span>
             <div className="grid grid-cols-1 gap-1.5">
-              <button
-                type="button"
-                onClick={() => {
-                  setHostInput(DEFAULT_SERVER);
-                  setTestResult(null);
-                }}
-                className="w-full text-left p-2 rounded-lg bg-indigo-50/70 dark:bg-indigo-950/40 hover:bg-indigo-100/70 dark:hover:bg-indigo-900/50 border border-indigo-200/50 dark:border-indigo-800/50 text-indigo-700 dark:text-indigo-300 transition-colors"
-              >
-                <div className="font-extrabold flex items-center justify-between">
-                  <span>☁️ Cloud Public Server (Recommended)</span>
-                  <span className="text-[10px] px-1.5 py-0.2 bg-indigo-600 text-white rounded">No Wi-Fi Needed</span>
-                </div>
-                <div className="font-mono text-[10px] opacity-80 truncate">{DEFAULT_SERVER}</div>
-                <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Works anywhere on 4G, 5G or any Wi-Fi. Bypasses Windows Firewall.</div>
-              </button>
-
               <button
                 type="button"
                 onClick={() => {
@@ -243,7 +238,7 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({ isOpen
                   <span>🏠 Local Wi-Fi (LAN)</span>
                 </div>
                 <div className="font-mono text-[10px] opacity-80 truncate">{DEFAULT_LAN_SERVER}</div>
-                <div className="text-[10px] text-slate-400 mt-0.5">Requires phone on same Wi-Fi with port 5001 unblocked.</div>
+                <div className="text-[10px] text-slate-400 mt-0.5">Use when testing local Node backend server from your phone on the same Wi-Fi.</div>
               </button>
             </div>
           </div>
