@@ -133,6 +133,150 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
     return list;
   }, [mufgIssues, kfinIssues, eligibleIpos]);
 
+  // Dedicated list of shortcuts for recent allotment-out / declared IPOs
+  const recentAllotmentShortcuts = useMemo(() => {
+    const list: Array<{
+      id: string;
+      name: string;
+      badge: string;
+      badgeColor: string;
+      registrar: string;
+      isLiveApi: boolean;
+      allotmentDate?: string;
+    }> = [];
+
+    const cleanStr = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+    const parseTimestamp = (dateStr?: string): number => {
+      if (!dateStr || dateStr === 'T+1' || dateStr === 'T+3' || dateStr === 'Active' || dateStr === 'Declared') return 0;
+      const ts = Date.parse(dateStr);
+      if (!isNaN(ts)) return ts;
+      const parts = dateStr.split(/[-/ ]+/);
+      if (parts.length === 3) {
+        const d = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10) - 1;
+        const y = parseInt(parts[2], 10);
+        if (!isNaN(d) && !isNaN(m) && !isNaN(y)) {
+          const parsed = new Date(y < 100 ? y + 2000 : y, m, d).getTime();
+          if (!isNaN(parsed)) return parsed;
+        }
+      }
+      return 0;
+    };
+
+    // 1. Gather closed and listed IPOs from ipos (allotment declared/out or listing concluded)
+    const closedOrListed = ipos
+      .filter(i => i.status === 'closed' || i.status === 'listed')
+      .slice()
+      .sort((a, b) => {
+        const timeB = Math.max(
+          parseTimestamp(b.allotmentDate),
+          parseTimestamp(b.listingDate),
+          parseTimestamp(b.closeDate)
+        );
+        const timeA = Math.max(
+          parseTimestamp(a.allotmentDate),
+          parseTimestamp(a.listingDate),
+          parseTimestamp(a.closeDate)
+        );
+        return timeB - timeA;
+      });
+
+    closedOrListed.forEach(ipo => {
+      const clean = cleanStr(ipo.name);
+      // Check if it matches an MUFG issue
+      const mufg = mufgIssues.find(m => {
+        const mClean = cleanStr(m.name);
+        return mClean.includes(clean) || clean.includes(mClean);
+      });
+      // Check if it matches a KFin issue
+      const kfin = !mufg && kfinIssues.find(k => {
+        const kClean = cleanStr(k.name);
+        return kClean.includes(clean) || clean.includes(kClean);
+      });
+
+      if (mufg) {
+        list.push({
+          id: mufg.clientId,
+          name: ipo.name,
+          badge: '⚡ MUFG Live',
+          badgeColor: 'bg-blue-600 text-white',
+          registrar: 'MUFG Intime',
+          isLiveApi: true,
+          allotmentDate: ipo.allotmentDate
+        });
+      } else if (kfin) {
+        list.push({
+          id: kfin.clientId,
+          name: ipo.name,
+          badge: '⚡ KFin Live',
+          badgeColor: 'bg-emerald-600 text-white',
+          registrar: 'KFintech',
+          isLiveApi: true,
+          allotmentDate: ipo.allotmentDate
+        });
+      } else {
+        list.push({
+          id: ipo.id,
+          name: ipo.name,
+          badge: ipo.status === 'listed' ? 'Listed' : 'Allotment Out',
+          badgeColor: 'bg-indigo-600 text-white',
+          registrar: ipo.registrar.split(' ')[0] || 'Official',
+          isLiveApi: false,
+          allotmentDate: ipo.allotmentDate
+        });
+      }
+    });
+
+    // 2. Also include top newly declared live issues from MUFG (highest clientId is newest added on Link Intime)
+    const sortedMufg = [...mufgIssues].sort((a, b) => {
+      const numA = parseInt(a.clientId, 10) || 0;
+      const numB = parseInt(b.clientId, 10) || 0;
+      return numB - numA;
+    });
+
+    sortedMufg.slice(0, 8).forEach(m => {
+      const clean = cleanStr(m.name);
+      const exists = list.some(item => {
+        const itemClean = cleanStr(item.name);
+        return itemClean.includes(clean) || clean.includes(itemClean) || item.id === m.clientId;
+      });
+      if (!exists) {
+        const cleanDisplayName = m.name.replace(/-(?:\s*SME)?\s*IPO$/i, '').trim();
+        list.push({
+          id: m.clientId,
+          name: cleanDisplayName,
+          badge: '⚡ MUFG Live',
+          badgeColor: 'bg-blue-600 text-white',
+          registrar: 'MUFG Intime',
+          isLiveApi: true
+        });
+      }
+    });
+
+    // 3. Also include top newly declared live issues from KFintech
+    kfinIssues.slice(0, 8).forEach(k => {
+      const clean = cleanStr(k.name);
+      const exists = list.some(item => {
+        const itemClean = cleanStr(item.name);
+        return itemClean.includes(clean) || clean.includes(itemClean) || item.id === k.clientId;
+      });
+      if (!exists) {
+        const cleanDisplayName = k.name.replace(/-(?:\s*SME)?\s*IPO$/i, '').replace(/LIMITED.*$/i, 'Ltd').trim();
+        list.push({
+          id: k.clientId,
+          name: cleanDisplayName,
+          badge: '⚡ KFin Live',
+          badgeColor: 'bg-emerald-600 text-white',
+          registrar: 'KFintech',
+          isLiveApi: true
+        });
+      }
+    });
+
+    return list.slice(0, 12);
+  }, [ipos, mufgIssues, kfinIssues]);
+
   const [selectedIpoId, setSelectedIpoId] = useState<string>('');
 
   // Auto-select and focus input when navigated from IPO Detail Dialog
@@ -261,7 +405,7 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
     }
 
     // 3. Feed IPO match
-    const feed = eligibleIpos.find(i => i.id === selectedIpoId);
+    const feed = ipos.find(i => i.id === selectedIpoId) || eligibleIpos.find(i => i.id === selectedIpoId);
     if (feed) {
       const cleanFeedName = feed.name.toLowerCase().replace(/[^a-z0-9]/g, '');
 
@@ -437,34 +581,48 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
                 </span>
               </div>
 
-              {/* Quick Select Trending/Recent Issues Pills */}
-              {allSearchableOptions.length > 0 && (
-                <div className="mb-3">
-                  <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1.5 flex items-center gap-1">
-                    <Sparkles className="w-3 h-3 text-amber-500" />
-                    <span>Quick Select Recent Issues:</span>
+              {/* Quick Select Recent Allotment Out Shortcuts Pills */}
+              {recentAllotmentShortcuts.length > 0 && (
+                <div className="mb-3.5">
+                  <div className="text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <span className="flex h-2 w-2 relative">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                      </span>
+                      <span className="uppercase tracking-wider text-[10px] text-slate-500 dark:text-slate-400 font-extrabold">Recent Allotment Out Shortcuts</span>
+                    </div>
+                    <span className="text-[10px] text-slate-400 hidden sm:inline-block">
+                      Click to auto-fill & check
+                    </span>
                   </div>
-                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 no-scrollbar -mx-1 px-1">
-                    {allSearchableOptions.slice(0, 8).map(opt => {
+                  <div className="flex items-center gap-2 overflow-x-auto pb-1.5 no-scrollbar -mx-1 px-1">
+                    {recentAllotmentShortcuts.map(opt => {
                       const isSelected = opt.id === selectedIpoId;
                       return (
                         <button
                           key={opt.id}
                           type="button"
                           onClick={() => selectIssue(opt.id)}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap shrink-0 transition-all cursor-pointer flex items-center gap-1.5 ${
+                          title={`${opt.name} (${opt.registrar})`}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 transition-all cursor-pointer flex items-center gap-2 border ${
                             isSelected
-                              ? 'bg-indigo-600 text-white shadow-xs font-bold'
-                              : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
+                              ? 'bg-indigo-600 text-white border-indigo-600 shadow-md ring-2 ring-indigo-500/30'
+                              : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 border-slate-200 dark:border-slate-700 shadow-2xs'
                           }`}
                         >
-                          <span className="truncate max-w-[120px] sm:max-w-[160px]">{opt.name}</span>
-                          {opt.group === 'MUFG Intime' && (
-                            <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-blue-500'}`} />
-                          )}
-                          {opt.group === 'KFintech' && (
-                            <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-emerald-500'}`} />
-                          )}
+                          <span className="truncate max-w-[130px] sm:max-w-[170px]">{opt.name}</span>
+                          <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded-md ${
+                            isSelected
+                              ? 'bg-white/20 text-white'
+                              : opt.badge.includes('MUFG')
+                                ? 'bg-blue-500/15 text-blue-600 dark:text-blue-400'
+                                : opt.badge.includes('KFin')
+                                  ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+                                  : 'bg-indigo-500/15 text-indigo-600 dark:text-indigo-400'
+                          }`}>
+                            {opt.badge.includes('MUFG') ? 'MUFG' : opt.badge.includes('KFin') ? 'KFin' : 'Out'}
+                          </span>
                         </button>
                       );
                     })}
