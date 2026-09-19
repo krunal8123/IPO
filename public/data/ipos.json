@@ -1,0 +1,3159 @@
+{
+  "success": true,
+  "timestamp": "2026-09-19T14:33:27.627Z",
+  "source": "Verified Market Scraper",
+  "count": 31,
+  "data": [
+    {
+      "id": "nse",
+      "symbol": "NSE",
+      "name": "NSE Limited",
+      "category": "mainboard",
+      "status": "live",
+      "badge": "Bidding Live",
+      "logo": "https://www.google.com/s2/favicons?domain=nseindia.com&sz=128",
+      "companyWebsite": "https://nseindia.com",
+      "sector": "Mainboard Corporate",
+      "priceBandMin": 1700,
+      "priceBandMax": 1785,
+      "cutOffPrice": 1785,
+      "lotSize": 8,
+      "minimumQuantity": 8,
+      "minInvestment": 14280,
+      "issueSizeCr": 850,
+      "freshIssueCr": 680,
+      "ofsCr": 170,
+      "openDate": "Sep 17, 2026",
+      "closeDate": "Sep 21, 2026",
+      "allotmentDate": "Sep 22, 2026",
+      "refundDate": "Sep 23, 2026",
+      "creditDate": "Sep 23, 2026",
+      "listingDate": "Sep 24, 2026",
+      "faceValue": 2,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI",
+        "QIB"
+      ],
+      "registrar": "Link Intime India Pvt Ltd",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "NSE",
+        "BSE"
+      ],
+      "gmp": {
+        "gmpPrice": 85,
+        "gmpPercent": 5,
+        "estimatedListingPrice": 1870,
+        "trend": "up",
+        "kostakRate": 1275,
+        "subjectToSauda": 68000,
+        "lastUpdated": "19 Sep 2026, 5:45 PM IST"
+      },
+      "subscription": {
+        "retail": 1.01,
+        "qib": 0.68,
+        "nii": 0.64,
+        "total": 0.75,
+        "day": 2,
+        "applications": 31500,
+        "lastUpdated": "Live Market Feed"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 57120,
+          "expense": 45696,
+          "pat": 11424,
+          "netWorth": 42840
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 74256,
+          "expense": 57120,
+          "pat": 17136,
+          "netWorth": 59976
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 97104,
+          "expense": 72828,
+          "pat": 24276,
+          "netWorth": 82824
+        }
+      ],
+      "about": "NSE Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    },
+    {
+      "id": "sonaselection-india",
+      "symbol": "SONASELECTION",
+      "name": "Sonaselection India Limited",
+      "category": "mainboard",
+      "status": "live",
+      "badge": "Bidding Live",
+      "logo": "https://www.google.com/s2/favicons?domain=sonaselection.com&sz=128",
+      "companyWebsite": "https://sonaselection.com",
+      "sector": "Mainboard Corporate",
+      "priceBandMin": 94,
+      "priceBandMax": 99,
+      "cutOffPrice": 99,
+      "lotSize": 151,
+      "minimumQuantity": 151,
+      "minInvestment": 14949,
+      "issueSizeCr": 141.57,
+      "freshIssueCr": 113,
+      "ofsCr": 28,
+      "openDate": "Sep 17, 2026",
+      "closeDate": "Sep 21, 2026",
+      "allotmentDate": "Sep 22, 2026",
+      "refundDate": "Sep 23, 2026",
+      "creditDate": "Sep 23, 2026",
+      "listingDate": "Sep 24, 2026",
+      "faceValue": 2,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI",
+        "QIB"
+      ],
+      "registrar": "Link Intime India Pvt Ltd",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "NSE",
+        "BSE"
+      ],
+      "gmp": {
+        "gmpPrice": 2,
+        "gmpPercent": 2,
+        "estimatedListingPrice": 101,
+        "trend": "up",
+        "kostakRate": 30,
+        "subjectToSauda": 1600,
+        "lastUpdated": "19 Sep 2026, 4:45 PM IST"
+      },
+      "subscription": {
+        "retail": 1.3,
+        "qib": 0.46,
+        "nii": 0.6,
+        "bNii": 0.59,
+        "sNii": 0.62,
+        "total": 0.91,
+        "day": 2,
+        "applications": 31979,
+        "lastUpdated": "Live Exchange Feed"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 59796,
+          "expense": 47837,
+          "pat": 11959,
+          "netWorth": 44847
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 77735,
+          "expense": 59796,
+          "pat": 17939,
+          "netWorth": 62786
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 101653,
+          "expense": 76240,
+          "pat": 25413,
+          "netWorth": 86704
+        }
+      ],
+      "about": "Sonaselection India Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    },
+    {
+      "id": "kheria-autocomp",
+      "symbol": "KHERIA",
+      "name": "Kheria Autocomp Limited",
+      "category": "sme",
+      "status": "live",
+      "badge": "Bidding Live",
+      "logo": "https://www.google.com/s2/favicons?domain=kheriaautocomp.com&sz=128",
+      "companyWebsite": "https://kheriaautocomp.com",
+      "sector": "SME Enterprise",
+      "priceBandMin": 96,
+      "priceBandMax": 101,
+      "cutOffPrice": 101,
+      "lotSize": 1200,
+      "minimumQuantity": 1200,
+      "minInvestment": 121200,
+      "issueSizeCr": 46.44,
+      "freshIssueCr": 37,
+      "ofsCr": 9,
+      "openDate": "Sep 17, 2026",
+      "closeDate": "Sep 21, 2026",
+      "allotmentDate": "Sep 22, 2026",
+      "refundDate": "Sep 23, 2026",
+      "creditDate": "Sep 23, 2026",
+      "listingDate": "Sep 24, 2026",
+      "faceValue": 10,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI"
+      ],
+      "registrar": "Bigshare Services Pvt Ltd",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "BSE SME"
+      ],
+      "gmp": {
+        "gmpPrice": 0,
+        "gmpPercent": 0,
+        "estimatedListingPrice": 101,
+        "trend": "up",
+        "kostakRate": 0,
+        "subjectToSauda": 0,
+        "lastUpdated": "Live Feed"
+      },
+      "subscription": {
+        "retail": 0.58,
+        "qib": 0.23,
+        "nii": 0.61,
+        "bNii": 0.65,
+        "sNii": 0.54,
+        "total": 0.49,
+        "day": 2,
+        "applications": 407,
+        "lastUpdated": "Live Exchange Feed"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 484800,
+          "expense": 387840,
+          "pat": 96960,
+          "netWorth": 363600
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 630240,
+          "expense": 484800,
+          "pat": 145440,
+          "netWorth": 509040
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 824160,
+          "expense": 618120,
+          "pat": 206040,
+          "netWorth": 702960
+        }
+      ],
+      "about": "Kheria Autocomp Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    },
+    {
+      "id": "spectraa-technology-solutions",
+      "symbol": "SPECTRAA",
+      "name": "SpectraA Technology Solutions Limited",
+      "category": "sme",
+      "status": "live",
+      "badge": "Bidding Live",
+      "logo": "https://www.google.com/s2/favicons?domain=spectratechnology.com&sz=128",
+      "companyWebsite": "https://spectratechnology.com",
+      "sector": "SME Enterprise",
+      "priceBandMin": 112,
+      "priceBandMax": 118,
+      "cutOffPrice": 118,
+      "lotSize": 1000,
+      "minimumQuantity": 1000,
+      "minInvestment": 118000,
+      "issueSizeCr": 42.52,
+      "freshIssueCr": 34,
+      "ofsCr": 9,
+      "openDate": "Sep 17, 2026",
+      "closeDate": "Sep 21, 2026",
+      "allotmentDate": "Sep 22, 2026",
+      "refundDate": "Sep 23, 2026",
+      "creditDate": "Sep 23, 2026",
+      "listingDate": "Sep 24, 2026",
+      "faceValue": 10,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI"
+      ],
+      "registrar": "Bigshare Services Pvt Ltd",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "BSE SME"
+      ],
+      "gmp": {
+        "gmpPrice": 22,
+        "gmpPercent": 19,
+        "estimatedListingPrice": 140,
+        "trend": "up",
+        "kostakRate": 330,
+        "subjectToSauda": 17600,
+        "lastUpdated": "19 Sep 2026, 5:00 PM IST"
+      },
+      "subscription": {
+        "retail": 31.41,
+        "qib": 0.02,
+        "nii": 20.04,
+        "bNii": 18.95,
+        "sNii": 22.22,
+        "total": 20.01,
+        "day": 2,
+        "applications": 17300,
+        "lastUpdated": "Live Exchange Feed"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 472000,
+          "expense": 377600,
+          "pat": 94400,
+          "netWorth": 354000
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 613600,
+          "expense": 472000,
+          "pat": 141600,
+          "netWorth": 495600
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 802400,
+          "expense": 601800,
+          "pat": 200600,
+          "netWorth": 684400
+        }
+      ],
+      "about": "SpectraA Technology Solutions Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    },
+    {
+      "id": "axiom-gas-engineering",
+      "symbol": "AXIOM",
+      "name": "Axiom Gas Engineering Limited",
+      "category": "sme",
+      "status": "live",
+      "badge": "Bidding Live",
+      "logo": "https://www.google.com/s2/favicons?domain=axiomgas.com&sz=128",
+      "companyWebsite": "https://axiomgas.com",
+      "sector": "SME Enterprise",
+      "priceBandMin": 50,
+      "priceBandMax": 53,
+      "cutOffPrice": 53,
+      "lotSize": 2300,
+      "minimumQuantity": 2300,
+      "minInvestment": 121900,
+      "issueSizeCr": 49.81,
+      "freshIssueCr": 40,
+      "ofsCr": 10,
+      "openDate": "Sep 18, 2026",
+      "closeDate": "Sep 22, 2026",
+      "allotmentDate": "Sep 23, 2026",
+      "refundDate": "Sep 24, 2026",
+      "creditDate": "Sep 24, 2026",
+      "listingDate": "Sep 25, 2026",
+      "faceValue": 10,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI"
+      ],
+      "registrar": "Bigshare Services Pvt Ltd",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "BSE SME"
+      ],
+      "gmp": {
+        "gmpPrice": 0,
+        "gmpPercent": 0,
+        "estimatedListingPrice": 53,
+        "trend": "up",
+        "kostakRate": 0,
+        "subjectToSauda": 0,
+        "lastUpdated": "Live Feed"
+      },
+      "subscription": {
+        "retail": 0.64,
+        "qib": 0.8,
+        "nii": 0.55,
+        "bNii": 0.58,
+        "sNii": 0.5,
+        "total": 0.62,
+        "day": 2,
+        "applications": 621,
+        "lastUpdated": "Live Exchange Feed"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 487600,
+          "expense": 390080,
+          "pat": 97520,
+          "netWorth": 365700
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 633880,
+          "expense": 487600,
+          "pat": 146280,
+          "netWorth": 511980
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 828920,
+          "expense": 621690,
+          "pat": 207230,
+          "netWorth": 707020
+        }
+      ],
+      "about": "Axiom Gas Engineering Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    },
+    {
+      "id": "century-business-media",
+      "symbol": "CENTURY",
+      "name": "Century Business Media Limited",
+      "category": "sme",
+      "status": "closed",
+      "badge": "Closed / Listed",
+      "logo": "https://www.google.com/s2/favicons?domain=centurybusinessmedia.com&sz=128",
+      "companyWebsite": "https://centurybusinessmedia.com",
+      "sector": "SME Enterprise",
+      "priceBandMin": 70,
+      "priceBandMax": 74,
+      "cutOffPrice": 74,
+      "lotSize": 1600,
+      "minimumQuantity": 1600,
+      "minInvestment": 118400,
+      "issueSizeCr": 17.11,
+      "freshIssueCr": 14,
+      "ofsCr": 3,
+      "openDate": "Sep 11, 2026",
+      "closeDate": "Sep 16, 2026",
+      "allotmentDate": "Sep 17, 2026",
+      "refundDate": "Sep 18, 2026",
+      "creditDate": "Sep 18, 2026",
+      "listingDate": "Sep 21, 2026",
+      "faceValue": 10,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI"
+      ],
+      "registrar": "KFin Technologies Ltd",
+      "kfinClientId": "18432822190",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "BSE SME"
+      ],
+      "gmp": {
+        "gmpPrice": 0,
+        "gmpPercent": 0,
+        "estimatedListingPrice": 74,
+        "trend": "up",
+        "kostakRate": 0,
+        "subjectToSauda": 0,
+        "lastUpdated": "Live Feed"
+      },
+      "subscription": {
+        "retail": 39.81,
+        "qib": 47.53,
+        "nii": 114.24,
+        "bNii": 142.78,
+        "sNii": 57.16,
+        "total": 58,
+        "day": 3,
+        "applications": 13066,
+        "lastUpdated": "Live Exchange Feed"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 473600,
+          "expense": 378880,
+          "pat": 94720,
+          "netWorth": 355200
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 615680,
+          "expense": 473600,
+          "pat": 142080,
+          "netWorth": 497280
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 805120,
+          "expense": 603840,
+          "pat": 201280,
+          "netWorth": 686720
+        }
+      ],
+      "about": "Century Business Media Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    },
+    {
+      "id": "injecto-polymers",
+      "symbol": "INJECTO",
+      "name": "Injecto Polymers Limited",
+      "category": "sme",
+      "status": "closed",
+      "badge": "Closed / Listed",
+      "logo": "https://www.google.com/s2/favicons?domain=injecto.in&sz=128",
+      "companyWebsite": "https://injecto.in",
+      "sector": "SME Enterprise",
+      "priceBandMin": 98,
+      "priceBandMax": 100,
+      "cutOffPrice": 100,
+      "lotSize": 1200,
+      "minimumQuantity": 1200,
+      "minInvestment": 120000,
+      "issueSizeCr": 56.12,
+      "freshIssueCr": 45,
+      "ofsCr": 11,
+      "openDate": "Sep 11, 2026",
+      "closeDate": "Sep 16, 2026",
+      "allotmentDate": "Sep 17, 2026",
+      "refundDate": "Sep 18, 2026",
+      "creditDate": "Sep 18, 2026",
+      "listingDate": "Sep 21, 2026",
+      "faceValue": 10,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI"
+      ],
+      "registrar": "Bigshare Services Pvt Ltd",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "BSE SME"
+      ],
+      "gmp": {
+        "gmpPrice": 0,
+        "gmpPercent": 0,
+        "estimatedListingPrice": 100,
+        "trend": "up",
+        "kostakRate": 0,
+        "subjectToSauda": 0,
+        "lastUpdated": "Live Feed"
+      },
+      "subscription": {
+        "retail": 1.28,
+        "qib": 1.57,
+        "nii": 1.21,
+        "bNii": 1.7,
+        "sNii": 0.22,
+        "total": 1.29,
+        "day": 3,
+        "applications": 1108,
+        "lastUpdated": "Live Exchange Feed"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 480000,
+          "expense": 384000,
+          "pat": 96000,
+          "netWorth": 360000
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 624000,
+          "expense": 480000,
+          "pat": 144000,
+          "netWorth": 504000
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 816000,
+          "expense": 612000,
+          "pat": 204000,
+          "netWorth": 696000
+        }
+      ],
+      "about": "Injecto Polymers Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    },
+    {
+      "id": "manika-plastech",
+      "symbol": "MANIKA",
+      "name": "Manika Plastech Limited",
+      "category": "mainboard",
+      "status": "closed",
+      "badge": "Closed / Listed",
+      "logo": "https://www.google.com/s2/favicons?domain=manikaplastech.com&sz=128",
+      "companyWebsite": "https://manikaplastech.com",
+      "sector": "Mainboard Corporate",
+      "priceBandMin": 40,
+      "priceBandMax": 43,
+      "cutOffPrice": 43,
+      "lotSize": 348,
+      "minimumQuantity": 348,
+      "minInvestment": 14964,
+      "issueSizeCr": 125.5,
+      "freshIssueCr": 100,
+      "ofsCr": 25,
+      "openDate": "Sep 11, 2026",
+      "closeDate": "Sep 16, 2026",
+      "allotmentDate": "Sep 17, 2026",
+      "refundDate": "Sep 18, 2026",
+      "creditDate": "Sep 18, 2026",
+      "listingDate": "Sep 21, 2026",
+      "faceValue": 2,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI",
+        "QIB"
+      ],
+      "registrar": "Link Intime India Pvt Ltd",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "NSE",
+        "BSE"
+      ],
+      "gmp": {
+        "gmpPrice": 2,
+        "gmpPercent": 5,
+        "estimatedListingPrice": 45,
+        "trend": "up",
+        "kostakRate": 30,
+        "subjectToSauda": 1600,
+        "lastUpdated": "19 Sep 2026, 4:45 PM IST"
+      },
+      "subscription": {
+        "retail": 23.98,
+        "qib": 11.22,
+        "nii": 66.58,
+        "bNii": 74.16,
+        "sNii": 51.42,
+        "total": 29.46,
+        "day": 3,
+        "applications": 636650,
+        "lastUpdated": "Live Exchange Feed"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 59856,
+          "expense": 47885,
+          "pat": 11971,
+          "netWorth": 44892
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 77813,
+          "expense": 59856,
+          "pat": 17957,
+          "netWorth": 62849
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 101755,
+          "expense": 76316,
+          "pat": 25439,
+          "netWorth": 86791
+        }
+      ],
+      "about": "Manika Plastech Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    },
+    {
+      "id": "quanto-agroworld",
+      "symbol": "QUANTO",
+      "name": "Quanto Agroworld Limited",
+      "category": "sme",
+      "status": "closed",
+      "badge": "Closed / Listed",
+      "logo": "https://www.google.com/s2/favicons?domain=quantoagroworld.com&sz=128",
+      "companyWebsite": "https://quantoagroworld.com",
+      "sector": "SME Enterprise",
+      "priceBandMin": 67,
+      "priceBandMax": 67,
+      "cutOffPrice": 67,
+      "lotSize": 1800,
+      "minimumQuantity": 1800,
+      "minInvestment": 120600,
+      "issueSizeCr": 31.02,
+      "freshIssueCr": 25,
+      "ofsCr": 6,
+      "openDate": "Sep 15, 2026",
+      "closeDate": "Sep 17, 2026",
+      "allotmentDate": "Sep 18, 2026",
+      "refundDate": "Sep 21, 2026",
+      "creditDate": "Sep 21, 2026",
+      "listingDate": "Sep 21, 2026",
+      "faceValue": 10,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI"
+      ],
+      "registrar": "Bigshare Services Pvt Ltd",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "BSE SME"
+      ],
+      "gmp": {
+        "gmpPrice": 0,
+        "gmpPercent": 0,
+        "estimatedListingPrice": 67,
+        "trend": "up",
+        "kostakRate": 0,
+        "subjectToSauda": 0,
+        "lastUpdated": "Live Feed"
+      },
+      "subscription": {
+        "retail": 0.79,
+        "qib": 0,
+        "nii": 1.77,
+        "bNii": 0,
+        "sNii": 0,
+        "total": 1.45,
+        "day": 3,
+        "applications": 584,
+        "lastUpdated": "Live Exchange Feed"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 482400,
+          "expense": 385920,
+          "pat": 96480,
+          "netWorth": 361800
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 627120,
+          "expense": 482400,
+          "pat": 144720,
+          "netWorth": 506520
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 820080,
+          "expense": 615060,
+          "pat": 205020,
+          "netWorth": 699480
+        }
+      ],
+      "about": "Quanto Agroworld Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    },
+    {
+      "id": "shakti-polytarp",
+      "symbol": "SHAKTI",
+      "name": "Shakti Polytarp Limited",
+      "category": "sme",
+      "status": "closed",
+      "badge": "Closed / Listed",
+      "logo": "https://www.google.com/s2/favicons?domain=shaktipolytarp.com&sz=128",
+      "companyWebsite": "https://shaktipolytarp.com",
+      "sector": "SME Enterprise",
+      "priceBandMin": 56,
+      "priceBandMax": 59,
+      "cutOffPrice": 59,
+      "lotSize": 2000,
+      "minimumQuantity": 2000,
+      "minInvestment": 118000,
+      "issueSizeCr": 26.93,
+      "freshIssueCr": 22,
+      "ofsCr": 5,
+      "openDate": "Sep 15, 2026",
+      "closeDate": "Sep 17, 2026",
+      "allotmentDate": "Sep 18, 2026",
+      "refundDate": "Sep 21, 2026",
+      "creditDate": "Sep 21, 2026",
+      "listingDate": "Sep 21, 2026",
+      "faceValue": 10,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI"
+      ],
+      "registrar": "Bigshare Services Pvt Ltd",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "BSE SME"
+      ],
+      "gmp": {
+        "gmpPrice": 0,
+        "gmpPercent": 0,
+        "estimatedListingPrice": 59,
+        "trend": "up",
+        "kostakRate": 0,
+        "subjectToSauda": 0,
+        "lastUpdated": "Live Feed"
+      },
+      "subscription": {
+        "retail": 4.12,
+        "qib": 49.22,
+        "nii": 5.6,
+        "bNii": 6.37,
+        "sNii": 4.05,
+        "total": 11.94,
+        "day": 3,
+        "applications": 2166,
+        "lastUpdated": "Live Exchange Feed"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 472000,
+          "expense": 377600,
+          "pat": 94400,
+          "netWorth": 354000
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 613600,
+          "expense": 472000,
+          "pat": 141600,
+          "netWorth": 495600
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 802400,
+          "expense": 601800,
+          "pat": 200600,
+          "netWorth": 684400
+        }
+      ],
+      "about": "Shakti Polytarp Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    },
+    {
+      "id": "vama-wovenfab",
+      "symbol": "VAMA",
+      "name": "Vama Wovenfab Limited",
+      "category": "sme",
+      "status": "closed",
+      "badge": "Closed / Listed",
+      "logo": "https://www.google.com/s2/favicons?domain=vamawovenfab.com&sz=128",
+      "companyWebsite": "https://vamawovenfab.com",
+      "sector": "SME Enterprise",
+      "priceBandMin": 324,
+      "priceBandMax": 341,
+      "cutOffPrice": 341,
+      "lotSize": 400,
+      "minimumQuantity": 400,
+      "minInvestment": 136400,
+      "issueSizeCr": 49.54,
+      "freshIssueCr": 40,
+      "ofsCr": 10,
+      "openDate": "Sep 15, 2026",
+      "closeDate": "Sep 17, 2026",
+      "allotmentDate": "Sep 18, 2026",
+      "refundDate": "Sep 21, 2026",
+      "creditDate": "Sep 21, 2026",
+      "listingDate": "Sep 21, 2026",
+      "faceValue": 10,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI"
+      ],
+      "registrar": "Bigshare Services Pvt Ltd",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "BSE SME"
+      ],
+      "gmp": {
+        "gmpPrice": 0,
+        "gmpPercent": 0,
+        "estimatedListingPrice": 341,
+        "trend": "up",
+        "kostakRate": 0,
+        "subjectToSauda": 0,
+        "lastUpdated": "Live Feed"
+      },
+      "subscription": {
+        "retail": 2.8,
+        "qib": 1,
+        "nii": 2.49,
+        "bNii": 2.72,
+        "sNii": 2.03,
+        "total": 2.72,
+        "day": 3,
+        "applications": 4057,
+        "lastUpdated": "Live Exchange Feed"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 545600,
+          "expense": 436480,
+          "pat": 109120,
+          "netWorth": 409200
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 709280,
+          "expense": 545600,
+          "pat": 163680,
+          "netWorth": 572880
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 927520,
+          "expense": 695640,
+          "pat": 231880,
+          "netWorth": 791120
+        }
+      ],
+      "about": "Vama Wovenfab Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    },
+    {
+      "id": "hero-motors",
+      "symbol": "HERO",
+      "name": "Hero Motors Limited",
+      "category": "mainboard",
+      "status": "closed",
+      "badge": "Closed / Listed",
+      "logo": "https://www.google.com/s2/favicons?domain=heromotors.com&sz=128",
+      "companyWebsite": "https://heromotors.com",
+      "sector": "Mainboard Corporate",
+      "priceBandMin": 79,
+      "priceBandMax": 84,
+      "cutOffPrice": 84,
+      "lotSize": 178,
+      "minimumQuantity": 178,
+      "minInvestment": 14952,
+      "issueSizeCr": 1000,
+      "freshIssueCr": 800,
+      "ofsCr": 200,
+      "openDate": "Sep 16, 2026",
+      "closeDate": "Sep 18, 2026",
+      "allotmentDate": "Sep 21, 2026",
+      "refundDate": "Sep 21, 2026",
+      "creditDate": "Sep 21, 2026",
+      "listingDate": "Sep 21, 2026",
+      "faceValue": 2,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI",
+        "QIB"
+      ],
+      "registrar": "Link Intime India Pvt Ltd",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "NSE",
+        "BSE"
+      ],
+      "gmp": {
+        "gmpPrice": 0,
+        "gmpPercent": 0,
+        "estimatedListingPrice": 84,
+        "trend": "up",
+        "kostakRate": 0,
+        "subjectToSauda": 0,
+        "lastUpdated": "19 Sep 2026, 5:00 PM IST"
+      },
+      "subscription": {
+        "retail": 8.76,
+        "qib": 1.59,
+        "nii": 10.48,
+        "bNii": 8.62,
+        "sNii": 14.2,
+        "total": 7.08,
+        "day": 3,
+        "applications": 1624494,
+        "lastUpdated": "Live Exchange Feed"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 59808,
+          "expense": 47846,
+          "pat": 11962,
+          "netWorth": 44856
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 77750,
+          "expense": 59808,
+          "pat": 17942,
+          "netWorth": 62798
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 101674,
+          "expense": 76255,
+          "pat": 25418,
+          "netWorth": 86722
+        }
+      ],
+      "about": "Hero Motors Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    },
+    {
+      "id": "jindal-supreme-india",
+      "symbol": "JINDAL",
+      "name": "Jindal Supreme (India) Limited",
+      "category": "mainboard",
+      "status": "closed",
+      "badge": "Closed / Listed",
+      "logo": "https://www.google.com/s2/favicons?domain=jindalsupreme.com&sz=128",
+      "companyWebsite": "https://jindalsupreme.com",
+      "sector": "Mainboard Corporate",
+      "priceBandMin": 88,
+      "priceBandMax": 93,
+      "cutOffPrice": 93,
+      "lotSize": 161,
+      "minimumQuantity": 161,
+      "minInvestment": 14973,
+      "issueSizeCr": 124.88,
+      "freshIssueCr": 100,
+      "ofsCr": 25,
+      "openDate": "Sep 16, 2026",
+      "closeDate": "Sep 18, 2026",
+      "allotmentDate": "Sep 21, 2026",
+      "refundDate": "Sep 21, 2026",
+      "creditDate": "Sep 21, 2026",
+      "listingDate": "Sep 21, 2026",
+      "faceValue": 2,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI",
+        "QIB"
+      ],
+      "registrar": "Link Intime India Pvt Ltd",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "NSE",
+        "BSE"
+      ],
+      "gmp": {
+        "gmpPrice": 25,
+        "gmpPercent": 27,
+        "estimatedListingPrice": 118,
+        "trend": "up",
+        "kostakRate": 375,
+        "subjectToSauda": 20000,
+        "lastUpdated": "19 Sep 2026, 4:45 PM IST"
+      },
+      "subscription": {
+        "retail": 149.34,
+        "qib": 126.41,
+        "nii": 327.99,
+        "bNii": 304.18,
+        "sNii": 375.61,
+        "total": 181.07,
+        "day": 3,
+        "applications": 3820449,
+        "lastUpdated": "Live Exchange Feed"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 59892,
+          "expense": 47914,
+          "pat": 11978,
+          "netWorth": 44919
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 77860,
+          "expense": 59892,
+          "pat": 17968,
+          "netWorth": 62887
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 101816,
+          "expense": 76362,
+          "pat": 25454,
+          "netWorth": 86843
+        }
+      ],
+      "about": "Jindal Supreme (India) Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    },
+    {
+      "id": "ss-retail",
+      "symbol": "SS",
+      "name": "SS Retail Limited",
+      "category": "mainboard",
+      "status": "closed",
+      "badge": "Closed / Listed",
+      "logo": "https://www.google.com/s2/favicons?domain=ssmobile.com&sz=128",
+      "companyWebsite": "https://ssmobile.com",
+      "sector": "Mainboard Corporate",
+      "priceBandMin": 403,
+      "priceBandMax": 424,
+      "cutOffPrice": 424,
+      "lotSize": 35,
+      "minimumQuantity": 35,
+      "minInvestment": 14840,
+      "issueSizeCr": 500,
+      "freshIssueCr": 400,
+      "ofsCr": 100,
+      "openDate": "Sep 16, 2026",
+      "closeDate": "Sep 18, 2026",
+      "allotmentDate": "Sep 21, 2026",
+      "refundDate": "Sep 21, 2026",
+      "creditDate": "Sep 21, 2026",
+      "listingDate": "Sep 21, 2026",
+      "faceValue": 2,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI",
+        "QIB"
+      ],
+      "registrar": "Link Intime India Pvt Ltd",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "NSE",
+        "BSE"
+      ],
+      "gmp": {
+        "gmpPrice": 135,
+        "gmpPercent": 32,
+        "estimatedListingPrice": 559,
+        "trend": "up",
+        "kostakRate": 2025,
+        "subjectToSauda": 108000,
+        "lastUpdated": "19 Sep 2026, 4:45 PM IST"
+      },
+      "subscription": {
+        "retail": 38.26,
+        "qib": 214.22,
+        "nii": 150.79,
+        "bNii": 165.06,
+        "sNii": 122.24,
+        "total": 108.69,
+        "day": 3,
+        "applications": 4164580,
+        "lastUpdated": "Live Exchange Feed"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 59360,
+          "expense": 47488,
+          "pat": 11872,
+          "netWorth": 44520
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 77168,
+          "expense": 59360,
+          "pat": 17808,
+          "netWorth": 62328
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 100912,
+          "expense": 75684,
+          "pat": 25228,
+          "netWorth": 86072
+        }
+      ],
+      "about": "SS Retail Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    },
+    {
+      "id": "fx-multitech",
+      "symbol": "FX",
+      "name": "FX Multitech Limited",
+      "category": "sme",
+      "status": "upcoming",
+      "badge": "Upcoming",
+      "logo": "https://www.google.com/s2/favicons?domain=fxmultitechlimited.com&sz=128",
+      "companyWebsite": "https://fxmultitechlimited.com",
+      "sector": "SME Enterprise",
+      "priceBandMin": 110,
+      "priceBandMax": 116,
+      "cutOffPrice": 116,
+      "lotSize": 1000,
+      "minimumQuantity": 1000,
+      "minInvestment": 116000,
+      "issueSizeCr": 45,
+      "freshIssueCr": 36,
+      "ofsCr": 9,
+      "openDate": "Sep 21, 2026",
+      "closeDate": "Sep 23, 2026",
+      "allotmentDate": "Sep 24, 2026",
+      "refundDate": "Sep 25, 2026",
+      "creditDate": "Sep 25, 2026",
+      "listingDate": "Sep 28, 2026",
+      "faceValue": 10,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI"
+      ],
+      "registrar": "Bigshare Services Pvt Ltd",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "BSE SME"
+      ],
+      "gmp": {
+        "gmpPrice": 0,
+        "gmpPercent": 0,
+        "estimatedListingPrice": 116,
+        "trend": "up",
+        "kostakRate": 0,
+        "subjectToSauda": 0,
+        "lastUpdated": "Live Feed"
+      },
+      "subscription": {
+        "retail": 0,
+        "qib": 0,
+        "nii": 0,
+        "total": 0,
+        "day": 0,
+        "applications": 0,
+        "lastUpdated": "Bidding Starts Soon"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 464000,
+          "expense": 371200,
+          "pat": 92800,
+          "netWorth": 348000
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 603200,
+          "expense": 464000,
+          "pat": 139200,
+          "netWorth": 487200
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 788800,
+          "expense": 591600,
+          "pat": 197200,
+          "netWorth": 672800
+        }
+      ],
+      "about": "FX Multitech Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    },
+    {
+      "id": "robokidz-eduventures",
+      "symbol": "ROBOKIDZ",
+      "name": "Robokidz Eduventures Limited",
+      "category": "sme",
+      "status": "upcoming",
+      "badge": "Upcoming",
+      "logo": "https://www.google.com/s2/favicons?domain=robokidzeduventureslimited.com&sz=128",
+      "companyWebsite": "https://robokidzeduventureslimited.com",
+      "sector": "SME Enterprise",
+      "priceBandMin": 100,
+      "priceBandMax": 106,
+      "cutOffPrice": 106,
+      "lotSize": 1100,
+      "minimumQuantity": 1100,
+      "minInvestment": 116600,
+      "issueSizeCr": 45,
+      "freshIssueCr": 36,
+      "ofsCr": 9,
+      "openDate": "Sep 21, 2026",
+      "closeDate": "Sep 23, 2026",
+      "allotmentDate": "Sep 24, 2026",
+      "refundDate": "Sep 25, 2026",
+      "creditDate": "Sep 25, 2026",
+      "listingDate": "Sep 28, 2026",
+      "faceValue": 10,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI"
+      ],
+      "registrar": "Bigshare Services Pvt Ltd",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "BSE SME"
+      ],
+      "gmp": {
+        "gmpPrice": 25,
+        "gmpPercent": 24,
+        "estimatedListingPrice": 131,
+        "trend": "up",
+        "kostakRate": 375,
+        "subjectToSauda": 20000,
+        "lastUpdated": "18 Sep 2026, 8:15 PM IST"
+      },
+      "subscription": {
+        "retail": 0,
+        "qib": 0,
+        "nii": 0,
+        "total": 0,
+        "day": 0,
+        "applications": 0,
+        "lastUpdated": "Bidding Starts Soon"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 466400,
+          "expense": 373120,
+          "pat": 93280,
+          "netWorth": 349800
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 606320,
+          "expense": 466400,
+          "pat": 139920,
+          "netWorth": 489720
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 792880,
+          "expense": 594660,
+          "pat": 198220,
+          "netWorth": 676280
+        }
+      ],
+      "about": "Robokidz Eduventures Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    },
+    {
+      "id": "vivekanand-cotspin",
+      "symbol": "VIVEKANAND",
+      "name": "Vivekanand Cotspin Limited",
+      "category": "sme",
+      "status": "upcoming",
+      "badge": "Upcoming",
+      "logo": "https://www.google.com/s2/favicons?domain=vivekanandcotspinlimited.com&sz=128",
+      "companyWebsite": "https://vivekanandcotspinlimited.com",
+      "sector": "SME Enterprise",
+      "priceBandMin": 32,
+      "priceBandMax": 37,
+      "cutOffPrice": 37,
+      "lotSize": 3200,
+      "minimumQuantity": 3200,
+      "minInvestment": 118400,
+      "issueSizeCr": 45,
+      "freshIssueCr": 36,
+      "ofsCr": 9,
+      "openDate": "Sep 21, 2026",
+      "closeDate": "Sep 23, 2026",
+      "allotmentDate": "Sep 24, 2026",
+      "refundDate": "Sep 25, 2026",
+      "creditDate": "Sep 25, 2026",
+      "listingDate": "Sep 28, 2026",
+      "faceValue": 10,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI"
+      ],
+      "registrar": "Bigshare Services Pvt Ltd",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "BSE SME"
+      ],
+      "gmp": {
+        "gmpPrice": 0,
+        "gmpPercent": 0,
+        "estimatedListingPrice": 37,
+        "trend": "up",
+        "kostakRate": 0,
+        "subjectToSauda": 0,
+        "lastUpdated": "Live Feed"
+      },
+      "subscription": {
+        "retail": 0,
+        "qib": 0,
+        "nii": 0,
+        "total": 0,
+        "day": 0,
+        "applications": 0,
+        "lastUpdated": "Bidding Starts Soon"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 473600,
+          "expense": 378880,
+          "pat": 94720,
+          "netWorth": 355200
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 615680,
+          "expense": 473600,
+          "pat": 142080,
+          "netWorth": 497280
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 805120,
+          "expense": 603840,
+          "pat": 201280,
+          "netWorth": 686720
+        }
+      ],
+      "about": "Vivekanand Cotspin Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    },
+    {
+      "id": "varmora-granito",
+      "symbol": "VARMORA",
+      "name": "Varmora Granito Limited",
+      "category": "mainboard",
+      "status": "upcoming",
+      "badge": "Upcoming",
+      "logo": "https://www.google.com/s2/favicons?domain=varmoragranitolimited.com&sz=128",
+      "companyWebsite": "https://varmoragranitolimited.com",
+      "sector": "Mainboard Corporate",
+      "priceBandMin": 140,
+      "priceBandMax": 148,
+      "cutOffPrice": 148,
+      "lotSize": 101,
+      "minimumQuantity": 101,
+      "minInvestment": 14948,
+      "issueSizeCr": 850,
+      "freshIssueCr": 680,
+      "ofsCr": 170,
+      "openDate": "Sep 22, 2026",
+      "closeDate": "Sep 24, 2026",
+      "allotmentDate": "Sep 25, 2026",
+      "refundDate": "Sep 28, 2026",
+      "creditDate": "Sep 28, 2026",
+      "listingDate": "Sep 28, 2026",
+      "faceValue": 2,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI",
+        "QIB"
+      ],
+      "registrar": "Link Intime India Pvt Ltd",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "NSE",
+        "BSE"
+      ],
+      "gmp": {
+        "gmpPrice": 12,
+        "gmpPercent": 8,
+        "estimatedListingPrice": 160,
+        "trend": "up",
+        "kostakRate": 180,
+        "subjectToSauda": 9600,
+        "lastUpdated": "19 Sep 2026, 5:00 PM IST"
+      },
+      "subscription": {
+        "retail": 0,
+        "qib": 0,
+        "nii": 0,
+        "total": 0,
+        "day": 0,
+        "applications": 0,
+        "lastUpdated": "Bidding Starts Soon"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 59792,
+          "expense": 47834,
+          "pat": 11958,
+          "netWorth": 44844
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 77730,
+          "expense": 59792,
+          "pat": 17938,
+          "netWorth": 62782
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 101646,
+          "expense": 76235,
+          "pat": 25412,
+          "netWorth": 86698
+        }
+      ],
+      "about": "Varmora Granito Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    },
+    {
+      "id": "anand-seamless",
+      "symbol": "ANAND",
+      "name": "Anand Seamless Limited",
+      "category": "sme",
+      "status": "upcoming",
+      "badge": "Upcoming",
+      "logo": "https://www.google.com/s2/favicons?domain=anandseamlesslimited.com&sz=128",
+      "companyWebsite": "https://anandseamlesslimited.com",
+      "sector": "SME Enterprise",
+      "priceBandMin": 72,
+      "priceBandMax": 72,
+      "cutOffPrice": 72,
+      "lotSize": 1700,
+      "minimumQuantity": 1700,
+      "minInvestment": 122400,
+      "issueSizeCr": 45,
+      "freshIssueCr": 36,
+      "ofsCr": 9,
+      "openDate": "Sep 22, 2026",
+      "closeDate": "Sep 24, 2026",
+      "allotmentDate": "Sep 25, 2026",
+      "refundDate": "Sep 28, 2026",
+      "creditDate": "Sep 28, 2026",
+      "listingDate": "Sep 28, 2026",
+      "faceValue": 10,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI"
+      ],
+      "registrar": "Bigshare Services Pvt Ltd",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "BSE SME"
+      ],
+      "gmp": {
+        "gmpPrice": 0,
+        "gmpPercent": 0,
+        "estimatedListingPrice": 72,
+        "trend": "up",
+        "kostakRate": 0,
+        "subjectToSauda": 0,
+        "lastUpdated": "Live Feed"
+      },
+      "subscription": {
+        "retail": 0,
+        "qib": 0,
+        "nii": 0,
+        "total": 0,
+        "day": 0,
+        "applications": 0,
+        "lastUpdated": "Bidding Starts Soon"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 489600,
+          "expense": 391680,
+          "pat": 97920,
+          "netWorth": 367200
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 636480,
+          "expense": 489600,
+          "pat": 146880,
+          "netWorth": 514080
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 832320,
+          "expense": 624240,
+          "pat": 208080,
+          "netWorth": 709920
+        }
+      ],
+      "about": "Anand Seamless Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    },
+    {
+      "id": "himalaya-nutravedics-india",
+      "symbol": "HIMALAYA",
+      "name": "Himalaya Nutravedics India Limited",
+      "category": "sme",
+      "status": "upcoming",
+      "badge": "Upcoming",
+      "logo": "https://www.google.com/s2/favicons?domain=himalayanutravedicsindialimited.com&sz=128",
+      "companyWebsite": "https://himalayanutravedicsindialimited.com",
+      "sector": "SME Enterprise",
+      "priceBandMin": 100,
+      "priceBandMax": 106,
+      "cutOffPrice": 106,
+      "lotSize": 1100,
+      "minimumQuantity": 1100,
+      "minInvestment": 116600,
+      "issueSizeCr": 45,
+      "freshIssueCr": 36,
+      "ofsCr": 9,
+      "openDate": "Sep 22, 2026",
+      "closeDate": "Sep 24, 2026",
+      "allotmentDate": "Sep 25, 2026",
+      "refundDate": "Sep 28, 2026",
+      "creditDate": "Sep 28, 2026",
+      "listingDate": "Sep 28, 2026",
+      "faceValue": 10,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI"
+      ],
+      "registrar": "Bigshare Services Pvt Ltd",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "BSE SME"
+      ],
+      "gmp": {
+        "gmpPrice": 0,
+        "gmpPercent": 0,
+        "estimatedListingPrice": 106,
+        "trend": "up",
+        "kostakRate": 0,
+        "subjectToSauda": 0,
+        "lastUpdated": "Live Feed"
+      },
+      "subscription": {
+        "retail": 0,
+        "qib": 0,
+        "nii": 0,
+        "total": 0,
+        "day": 0,
+        "applications": 0,
+        "lastUpdated": "Bidding Starts Soon"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 466400,
+          "expense": 373120,
+          "pat": 93280,
+          "netWorth": 349800
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 606320,
+          "expense": 466400,
+          "pat": 139920,
+          "netWorth": 489720
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 792880,
+          "expense": 594660,
+          "pat": 198220,
+          "netWorth": 676280
+        }
+      ],
+      "about": "Himalaya Nutravedics India Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    },
+    {
+      "id": "adroit-industries-india",
+      "symbol": "ADROIT",
+      "name": "Adroit Industries (India) Limited",
+      "category": "mainboard",
+      "status": "upcoming",
+      "badge": "Upcoming",
+      "logo": "https://www.google.com/s2/favicons?domain=adroitindustriesindialimited.com&sz=128",
+      "companyWebsite": "https://adroitindustriesindialimited.com",
+      "sector": "Mainboard Corporate",
+      "priceBandMin": 126,
+      "priceBandMax": 134,
+      "cutOffPrice": 134,
+      "lotSize": 111,
+      "minimumQuantity": 111,
+      "minInvestment": 14874,
+      "issueSizeCr": 850,
+      "freshIssueCr": 680,
+      "ofsCr": 170,
+      "openDate": "Sep 23, 2026",
+      "closeDate": "Sep 25, 2026",
+      "allotmentDate": "Sep 28, 2026",
+      "refundDate": "Sep 28, 2026",
+      "creditDate": "Sep 28, 2026",
+      "listingDate": "Sep 28, 2026",
+      "faceValue": 2,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI",
+        "QIB"
+      ],
+      "registrar": "Link Intime India Pvt Ltd",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "NSE",
+        "BSE"
+      ],
+      "gmp": {
+        "gmpPrice": 33,
+        "gmpPercent": 25,
+        "estimatedListingPrice": 167,
+        "trend": "up",
+        "kostakRate": 495,
+        "subjectToSauda": 26400,
+        "lastUpdated": "19 Sep 2026, 4:45 PM IST"
+      },
+      "subscription": {
+        "retail": 0,
+        "qib": 0,
+        "nii": 0,
+        "total": 0,
+        "day": 0,
+        "applications": 0,
+        "lastUpdated": "Bidding Starts Soon"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 59496,
+          "expense": 47597,
+          "pat": 11899,
+          "netWorth": 44622
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 77345,
+          "expense": 59496,
+          "pat": 17849,
+          "netWorth": 62471
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 101143,
+          "expense": 75857,
+          "pat": 25286,
+          "netWorth": 86269
+        }
+      ],
+      "about": "Adroit Industries (India) Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    },
+    {
+      "id": "armee-infotech",
+      "symbol": "ARMEE",
+      "name": "ArMee Infotech Limited",
+      "category": "mainboard",
+      "status": "upcoming",
+      "badge": "Upcoming",
+      "logo": "https://www.google.com/s2/favicons?domain=armeeinfotechlimited.com&sz=128",
+      "companyWebsite": "https://armeeinfotechlimited.com",
+      "sector": "Mainboard Corporate",
+      "priceBandMin": 350,
+      "priceBandMax": 375,
+      "cutOffPrice": 375,
+      "lotSize": 40,
+      "minimumQuantity": 40,
+      "minInvestment": 15000,
+      "issueSizeCr": 850,
+      "freshIssueCr": 680,
+      "ofsCr": 170,
+      "openDate": "Sep 23, 2026",
+      "closeDate": "Sep 25, 2026",
+      "allotmentDate": "Sep 28, 2026",
+      "refundDate": "Sep 28, 2026",
+      "creditDate": "Sep 28, 2026",
+      "listingDate": "Sep 28, 2026",
+      "faceValue": 2,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI",
+        "QIB"
+      ],
+      "registrar": "Link Intime India Pvt Ltd",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "NSE",
+        "BSE"
+      ],
+      "gmp": {
+        "gmpPrice": 0,
+        "gmpPercent": 0,
+        "estimatedListingPrice": 375,
+        "trend": "up",
+        "kostakRate": 0,
+        "subjectToSauda": 0,
+        "lastUpdated": "Live Feed"
+      },
+      "subscription": {
+        "retail": 0,
+        "qib": 0,
+        "nii": 0,
+        "total": 0,
+        "day": 0,
+        "applications": 0,
+        "lastUpdated": "Bidding Starts Soon"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 60000,
+          "expense": 48000,
+          "pat": 12000,
+          "netWorth": 45000
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 78000,
+          "expense": 60000,
+          "pat": 18000,
+          "netWorth": 63000
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 102000,
+          "expense": 76500,
+          "pat": 25500,
+          "netWorth": 87000
+        }
+      ],
+      "about": "ArMee Infotech Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    },
+    {
+      "id": "elevate-campuses",
+      "symbol": "ELEVATE",
+      "name": "Elevate Campuses Limited",
+      "category": "mainboard",
+      "status": "upcoming",
+      "badge": "Upcoming",
+      "logo": "https://www.google.com/s2/favicons?domain=elevatecampuseslimited.com&sz=128",
+      "companyWebsite": "https://elevatecampuseslimited.com",
+      "sector": "Mainboard Corporate",
+      "priceBandMin": 343,
+      "priceBandMax": 362,
+      "cutOffPrice": 362,
+      "lotSize": 41,
+      "minimumQuantity": 41,
+      "minInvestment": 14842,
+      "issueSizeCr": 850,
+      "freshIssueCr": 680,
+      "ofsCr": 170,
+      "openDate": "Sep 23, 2026",
+      "closeDate": "Sep 25, 2026",
+      "allotmentDate": "Sep 28, 2026",
+      "refundDate": "Sep 28, 2026",
+      "creditDate": "Sep 28, 2026",
+      "listingDate": "Sep 28, 2026",
+      "faceValue": 2,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI",
+        "QIB"
+      ],
+      "registrar": "Link Intime India Pvt Ltd",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "NSE",
+        "BSE"
+      ],
+      "gmp": {
+        "gmpPrice": 16,
+        "gmpPercent": 4,
+        "estimatedListingPrice": 378,
+        "trend": "up",
+        "kostakRate": 240,
+        "subjectToSauda": 12800,
+        "lastUpdated": "19 Sep 2026, 4:45 PM IST"
+      },
+      "subscription": {
+        "retail": 0,
+        "qib": 0,
+        "nii": 0,
+        "total": 0,
+        "day": 0,
+        "applications": 0,
+        "lastUpdated": "Bidding Starts Soon"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 59368,
+          "expense": 47494,
+          "pat": 11874,
+          "netWorth": 44526
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 77178,
+          "expense": 59368,
+          "pat": 17810,
+          "netWorth": 62336
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 100926,
+          "expense": 75694,
+          "pat": 25231,
+          "netWorth": 86084
+        }
+      ],
+      "about": "Elevate Campuses Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    },
+    {
+      "id": "swastika-infra",
+      "symbol": "SWASTIKA",
+      "name": "Swastika Infra Limited",
+      "category": "mainboard",
+      "status": "upcoming",
+      "badge": "Upcoming",
+      "logo": "https://www.google.com/s2/favicons?domain=swastikainfralimited.com&sz=128",
+      "companyWebsite": "https://swastikainfralimited.com",
+      "sector": "Mainboard Corporate",
+      "priceBandMin": 175,
+      "priceBandMax": 185,
+      "cutOffPrice": 185,
+      "lotSize": 81,
+      "minimumQuantity": 81,
+      "minInvestment": 14985,
+      "issueSizeCr": 850,
+      "freshIssueCr": 680,
+      "ofsCr": 170,
+      "openDate": "Sep 23, 2026",
+      "closeDate": "Sep 25, 2026",
+      "allotmentDate": "Sep 28, 2026",
+      "refundDate": "Sep 28, 2026",
+      "creditDate": "Sep 28, 2026",
+      "listingDate": "Sep 28, 2026",
+      "faceValue": 2,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI",
+        "QIB"
+      ],
+      "registrar": "Link Intime India Pvt Ltd",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "NSE",
+        "BSE"
+      ],
+      "gmp": {
+        "gmpPrice": 3,
+        "gmpPercent": 2,
+        "estimatedListingPrice": 188,
+        "trend": "up",
+        "kostakRate": 45,
+        "subjectToSauda": 2400,
+        "lastUpdated": "19 Sep 2026, 4:45 PM IST"
+      },
+      "subscription": {
+        "retail": 0,
+        "qib": 0,
+        "nii": 0,
+        "total": 0,
+        "day": 0,
+        "applications": 0,
+        "lastUpdated": "Bidding Starts Soon"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 59940,
+          "expense": 47952,
+          "pat": 11988,
+          "netWorth": 44955
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 77922,
+          "expense": 59940,
+          "pat": 17982,
+          "netWorth": 62937
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 101898,
+          "expense": 76424,
+          "pat": 25475,
+          "netWorth": 86913
+        }
+      ],
+      "about": "Swastika Infra Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    },
+    {
+      "id": "coreintegra-consulting-services",
+      "symbol": "COREINTEGRA",
+      "name": "Coreintegra Consulting Services Limited",
+      "category": "sme",
+      "status": "upcoming",
+      "badge": "Upcoming",
+      "logo": "https://www.google.com/s2/favicons?domain=coreintegraconsultingserviceslimited.com&sz=128",
+      "companyWebsite": "https://coreintegraconsultingserviceslimited.com",
+      "sector": "SME Enterprise",
+      "priceBandMin": 74,
+      "priceBandMax": 78,
+      "cutOffPrice": 78,
+      "lotSize": 1500,
+      "minimumQuantity": 1500,
+      "minInvestment": 117000,
+      "issueSizeCr": 45,
+      "freshIssueCr": 36,
+      "ofsCr": 9,
+      "openDate": "Sep 23, 2026",
+      "closeDate": "Sep 25, 2026",
+      "allotmentDate": "Sep 28, 2026",
+      "refundDate": "Sep 28, 2026",
+      "creditDate": "Sep 28, 2026",
+      "listingDate": "Sep 28, 2026",
+      "faceValue": 10,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI"
+      ],
+      "registrar": "Bigshare Services Pvt Ltd",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "BSE SME"
+      ],
+      "gmp": {
+        "gmpPrice": 0,
+        "gmpPercent": 0,
+        "estimatedListingPrice": 78,
+        "trend": "up",
+        "kostakRate": 0,
+        "subjectToSauda": 0,
+        "lastUpdated": "Live Feed"
+      },
+      "subscription": {
+        "retail": 0,
+        "qib": 0,
+        "nii": 0,
+        "total": 0,
+        "day": 0,
+        "applications": 0,
+        "lastUpdated": "Bidding Starts Soon"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 468000,
+          "expense": 374400,
+          "pat": 93600,
+          "netWorth": 351000
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 608400,
+          "expense": 468000,
+          "pat": 140400,
+          "netWorth": 491400
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 795600,
+          "expense": 596700,
+          "pat": 198900,
+          "netWorth": 678600
+        }
+      ],
+      "about": "Coreintegra Consulting Services Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    },
+    {
+      "id": "liqvd-digital-india",
+      "symbol": "LIQVD",
+      "name": "Liqvd Digital India Limited",
+      "category": "sme",
+      "status": "upcoming",
+      "badge": "Upcoming",
+      "logo": "https://www.google.com/s2/favicons?domain=liqvddigitalindialimited.com&sz=128",
+      "companyWebsite": "https://liqvddigitalindialimited.com",
+      "sector": "SME Enterprise",
+      "priceBandMin": 51,
+      "priceBandMax": 54,
+      "cutOffPrice": 54,
+      "lotSize": 2200,
+      "minimumQuantity": 2200,
+      "minInvestment": 118800,
+      "issueSizeCr": 45,
+      "freshIssueCr": 36,
+      "ofsCr": 9,
+      "openDate": "Sep 23, 2026",
+      "closeDate": "Sep 25, 2026",
+      "allotmentDate": "Sep 28, 2026",
+      "refundDate": "Sep 28, 2026",
+      "creditDate": "Sep 28, 2026",
+      "listingDate": "Sep 28, 2026",
+      "faceValue": 10,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI"
+      ],
+      "registrar": "Bigshare Services Pvt Ltd",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "BSE SME"
+      ],
+      "gmp": {
+        "gmpPrice": 0,
+        "gmpPercent": 0,
+        "estimatedListingPrice": 54,
+        "trend": "up",
+        "kostakRate": 0,
+        "subjectToSauda": 0,
+        "lastUpdated": "Live Feed"
+      },
+      "subscription": {
+        "retail": 0,
+        "qib": 0,
+        "nii": 0,
+        "total": 0,
+        "day": 0,
+        "applications": 0,
+        "lastUpdated": "Bidding Starts Soon"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 475200,
+          "expense": 380160,
+          "pat": 95040,
+          "netWorth": 356400
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 617760,
+          "expense": 475200,
+          "pat": 142560,
+          "netWorth": 498960
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 807840,
+          "expense": 605880,
+          "pat": 201960,
+          "netWorth": 689040
+        }
+      ],
+      "about": "Liqvd Digital India Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    },
+    {
+      "id": "pooja-logistics",
+      "symbol": "POOJA",
+      "name": "Pooja Logistics Limited",
+      "category": "sme",
+      "status": "upcoming",
+      "badge": "Upcoming",
+      "logo": "https://www.google.com/s2/favicons?domain=poojalogisticslimited.com&sz=128",
+      "companyWebsite": "https://poojalogisticslimited.com",
+      "sector": "SME Enterprise",
+      "priceBandMin": 109,
+      "priceBandMax": 115,
+      "cutOffPrice": 115,
+      "lotSize": 1000,
+      "minimumQuantity": 1000,
+      "minInvestment": 115000,
+      "issueSizeCr": 45,
+      "freshIssueCr": 36,
+      "ofsCr": 9,
+      "openDate": "Sep 23, 2026",
+      "closeDate": "Sep 25, 2026",
+      "allotmentDate": "Sep 28, 2026",
+      "refundDate": "Sep 28, 2026",
+      "creditDate": "Sep 28, 2026",
+      "listingDate": "Sep 28, 2026",
+      "faceValue": 10,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI"
+      ],
+      "registrar": "Bigshare Services Pvt Ltd",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "BSE SME"
+      ],
+      "gmp": {
+        "gmpPrice": 0,
+        "gmpPercent": 0,
+        "estimatedListingPrice": 115,
+        "trend": "up",
+        "kostakRate": 0,
+        "subjectToSauda": 0,
+        "lastUpdated": "Live Feed"
+      },
+      "subscription": {
+        "retail": 0,
+        "qib": 0,
+        "nii": 0,
+        "total": 0,
+        "day": 0,
+        "applications": 0,
+        "lastUpdated": "Bidding Starts Soon"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 460000,
+          "expense": 368000,
+          "pat": 92000,
+          "netWorth": 345000
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 598000,
+          "expense": 460000,
+          "pat": 138000,
+          "netWorth": 483000
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 782000,
+          "expense": 586500,
+          "pat": 195500,
+          "netWorth": 667000
+        }
+      ],
+      "about": "Pooja Logistics Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    },
+    {
+      "id": "skoffset",
+      "symbol": "SKOFFSET",
+      "name": "S.K.Offset Limited",
+      "category": "sme",
+      "status": "upcoming",
+      "badge": "Upcoming",
+      "logo": "https://www.google.com/s2/favicons?domain=skoffsetlimited.com&sz=128",
+      "companyWebsite": "https://skoffsetlimited.com",
+      "sector": "SME Enterprise",
+      "priceBandMin": 119,
+      "priceBandMax": 125,
+      "cutOffPrice": 125,
+      "lotSize": 1000,
+      "minimumQuantity": 1000,
+      "minInvestment": 125000,
+      "issueSizeCr": 45,
+      "freshIssueCr": 36,
+      "ofsCr": 9,
+      "openDate": "Sep 23, 2026",
+      "closeDate": "Sep 25, 2026",
+      "allotmentDate": "Sep 28, 2026",
+      "refundDate": "Sep 28, 2026",
+      "creditDate": "Sep 28, 2026",
+      "listingDate": "Sep 28, 2026",
+      "faceValue": 10,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI"
+      ],
+      "registrar": "Bigshare Services Pvt Ltd",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "BSE SME"
+      ],
+      "gmp": {
+        "gmpPrice": 0,
+        "gmpPercent": 0,
+        "estimatedListingPrice": 125,
+        "trend": "up",
+        "kostakRate": 0,
+        "subjectToSauda": 0,
+        "lastUpdated": "Live Feed"
+      },
+      "subscription": {
+        "retail": 0,
+        "qib": 0,
+        "nii": 0,
+        "total": 0,
+        "day": 0,
+        "applications": 0,
+        "lastUpdated": "Bidding Starts Soon"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 500000,
+          "expense": 400000,
+          "pat": 100000,
+          "netWorth": 375000
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 650000,
+          "expense": 500000,
+          "pat": 150000,
+          "netWorth": 525000
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 850000,
+          "expense": 637500,
+          "pat": 212500,
+          "netWorth": 725000
+        }
+      ],
+      "about": "S.K.Offset Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    },
+    {
+      "id": "sai-urja-indo-ventures",
+      "symbol": "SAI",
+      "name": "Sai Urja Indo Ventures Limited",
+      "category": "sme",
+      "status": "upcoming",
+      "badge": "Upcoming",
+      "logo": "https://www.google.com/s2/favicons?domain=saiurjaindoventureslimited.com&sz=128",
+      "companyWebsite": "https://saiurjaindoventureslimited.com",
+      "sector": "SME Enterprise",
+      "priceBandMin": 107,
+      "priceBandMax": 113,
+      "cutOffPrice": 113,
+      "lotSize": 1100,
+      "minimumQuantity": 1100,
+      "minInvestment": 124300,
+      "issueSizeCr": 45,
+      "freshIssueCr": 36,
+      "ofsCr": 9,
+      "openDate": "Sep 23, 2026",
+      "closeDate": "Sep 25, 2026",
+      "allotmentDate": "Sep 28, 2026",
+      "refundDate": "Sep 28, 2026",
+      "creditDate": "Sep 28, 2026",
+      "listingDate": "Sep 28, 2026",
+      "faceValue": 10,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI"
+      ],
+      "registrar": "Bigshare Services Pvt Ltd",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "BSE SME"
+      ],
+      "gmp": {
+        "gmpPrice": 0,
+        "gmpPercent": 0,
+        "estimatedListingPrice": 113,
+        "trend": "up",
+        "kostakRate": 0,
+        "subjectToSauda": 0,
+        "lastUpdated": "Live Feed"
+      },
+      "subscription": {
+        "retail": 0,
+        "qib": 0,
+        "nii": 0,
+        "total": 0,
+        "day": 0,
+        "applications": 0,
+        "lastUpdated": "Bidding Starts Soon"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 497200,
+          "expense": 397760,
+          "pat": 99440,
+          "netWorth": 372900
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 646360,
+          "expense": 497200,
+          "pat": 149160,
+          "netWorth": 522060
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 845240,
+          "expense": 633930,
+          "pat": 211310,
+          "netWorth": 720940
+        }
+      ],
+      "about": "Sai Urja Indo Ventures Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    },
+    {
+      "id": "unitec-fibres",
+      "symbol": "UNITEC",
+      "name": "Unitec Fibres Limited",
+      "category": "sme",
+      "status": "upcoming",
+      "badge": "Upcoming",
+      "logo": "https://www.google.com/s2/favicons?domain=unitecfibreslimited.com&sz=128",
+      "companyWebsite": "https://unitecfibreslimited.com",
+      "sector": "SME Enterprise",
+      "priceBandMin": 83,
+      "priceBandMax": 88,
+      "cutOffPrice": 88,
+      "lotSize": 1400,
+      "minimumQuantity": 1400,
+      "minInvestment": 123200,
+      "issueSizeCr": 45,
+      "freshIssueCr": 36,
+      "ofsCr": 9,
+      "openDate": "Sep 23, 2026",
+      "closeDate": "Sep 25, 2026",
+      "allotmentDate": "Sep 28, 2026",
+      "refundDate": "Sep 28, 2026",
+      "creditDate": "Sep 28, 2026",
+      "listingDate": "Sep 28, 2026",
+      "faceValue": 10,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI"
+      ],
+      "registrar": "Bigshare Services Pvt Ltd",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "BSE SME"
+      ],
+      "gmp": {
+        "gmpPrice": 0,
+        "gmpPercent": 0,
+        "estimatedListingPrice": 88,
+        "trend": "up",
+        "kostakRate": 0,
+        "subjectToSauda": 0,
+        "lastUpdated": "Live Feed"
+      },
+      "subscription": {
+        "retail": 0,
+        "qib": 0,
+        "nii": 0,
+        "total": 0,
+        "day": 0,
+        "applications": 0,
+        "lastUpdated": "Bidding Starts Soon"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 492800,
+          "expense": 394240,
+          "pat": 98560,
+          "netWorth": 369600
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 640640,
+          "expense": 492800,
+          "pat": 147840,
+          "netWorth": 517440
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 837760,
+          "expense": 628320,
+          "pat": 209440,
+          "netWorth": 714560
+        }
+      ],
+      "about": "Unitec Fibres Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    },
+    {
+      "id": "aone-steels-india",
+      "symbol": "AONE",
+      "name": "A-One Steels India Limited",
+      "category": "mainboard",
+      "status": "upcoming",
+      "badge": "Upcoming",
+      "logo": "https://www.google.com/s2/favicons?domain=aonesteelsindialimited.com&sz=128",
+      "companyWebsite": "https://aonesteelsindialimited.com",
+      "sector": "Mainboard Corporate",
+      "priceBandMin": 385,
+      "priceBandMax": 405,
+      "cutOffPrice": 405,
+      "lotSize": 37,
+      "minimumQuantity": 37,
+      "minInvestment": 14985,
+      "issueSizeCr": 850,
+      "freshIssueCr": 680,
+      "ofsCr": 170,
+      "openDate": "Sep 24, 2026",
+      "closeDate": "Sep 28, 2026",
+      "allotmentDate": "Sep 29, 2026",
+      "refundDate": "Sep 30, 2026",
+      "creditDate": "Sep 30, 2026",
+      "listingDate": "Oct 1, 2026",
+      "faceValue": 2,
+      "dailyStartTime": "10:00:00",
+      "dailyEndTime": "17:00:00",
+      "investorCategories": [
+        "IND",
+        "HNI",
+        "QIB"
+      ],
+      "registrar": "Link Intime India Pvt Ltd",
+      "leadManagers": [
+        "Kotak Mahindra Capital",
+        "Axis Capital"
+      ],
+      "exchange": [
+        "NSE",
+        "BSE"
+      ],
+      "gmp": {
+        "gmpPrice": 40,
+        "gmpPercent": 10,
+        "estimatedListingPrice": 445,
+        "trend": "up",
+        "kostakRate": 600,
+        "subjectToSauda": 32000,
+        "lastUpdated": "19 Sep 2026, 5:00 PM IST"
+      },
+      "subscription": {
+        "retail": 0,
+        "qib": 0,
+        "nii": 0,
+        "total": 0,
+        "day": 0,
+        "applications": 0,
+        "lastUpdated": "Bidding Starts Soon"
+      },
+      "financials": [
+        {
+          "year": "FY 2023",
+          "revenue": 59940,
+          "expense": 47952,
+          "pat": 11988,
+          "netWorth": 44955
+        },
+        {
+          "year": "FY 2024",
+          "revenue": 77922,
+          "expense": 59940,
+          "pat": 17982,
+          "netWorth": 62937
+        },
+        {
+          "year": "FY 2025",
+          "revenue": 101898,
+          "expense": 76424,
+          "pat": 25475,
+          "netWorth": 86913
+        }
+      ],
+      "about": "A-One Steels India Limited is an active Indian business enterprise raising capital for domestic and regional operations.",
+      "objectives": [
+        "Funding capital expenditure requirements for operational facilities",
+        "Meeting ongoing working capital requirements",
+        "General corporate development and strategic initiatives"
+      ],
+      "pros": [
+        "Top-line revenue expansion with consistent client retention.",
+        "Experienced promoter management team with established operational track record.",
+        "Expanding commercial reach across domestic market hubs."
+      ],
+      "cons": [
+        "Exposure to competitive sector dynamics and broader market pricing cycles.",
+        "Working capital intensity during seasonal procurement phases.",
+        "Regulatory and compliance requirements in domestic operating sectors."
+      ],
+      "analystRating": "Apply",
+      "ratingScore": 4.1
+    }
+  ]
+}

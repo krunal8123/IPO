@@ -5,8 +5,9 @@ import { fetchLiveGmp } from './services/gmpService.js';
 import { fetchKfinIssues } from './services/kfintechService.js';
 import { fetchMufgIssues } from './services/mufgService.js';
 import { fetchLiveSubscription } from './services/subscriptionService.js';
-import { fetchUpstoxIpos } from './services/upstoxService.js';
+import { fetchUpstoxIpos, saveAccessToken } from './services/upstoxService.js';
 import { buildDynamicIpoFromScraped } from './services/ipoAutoBuilder.js';
+import { getFreshUpstoxToken } from './upstoxAuth.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,6 +45,17 @@ async function buildStaticData() {
 
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
+  }
+
+  // Ensure Upstox authentication is fresh via TOTP or existing token
+  try {
+    const freshToken = await getFreshUpstoxToken();
+    if (freshToken) {
+      process.env.UPSTOX_ACCESS_TOKEN = freshToken;
+      saveAccessToken(freshToken);
+    }
+  } catch (authErr) {
+    console.warn('⚠️ [Upstox Auth] Token refresh warning:', authErr.message);
   }
 
   try {

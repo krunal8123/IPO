@@ -241,11 +241,32 @@ export function mapRawUpstoxToIpoItem(item: any): IpoItem {
   });
 }
 
+export async function syncTokenFromStaticFeed(): Promise<string> {
+  const existing = getStoredUpstoxToken();
+  if (existing) return existing;
+  try {
+    const base = import.meta.env.BASE_URL || '/';
+    const cleanBase = base.endsWith('/') ? base : `${base}/`;
+    const res = await fetch(`${cleanBase}data/upstox_token.json`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data?.access_token) {
+        setStoredUpstoxToken(data.access_token);
+        return data.access_token;
+      }
+    }
+  } catch {}
+  return '';
+}
+
 /**
  * Fetch IPOs directly from api.upstox.com from the browser with ZERO backend/Render in between!
  */
 export async function fetchUpstoxDirectIpos(token?: string): Promise<{ success: boolean; data: IpoItem[]; source: string }> {
-  const authToken = token || getStoredUpstoxToken();
+  let authToken = token || getStoredUpstoxToken();
+  if (!authToken) {
+    authToken = await syncTokenFromStaticFeed();
+  }
   if (!authToken) {
     return { success: false, data: [], source: 'No Upstox Token' };
   }
