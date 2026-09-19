@@ -72,6 +72,7 @@ export interface IpoItem {
   ratingScore: number; // out of 5
   kfinClientId?: string;
   mufgClientId?: string;
+  bigshareCompanyId?: string;
   isin?: string;
   rhpUrl?: string;
   drhpUrl?: string;
@@ -113,6 +114,18 @@ export interface MufgIssue {
   name: string;
 }
 
+export interface BigshareIssue {
+  companyId: string;
+  name: string;
+}
+
+export interface BigshareCaptchaResponse {
+  success: boolean;
+  token?: string;
+  image?: string;
+  error?: string;
+}
+
 export interface AllotmentResult {
   ipoId: string;
   ipoName: string;
@@ -122,7 +135,7 @@ export interface AllotmentResult {
   dpId: string;
   sharesApplied: number;
   sharesAllotted: number;
-  status: 'Allotted' | 'Not Allotted' | 'Under Process' | 'Not Found';
+  status: 'Allotted' | 'Not Allotted' | 'Under Process' | 'Not Found' | 'CAPTCHA_INVALID' | 'CAPTCHA_REQUIRED';
   finalizedDate?: string;
   registrarPortalUrl?: string;
   refundAmount: number;

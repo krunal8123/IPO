@@ -4,15 +4,15 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently -n \"VITE,SERVER\" -c \"blue,green\" \"vite\" \"node server/index.js\"",
+    "dev": "concurrently -n \"VITE,SERVER\" -c \"blue,green\" \"vite\" \"node --watch-path=server server/index.js\"",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "cap:sync": "cap sync",
     "cap:android": "cap open android",
     "cap:ios": "cap open ios",
-    "server": "node server/index.js",
+    "server": "node --watch-path=server server/index.js",
     "dev:client": "vite",
-    "dev:server": "node server/index.js"
+    "dev:server": "node --watch-path=server server/index.js"
   },
   "dependencies": {
     "@capacitor/android": "^7.0.1",

@@ -112,6 +112,16 @@ export async function fetchKfinIssues() {
   return BASELINE_KFIN_ISSUES;
 }
 
+const STOP_WORDS = new Set([
+  'limited', 'ltd', 'pvt', 'private', 'ipo', 'sme', 'india',
+  'industries', 'technologies', 'technology', 'solutions', 'enterprises',
+  'logistics', 'chemicals', 'pharma', 'finance', 'financial', 'capital',
+  'international', 'systems', 'infra', 'infrastructure', 'electricals',
+  'services', 'holdings', 'group', 'corp', 'corporation', 'company', 'co',
+  'labs', 'projects', 'ventures', 'engineering', 'products', 'retail',
+  'power', 'securities', 'energy', 'global', 'reit', 'sm', 'trust'
+]);
+
 function normalizeIssueName(name = '') {
   return name
     .toLowerCase()
@@ -121,39 +131,54 @@ function normalizeIssueName(name = '') {
     .trim();
 }
 
+function getDistinctTokens(name = '') {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, ' ')
+    .split(/\s+/)
+    .filter(t => t.length > 2 && !STOP_WORDS.has(t));
+}
+
 export async function findKfinIssue(ipoName = '', symbol = '') {
   const issues = await fetchKfinIssues();
   const cleanTarget = normalizeIssueName(ipoName);
-  const targetTokens = cleanTarget.split(' ').filter(t => t.length > 2);
+  if (!cleanTarget) return null;
+
+  // 1. Exact cleaned match first
+  for (const issue of issues) {
+    const cleanIssue = normalizeIssueName(issue.name);
+    if (cleanIssue === cleanTarget) {
+      return issue;
+    }
+  }
+
+  // 2. Distinct non-generic token matching
+  const targetTokens = getDistinctTokens(ipoName);
+  if (targetTokens.length === 0) return null;
 
   let bestMatch = null;
   let maxScore = 0;
 
   for (const issue of issues) {
-    const cleanIssue = normalizeIssueName(issue.name);
-    
-    // Direct exact inclusion
-    if (cleanIssue === cleanTarget || cleanIssue.includes(cleanTarget) || cleanTarget.includes(cleanIssue)) {
-      return issue;
-    }
+    const issueTokens = getDistinctTokens(issue.name);
+    if (issueTokens.length === 0) continue;
 
-    // Token overlap match
-    const issueTokens = cleanIssue.split(' ').filter(t => t.length > 2);
     let matched = 0;
     for (const t of targetTokens) {
       if (issueTokens.includes(t)) matched++;
     }
 
-    if (matched > maxScore && matched >= 1) {
-      maxScore = matched;
+    const ratio = matched / Math.max(targetTokens.length, issueTokens.length);
+    if (matched > 0 && ratio >= 0.5 && ratio > maxScore) {
+      maxScore = ratio;
       bestMatch = issue;
     }
   }
 
-  // Symbol check
-  if (!bestMatch && symbol) {
+  // 3. Symbol check (only if symbol is distinct)
+  if (!bestMatch && symbol && symbol.length >= 3 && !STOP_WORDS.has(symbol.toLowerCase())) {
     const cleanSym = symbol.toLowerCase().trim();
-    bestMatch = issues.find(i => normalizeIssueName(i.name).startsWith(cleanSym));
+    bestMatch = issues.find(i => normalizeIssueName(i.name).startsWith(cleanSym)) || null;
   }
 
   return bestMatch;

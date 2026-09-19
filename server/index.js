@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import { checkRegistrarAllotment } from './services/registrarService.js';
 import { fetchKfinIssues, queryKfintechAllotment, findKfinIssue } from './services/kfintechService.js';
 import { fetchMufgIssues, queryMufgAllotment, findMufgIssue } from './services/mufgService.js';
+import { fetchBigshareIssues, queryBigshareAllotment, findBigshareIssue, fetchBigshareCaptcha } from './services/bigshareService.js';
 import {
   fetchUpstoxIpos,
   fetchUpstoxIpoDetails,
@@ -384,63 +385,166 @@ app.get('/api/allotment/mufg-issues', async (req, res) => {
   }
 });
 
-// POST /api/allotment/check - Verifies against live market issues, KFintech, or MUFG Intime
+// GET /api/allotment/bigshare-issues - Returns all official issues currently declared on Bigshare Services
+app.get('/api/allotment/bigshare-issues', async (req, res) => {
+  try {
+    const issues = await fetchBigshareIssues();
+    res.json({ success: true, count: issues.length, data: issues });
+  } catch (error) {
+    console.error('[API Error /api/allotment/bigshare-issues]:', error.message);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// GET /api/allotment/bigshare-captcha - Generates fresh CAPTCHA token and base64 challenge image
+app.get('/api/allotment/bigshare-captcha', async (req, res) => {
+  try {
+    const captcha = await fetchBigshareCaptcha();
+    if (captcha.success) {
+      res.json({ success: true, token: captcha.token, image: captcha.image });
+    } else {
+      res.status(500).json({ success: false, error: captcha.error });
+    }
+  } catch (error) {
+    console.error('[API Error /api/allotment/bigshare-captcha]:', error.message);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// POST /api/allotment/check - Verifies against live market issues, KFintech, MUFG Intime, or Bigshare
 app.post('/api/allotment/check', async (req, res) => {
   try {
-    const { ipoId, queryType, queryValue, kfinClientId, mufgClientId, ipoName } = req.body;
+    const { ipoId, queryType, queryValue, kfinClientId, mufgClientId, bigshareCompanyId, captchaToken, captchaAnswer, ipoName } = req.body;
     if (!queryValue) {
       return res.status(400).json({ success: false, error: 'Missing queryValue' });
     }
 
     let targetIpo = currentLiveIpos.find(i => i.id === ipoId);
 
-    // 1. Check if ipoId is an MUFG issue or mufgClientId is provided or ipoName matches
-    const mufgIssues = await fetchMufgIssues();
-    let matchedMufg = mufgClientId
-      ? mufgIssues.find(m => m.clientId === String(mufgClientId))
-      : mufgIssues.find(m => m.clientId === String(ipoId));
-
-    if (!matchedMufg && ipoName) {
-      matchedMufg = await findMufgIssue(ipoName);
-    }
-
-    if (matchedMufg || mufgClientId) {
-      const effectiveMufgId = mufgClientId || matchedMufg?.clientId;
+    // 1. Explicit Registrar IDs passed in request
+    if (bigshareCompanyId) {
       targetIpo = {
-        id: effectiveMufgId,
-        name: ipoName || (matchedMufg ? matchedMufg.name : (targetIpo ? targetIpo.name : 'MUFG Issue')),
-        registrar: 'MUFG Intime India Pvt Ltd',
-        mufgClientId: effectiveMufgId,
+        id: String(bigshareCompanyId),
+        name: ipoName || targetIpo?.name || 'Bigshare Issue',
+        registrar: 'Bigshare Services Pvt Ltd',
+        bigshareCompanyId: String(bigshareCompanyId),
         status: targetIpo?.status || 'listed',
         allotmentDate: targetIpo?.allotmentDate || 'Declared',
         lotSize: targetIpo?.lotSize || 100,
         priceBandMax: targetIpo?.priceBandMax || 140
       };
-    }
+    } else if (mufgClientId) {
+      targetIpo = {
+        id: String(mufgClientId),
+        name: ipoName || targetIpo?.name || 'MUFG Issue',
+        registrar: 'MUFG Intime India Pvt Ltd',
+        mufgClientId: String(mufgClientId),
+        status: targetIpo?.status || 'listed',
+        allotmentDate: targetIpo?.allotmentDate || 'Declared',
+        lotSize: targetIpo?.lotSize || 100,
+        priceBandMax: targetIpo?.priceBandMax || 140
+      };
+    } else if (kfinClientId) {
+      targetIpo = {
+        id: String(kfinClientId),
+        name: ipoName || targetIpo?.name || 'KFintech Issue',
+        registrar: 'KFin Technologies Ltd',
+        kfinClientId: String(kfinClientId),
+        status: targetIpo?.status || 'listed',
+        allotmentDate: targetIpo?.allotmentDate || 'Declared',
+        lotSize: targetIpo?.lotSize || 100,
+        priceBandMax: targetIpo?.priceBandMax || 140
+      };
+    } else {
+      // 2. Check if ipoId directly matches a registrar issue ID
+      const [bigshareIssues, mufgIssues, kfinIssues] = await Promise.all([
+        fetchBigshareIssues(),
+        fetchMufgIssues(),
+        fetchKfinIssues()
+      ]);
 
-    // 2. Check if ipoId is a KFintech clientId directly or kfinClientId is supplied or ipoName matches
-    if (!matchedMufg && !mufgClientId) {
-      const kfinIssues = await fetchKfinIssues();
-      let matchedKfin = kfinClientId
-        ? kfinIssues.find(k => k.clientId === String(kfinClientId))
-        : kfinIssues.find(k => k.clientId === String(ipoId));
+      const matchedBigshare = bigshareIssues.find(b => b.companyId === String(ipoId));
+      const matchedMufg = mufgIssues.find(m => m.clientId === String(ipoId));
+      const matchedKfin = kfinIssues.find(k => k.clientId === String(ipoId));
 
-      if (!matchedKfin && ipoName) {
-        matchedKfin = await findKfinIssue(ipoName);
-      }
-
-      const effectiveClientId = kfinClientId || (matchedKfin ? matchedKfin.clientId : (ipoId && /^\d+$/.test(ipoId) ? ipoId : null));
-      if (effectiveClientId && (!targetIpo || !targetIpo.kfinClientId)) {
+      if (matchedBigshare) {
         targetIpo = {
-          id: effectiveClientId,
-          name: ipoName || (matchedKfin ? matchedKfin.name : (targetIpo ? targetIpo.name : 'KFintech Issue')),
-          registrar: 'KFin Technologies Ltd',
-          kfinClientId: effectiveClientId,
+          id: matchedBigshare.companyId,
+          name: ipoName || matchedBigshare.name,
+          registrar: 'Bigshare Services Pvt Ltd',
+          bigshareCompanyId: matchedBigshare.companyId,
           status: targetIpo?.status || 'listed',
           allotmentDate: targetIpo?.allotmentDate || 'Declared',
           lotSize: targetIpo?.lotSize || 100,
           priceBandMax: targetIpo?.priceBandMax || 140
         };
+      } else if (matchedMufg) {
+        targetIpo = {
+          id: matchedMufg.clientId,
+          name: ipoName || matchedMufg.name,
+          registrar: 'MUFG Intime India Pvt Ltd',
+          mufgClientId: matchedMufg.clientId,
+          status: targetIpo?.status || 'listed',
+          allotmentDate: targetIpo?.allotmentDate || 'Declared',
+          lotSize: targetIpo?.lotSize || 100,
+          priceBandMax: targetIpo?.priceBandMax || 140
+        };
+      } else if (matchedKfin) {
+        targetIpo = {
+          id: matchedKfin.clientId,
+          name: ipoName || matchedKfin.name,
+          registrar: 'KFin Technologies Ltd',
+          kfinClientId: matchedKfin.clientId,
+          status: targetIpo?.status || 'listed',
+          allotmentDate: targetIpo?.allotmentDate || 'Declared',
+          lotSize: targetIpo?.lotSize || 100,
+          priceBandMax: targetIpo?.priceBandMax || 140
+        };
+      } else if (targetIpo && targetIpo.registrar) {
+        const reg = targetIpo.registrar.toLowerCase();
+        if (reg.includes('bigshare')) {
+          const bsMatch = await findBigshareIssue(targetIpo.name);
+          targetIpo.bigshareCompanyId = bsMatch?.companyId || targetIpo.bigshareCompanyId;
+        } else if (reg.includes('mufg') || reg.includes('link intime')) {
+          const mufgMatch = await findMufgIssue(targetIpo.name);
+          targetIpo.mufgClientId = mufgMatch?.clientId || targetIpo.mufgClientId;
+        } else if (reg.includes('kfin') || reg.includes('karvy')) {
+          const kfinMatch = await findKfinIssue(targetIpo.name);
+          targetIpo.kfinClientId = kfinMatch?.clientId || targetIpo.kfinClientId;
+        }
+      } else if (ipoName) {
+        // 3. Fallback search by IPO name
+        const [bsMatch, mMatch, kMatch] = await Promise.all([
+          findBigshareIssue(ipoName),
+          findMufgIssue(ipoName),
+          findKfinIssue(ipoName)
+        ]);
+
+        if (bsMatch) {
+          targetIpo = {
+            id: bsMatch.companyId,
+            name: ipoName,
+            registrar: 'Bigshare Services Pvt Ltd',
+            bigshareCompanyId: bsMatch.companyId,
+            status: 'listed'
+          };
+        } else if (mMatch) {
+          targetIpo = {
+            id: mMatch.clientId,
+            name: ipoName,
+            registrar: 'MUFG Intime India Pvt Ltd',
+            mufgClientId: mMatch.clientId,
+            status: 'listed'
+          };
+        } else if (kMatch) {
+          targetIpo = {
+            id: kMatch.clientId,
+            name: ipoName,
+            registrar: 'KFin Technologies Ltd',
+            kfinClientId: kMatch.clientId,
+            status: 'listed'
+          };
+        }
       }
     }
 
@@ -453,7 +557,11 @@ app.post('/api/allotment/check', async (req, res) => {
       };
     }
 
-    const result = await checkRegistrarAllotment(targetIpo, queryType || 'pan', queryValue);
+    const result = await checkRegistrarAllotment(targetIpo, queryType || 'pan', queryValue, {
+      bigshareCompanyId: targetIpo?.bigshareCompanyId || bigshareCompanyId,
+      captchaToken,
+      captchaAnswer
+    });
     res.json({ success: true, data: result });
   } catch (error) {
     console.error('[API Error /api/allotment/check]:', error.message);
@@ -474,5 +582,6 @@ app.listen(PORT, () => {
   console.log(`🔥 Live GMP Feed: http://localhost:${PORT}/api/ipos/gmp`);
   console.log(`📋 KFintech Issues: http://localhost:${PORT}/api/allotment/kfin-issues`);
   console.log(`📋 MUFG Intime Issues: http://localhost:${PORT}/api/allotment/mufg-issues`);
+  console.log(`📋 Bigshare Issues: http://localhost:${PORT}/api/allotment/bigshare-issues`);
   console.log(`🔑 Upstox Auth Login: http://localhost:${PORT}/api/upstox/login`);
 });

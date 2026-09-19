@@ -83,51 +83,80 @@ export async function fetchMufgIssues() {
 /**
  * Normalizes issue name for fuzzy comparison
  */
+const STOP_WORDS = new Set([
+  'limited', 'ltd', 'pvt', 'private', 'ipo', 'sme', 'india',
+  'industries', 'technologies', 'technology', 'solutions', 'enterprises',
+  'logistics', 'chemicals', 'pharma', 'finance', 'financial', 'capital',
+  'international', 'systems', 'infra', 'infrastructure', 'electricals',
+  'services', 'holdings', 'group', 'corp', 'corporation', 'company', 'co',
+  'labs', 'projects', 'ventures', 'engineering', 'products', 'retail',
+  'power', 'securities', 'energy', 'global', 'reit', 'sm', 'trust', 'invit'
+]);
+
 function normalizeIssueName(name = '') {
   return name
     .toLowerCase()
     .replace(/-(ipo|sme|reit|invit)/g, '')
-    .replace(/\b(limited|ltd|ipo|sme|india|corp|corporation|technologies|solutions)\b/g, '')
+    .replace(/\b(limited|ltd|pvt|private|ipo|sme|india)\b/gi, '')
     .replace(/[^a-z0-9]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 }
 
+function getDistinctTokens(name = '') {
+  return name
+    .toLowerCase()
+    .replace(/-(ipo|sme|reit|invit)/g, '')
+    .replace(/[^a-z0-9]/g, ' ')
+    .split(/\s+/)
+    .filter(t => t.length > 2 && !STOP_WORDS.has(t));
+}
+
 /**
  * Match IPO name / symbol against MUFG issues
  */
-export async function findMufgIssue(targetName, symbol) {
+export async function findMufgIssue(targetName = '', symbol = '') {
   const issues = await fetchMufgIssues();
   if (!issues || issues.length === 0) return null;
 
   const cleanTarget = normalizeIssueName(targetName);
-  const targetTokens = cleanTarget.split(' ').filter(t => t.length > 2);
+  if (!cleanTarget) return null;
 
-  let bestMatch = null;
-  let maxScore = 0;
-
+  // 1. Exact cleaned match first
   for (const issue of issues) {
     const cleanIssue = normalizeIssueName(issue.name);
     if (cleanIssue === cleanTarget) {
       return issue;
     }
+  }
 
-    // Token overlap
-    const issueTokens = cleanIssue.split(' ').filter(t => t.length > 2);
+  // 2. Distinct non-generic token matching
+  const targetTokens = getDistinctTokens(targetName);
+  if (targetTokens.length === 0) return null;
+
+  let bestMatch = null;
+  let maxScore = 0;
+
+  for (const issue of issues) {
+    const issueTokens = getDistinctTokens(issue.name);
+    if (issueTokens.length === 0) continue;
+
     let matched = 0;
     for (const t of targetTokens) {
       if (issueTokens.includes(t)) matched++;
     }
 
-    if (matched > maxScore && matched >= 1) {
-      maxScore = matched;
+    const ratio = matched / Math.max(targetTokens.length, issueTokens.length);
+    if (matched > 0 && ratio >= 0.5 && ratio > maxScore) {
+      maxScore = ratio;
       bestMatch = issue;
     }
   }
 
-  if (!bestMatch && symbol) {
+  // 3. Symbol check
+  if (!bestMatch && symbol && symbol.length >= 3 && !STOP_WORDS.has(symbol.toLowerCase())) {
     const cleanSym = symbol.toLowerCase().trim();
-    bestMatch = issues.find(i => normalizeIssueName(i.name).startsWith(cleanSym));
+    bestMatch = issues.find(i => normalizeIssueName(i.name).startsWith(cleanSym)) || null;
   }
 
   return bestMatch;

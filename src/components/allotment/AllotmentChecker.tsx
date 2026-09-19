@@ -1,8 +1,9 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import { IpoItem, AllotmentResult, KfinIssue, MufgIssue, BatchAllotmentResult } from '../../types/ipo';
+import { IpoItem, AllotmentResult, KfinIssue, MufgIssue, BigshareIssue, BatchAllotmentResult } from '../../types/ipo';
 import { liveIpoService } from '../../services/liveIpoService';
 import { usePan } from '../../context/PanContext';
 import { PanCardManager } from './PanCardManager';
+import { BigshareCaptchaModal } from './BigshareCaptchaModal';
 import {
   CheckCircle2,
   Search,
@@ -25,7 +26,8 @@ import {
   ChevronDown,
   Play,
   Users,
-  RefreshCw
+  RefreshCw,
+  Lock
 } from 'lucide-react';
 
 interface AllotmentCheckerProps {
@@ -34,9 +36,57 @@ interface AllotmentCheckerProps {
   selectionTimestamp?: number;
 }
 
+const STOP_WORDS_SET = new Set([
+  'limited', 'ltd', 'pvt', 'private', 'ipo', 'sme', 'india',
+  'industries', 'technologies', 'technology', 'solutions', 'enterprises',
+  'logistics', 'chemicals', 'pharma', 'finance', 'financial', 'capital',
+  'international', 'systems', 'infra', 'infrastructure', 'electricals',
+  'services', 'holdings', 'group', 'corp', 'corporation', 'company', 'co',
+  'labs', 'projects', 'ventures', 'engineering', 'products', 'retail',
+  'power', 'securities', 'energy', 'global', 'reit', 'sm', 'trust'
+]);
+
+function getDistinctTokens(name: string): string[] {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, ' ')
+    .split(/\s+/)
+    .filter(t => t.length > 2 && !STOP_WORDS_SET.has(t));
+}
+
+function matchIssueByName<T extends { name: string }>(targetName: string, issues: T[]): T | null {
+  const cleanTarget = targetName.toLowerCase().replace(/\b(limited|ltd|pvt|private|ipo|sme|india)\b/gi, '').replace(/[^a-z0-9]/g, ' ').replace(/\s+/g, ' ').trim();
+  for (const issue of issues) {
+    const cleanIssue = issue.name.toLowerCase().replace(/\b(limited|ltd|pvt|private|ipo|sme|india)\b/gi, '').replace(/[^a-z0-9]/g, ' ').replace(/\s+/g, ' ').trim();
+    if (cleanIssue === cleanTarget) return issue;
+  }
+  const targetTokens = getDistinctTokens(targetName);
+  if (targetTokens.length === 0) return null;
+  let best: T | null = null;
+  let maxScore = 0;
+  for (const issue of issues) {
+    const issueTokens = getDistinctTokens(issue.name);
+    if (issueTokens.length === 0) continue;
+    let matched = 0;
+    for (const t of targetTokens) {
+      if (issueTokens.includes(t)) matched++;
+    }
+    const ratio = matched / Math.max(targetTokens.length, issueTokens.length);
+    if (matched > 0 && ratio >= 0.5 && ratio > maxScore) {
+      maxScore = ratio;
+      best = issue;
+    }
+  }
+  return best;
+}
+
 export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initialSelectedIpoId, selectionTimestamp }) => {
   const [kfinIssues, setKfinIssues] = useState<KfinIssue[]>([]);
   const [mufgIssues, setMufgIssues] = useState<MufgIssue[]>([]);
+  const [bigshareIssues, setBigshareIssues] = useState<BigshareIssue[]>([]);
+  const [isCaptchaModalOpen, setIsCaptchaModalOpen] = useState<boolean>(false);
+  const [captchaPendingAction, setCaptchaPendingAction] = useState<'single' | 'batch' | null>(null);
+  const [batchCurrentPanIndex, setBatchCurrentPanIndex] = useState<number>(0);
   const [filterQuery, setFilterQuery] = useState<string>('');
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
@@ -51,6 +101,11 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
     liveIpoService.getMufgIssues().then(issues => {
       if (Array.isArray(issues) && issues.length > 0) {
         setMufgIssues(issues);
+      }
+    });
+    liveIpoService.getBigshareIssues().then(issues => {
+      if (Array.isArray(issues) && issues.length > 0) {
+        setBigshareIssues(issues);
       }
     });
   }, []);
@@ -72,17 +127,18 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
     return closedOrListed.length > 0 ? closedOrListed : ipos.filter(i => i.status !== 'upcoming');
   }, [ipos]);
 
-  // Master list of all searchable issues across MUFG, KFintech, and Market Feed
+  // Master list of all searchable issues across MUFG, KFintech, Bigshare, and Market Feed
   const allSearchableOptions = useMemo(() => {
     const list: Array<{
       id: string;
       name: string;
-      group: 'MUFG Intime' | 'KFintech' | 'Market Feed';
+      group: 'MUFG Intime' | 'KFintech' | 'Bigshare' | 'Market Feed';
       badge: string;
       badgeColor: string;
       registrar: string;
       mufgClientId?: string;
       kfinClientId?: string;
+      bigshareCompanyId?: string;
     }> = [];
 
     // 1. MUFG Intime Issues
@@ -111,7 +167,20 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
       });
     });
 
-    // 3. Market Feed Issues (deduplicated against MUFG and KFintech)
+    // 3. Bigshare Services Issues
+    bigshareIssues.forEach(b => {
+      list.push({
+        id: b.companyId,
+        name: b.name,
+        group: 'Bigshare',
+        badge: '🔐 Bigshare In-App',
+        badgeColor: 'bg-violet-600 text-white',
+        registrar: 'Bigshare Services Pvt Ltd',
+        bigshareCompanyId: b.companyId
+      });
+    });
+
+    // 4. Market Feed Issues (deduplicated against MUFG, KFintech, and Bigshare)
     eligibleIpos.forEach(i => {
       const clean = i.name.toLowerCase().replace(/[^a-z0-9]/g, '');
       const alreadyAdded = list.some(item => {
@@ -131,7 +200,7 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
     });
 
     return list;
-  }, [mufgIssues, kfinIssues, eligibleIpos]);
+  }, [mufgIssues, kfinIssues, bigshareIssues, eligibleIpos]);
 
   // Dedicated list of shortcuts for recent allotment-out / declared IPOs
   const recentAllotmentShortcuts = useMemo(() => {
@@ -164,9 +233,20 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
       return 0;
     };
 
-    // 1. Gather closed and listed IPOs from ipos (allotment declared/out or listing concluded)
+    const now = Date.now();
+
+    // 1. Gather IPOs where allotment has ACTUALLY been declared (allotmentDate is in the past)
+    // A 'closed' IPO just means bidding ended — allotment typically takes T+1 business day.
+    // We ONLY show shortcuts for IPOs whose allotmentDate has already passed today.
     const closedOrListed = ipos
-      .filter(i => i.status === 'closed' || i.status === 'listed')
+      .filter(i => {
+        if (i.status === 'listed') return true; // listed = definitely allotted
+        if (i.status !== 'closed') return false;
+        // For 'closed' status: only include if allotmentDate has already passed
+        const allotTs = parseTimestamp(i.allotmentDate);
+        if (allotTs === 0) return false; // unknown/placeholder date — skip
+        return allotTs <= now; // allotment date is today or in the past
+      })
       .slice()
       .sort((a, b) => {
         const timeB = Math.max(
@@ -183,17 +263,24 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
       });
 
     closedOrListed.forEach(ipo => {
-      const clean = cleanStr(ipo.name);
-      // Check if it matches an MUFG issue
-      const mufg = mufgIssues.find(m => {
-        const mClean = cleanStr(m.name);
-        return mClean.includes(clean) || clean.includes(mClean);
-      });
-      // Check if it matches a KFin issue
-      const kfin = !mufg && kfinIssues.find(k => {
-        const kClean = cleanStr(k.name);
-        return kClean.includes(clean) || clean.includes(kClean);
-      });
+      const reg = (ipo.registrar || '').toLowerCase();
+      let mufg: MufgIssue | null = null;
+      let kfin: KfinIssue | null = null;
+      let bigshare: BigshareIssue | null = null;
+
+      if (reg.includes('bigshare')) {
+        bigshare = matchIssueByName(ipo.name, bigshareIssues);
+      } else if (reg.includes('mufg') || reg.includes('link intime')) {
+        mufg = matchIssueByName(ipo.name, mufgIssues);
+      } else if (reg.includes('kfin')) {
+        kfin = matchIssueByName(ipo.name, kfinIssues);
+      }
+
+      if (!bigshare && !mufg && !kfin) {
+        bigshare = matchIssueByName(ipo.name, bigshareIssues);
+        if (!bigshare) mufg = matchIssueByName(ipo.name, mufgIssues);
+        if (!bigshare && !mufg) kfin = matchIssueByName(ipo.name, kfinIssues);
+      }
 
       if (mufg) {
         list.push({
@@ -215,11 +302,21 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
           isLiveApi: true,
           allotmentDate: ipo.allotmentDate
         });
+      } else if (bigshare) {
+        list.push({
+          id: bigshare.companyId,
+          name: ipo.name,
+          badge: '🔐 Bigshare',
+          badgeColor: 'bg-violet-600 text-white',
+          registrar: 'Bigshare',
+          isLiveApi: true,
+          allotmentDate: ipo.allotmentDate
+        });
       } else {
         list.push({
           id: ipo.id,
           name: ipo.name,
-          badge: ipo.status === 'listed' ? 'Listed' : 'Allotment Out',
+          badge: ipo.status === 'listed' ? 'Listed' : 'Allotment',
           badgeColor: 'bg-indigo-600 text-white',
           registrar: ipo.registrar.split(' ')[0] || 'Official',
           isLiveApi: false,
@@ -274,8 +371,28 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
       }
     });
 
-    return list.slice(0, 12);
-  }, [ipos, mufgIssues, kfinIssues]);
+    // 4. Also include top newly declared live issues from Bigshare
+    bigshareIssues.slice(0, 5).forEach(b => {
+      const clean = cleanStr(b.name);
+      const exists = list.some(item => {
+        const itemClean = cleanStr(item.name);
+        return itemClean.includes(clean) || clean.includes(itemClean) || item.id === b.companyId;
+      });
+      if (!exists) {
+        const cleanDisplayName = b.name.replace(/-(?:\s*SME)?\s*IPO$/i, '').replace(/LIMITED.*$/i, 'Ltd').trim();
+        list.push({
+          id: b.companyId,
+          name: cleanDisplayName,
+          badge: '🔐 Bigshare',
+          badgeColor: 'bg-violet-600 text-white',
+          registrar: 'Bigshare',
+          isLiveApi: true
+        });
+      }
+    });
+
+    return list.slice(0, 14);
+  }, [ipos, mufgIssues, kfinIssues, bigshareIssues]);
 
   const [selectedIpoId, setSelectedIpoId] = useState<string>('');
 
@@ -294,44 +411,43 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
       return;
     }
 
-    // 2. Feed item name matching against MUFG or KFintech
+    // 2. Feed item name matching against Bigshare, MUFG, or KFintech
     const feedItem = ipos.find(i => i.id === initialSelectedIpoId);
     if (feedItem) {
-      const clean = feedItem.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const reg = (feedItem.registrar || '').toLowerCase();
+      let matchedId: string | null = null;
 
-      const mufg = mufgIssues.find(m => {
-        const mClean = m.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-        return mClean.includes(clean) || clean.includes(mClean);
-      });
-      if (mufg) {
-        selectIssue(mufg.clientId);
-        setTimeout(() => {
-          queryInputRef.current?.focus();
-          queryInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 150);
-        return;
+      if (reg.includes('bigshare')) {
+        const bs = matchIssueByName(feedItem.name, bigshareIssues);
+        if (bs) matchedId = bs.companyId;
+      } else if (reg.includes('mufg') || reg.includes('link intime')) {
+        const m = matchIssueByName(feedItem.name, mufgIssues);
+        if (m) matchedId = m.clientId;
+      } else if (reg.includes('kfin')) {
+        const k = matchIssueByName(feedItem.name, kfinIssues);
+        if (k) matchedId = k.clientId;
       }
 
-      const kfin = kfinIssues.find(k => {
-        const kClean = k.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-        return kClean.includes(clean) || clean.includes(kClean);
-      });
-      if (kfin) {
-        selectIssue(kfin.clientId);
-        setTimeout(() => {
-          queryInputRef.current?.focus();
-          queryInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 150);
-        return;
+      if (!matchedId) {
+        const bs = matchIssueByName(feedItem.name, bigshareIssues);
+        if (bs) matchedId = bs.companyId;
+        else {
+          const m = matchIssueByName(feedItem.name, mufgIssues);
+          if (m) matchedId = m.clientId;
+          else {
+            const k = matchIssueByName(feedItem.name, kfinIssues);
+            if (k) matchedId = k.clientId;
+          }
+        }
       }
 
-      selectIssue(feedItem.id);
+      selectIssue(matchedId || feedItem.id);
       setTimeout(() => {
         queryInputRef.current?.focus();
         queryInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 150);
     }
-  }, [initialSelectedIpoId, selectionTimestamp, allSearchableOptions, ipos, mufgIssues, kfinIssues]);
+  }, [initialSelectedIpoId, selectionTimestamp, allSearchableOptions, ipos, mufgIssues, kfinIssues, bigshareIssues]);
 
   const { pans } = usePan();
 
@@ -404,16 +520,75 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
       };
     }
 
-    // 3. Feed IPO match
+    // 3. Direct Bigshare issue match
+    const bigshare = bigshareIssues.find(b => b.companyId === selectedIpoId);
+    if (bigshare) {
+      return {
+        id: bigshare.companyId,
+        name: bigshare.name,
+        registrar: 'Bigshare Services Pvt Ltd',
+        bigshareCompanyId: bigshare.companyId,
+        status: 'listed' as const,
+        symbol: bigshare.name.split(' ')[0],
+        allotmentDate: 'Declared',
+        lotSize: 100,
+        priceBandMax: 140,
+        category: bigshare.name.toLowerCase().includes('sme') ? ('sme' as const) : ('mainboard' as const)
+      };
+    }
+
+    // 4. Feed IPO match
     const feed = ipos.find(i => i.id === selectedIpoId) || eligibleIpos.find(i => i.id === selectedIpoId);
     if (feed) {
-      const cleanFeedName = feed.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const reg = (feed.registrar || '').toLowerCase();
 
-      // Auto-attach MUFG clientId if feed item matches an MUFG registry issue
-      const matchedMufg = mufgIssues.find(m => {
-        const mClean = m.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-        return mClean.includes(cleanFeedName) || cleanFeedName.includes(mClean);
-      });
+      // If registrar explicitly states Bigshare, check Bigshare first
+      if (reg.includes('bigshare')) {
+        const matchedBigshare = matchIssueByName(feed.name, bigshareIssues);
+        if (matchedBigshare) {
+          return {
+            ...feed,
+            registrar: 'Bigshare Services Pvt Ltd',
+            bigshareCompanyId: matchedBigshare.companyId
+          };
+        }
+      }
+
+      // If registrar explicitly states MUFG / Link Intime, check MUFG first
+      if (reg.includes('mufg') || reg.includes('link intime')) {
+        const matchedMufg = matchIssueByName(feed.name, mufgIssues);
+        if (matchedMufg) {
+          return {
+            ...feed,
+            registrar: 'MUFG Intime India Pvt Ltd',
+            mufgClientId: matchedMufg.clientId
+          };
+        }
+      }
+
+      // If registrar explicitly states KFintech, check KFin first
+      if (reg.includes('kfin')) {
+        const matchedKfin = matchIssueByName(feed.name, kfinIssues);
+        if (matchedKfin) {
+          return {
+            ...feed,
+            registrar: 'KFin Technologies Ltd',
+            kfinClientId: matchedKfin.clientId
+          };
+        }
+      }
+
+      // Fallback matching without registrar hint
+      const matchedBigshare = matchIssueByName(feed.name, bigshareIssues);
+      if (matchedBigshare) {
+        return {
+          ...feed,
+          registrar: 'Bigshare Services Pvt Ltd',
+          bigshareCompanyId: matchedBigshare.companyId
+        };
+      }
+
+      const matchedMufg = matchIssueByName(feed.name, mufgIssues);
       if (matchedMufg) {
         return {
           ...feed,
@@ -422,11 +597,7 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
         };
       }
 
-      // Auto-attach KFin clientId if feed item matches a KFin registry issue
-      const matchedKfin = kfinIssues.find(k => {
-        const kClean = k.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-        return kClean.includes(cleanFeedName) || cleanFeedName.includes(kClean);
-      });
+      const matchedKfin = matchIssueByName(feed.name, kfinIssues);
       if (matchedKfin) {
         return {
           ...feed,
@@ -439,7 +610,7 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
     }
 
     return null;
-  }, [selectedIpoId, mufgIssues, kfinIssues, eligibleIpos]);
+  }, [selectedIpoId, mufgIssues, kfinIssues, bigshareIssues, eligibleIpos]);
 
   const isKfinIssue = useMemo(() => {
     if (!currentIpo) return false;
@@ -455,9 +626,22 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
     return reg.includes('mufg') || reg.includes('link intime') || reg.includes('linkintime');
   }, [currentIpo]);
 
+  const isBigshareIssue = useMemo(() => {
+    if (!currentIpo) return false;
+    if (currentIpo.bigshareCompanyId) return true;
+    const reg = (currentIpo.registrar || '').toLowerCase();
+    return reg.includes('bigshare');
+  }, [currentIpo]);
+
   const handleCheck = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!queryValue.trim() || !currentIpo) return;
+
+    if (isBigshareIssue) {
+      setCaptchaPendingAction('single');
+      setIsCaptchaModalOpen(true);
+      return;
+    }
 
     setLoading(true);
     setSearched(true);
@@ -470,7 +654,8 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
         ipos,
         currentIpo.kfinClientId,
         currentIpo.name,
-        currentIpo.mufgClientId
+        currentIpo.mufgClientId,
+        currentIpo.bigshareCompanyId
       );
       setResult(res);
     } catch (err) {
@@ -488,6 +673,21 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
 
   const handleBatchCheck = useCallback(async () => {
     if (!currentIpo || pans.length === 0) return;
+
+    if (isBigshareIssue) {
+      setBatchCurrentPanIndex(0);
+      setCaptchaPendingAction('batch');
+      const initial: BatchAllotmentResult[] = pans.map(p => ({
+        panCard: p,
+        result: null,
+        loading: true
+      }));
+      setBatchResults(initial);
+      setIsBatchChecking(true);
+      setBatchChecked(true);
+      setIsCaptchaModalOpen(true);
+      return;
+    }
 
     setIsBatchChecking(true);
     setBatchChecked(true);
@@ -511,7 +711,8 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
             ipos,
             currentIpo.kfinClientId,
             currentIpo.name,
-            currentIpo.mufgClientId
+            currentIpo.mufgClientId,
+            currentIpo.bigshareCompanyId
           );
           setBatchResults(prev =>
             prev.map((br, i) =>
@@ -529,14 +730,126 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
     );
 
     setIsBatchChecking(false);
-  }, [currentIpo, pans, ipos]);
+  }, [currentIpo, pans, ipos, isBigshareIssue]);
+
+  const handleCaptchaModalSubmit = async (token: string, answer: string): Promise<{ success: boolean; error?: string; hasMore?: boolean; done?: boolean }> => {
+    if (!currentIpo) return { success: false, error: 'No IPO selected' };
+
+    if (captchaPendingAction === 'single') {
+      setLoading(true);
+      setSearched(true);
+      try {
+        const res = await liveIpoService.checkAllotment(
+          currentIpo.id,
+          searchType,
+          queryValue,
+          ipos,
+          currentIpo.kfinClientId,
+          currentIpo.name,
+          currentIpo.mufgClientId,
+          currentIpo.bigshareCompanyId,
+          token,
+          answer
+        );
+
+        if (res.status === 'CAPTCHA_INVALID') {
+          setLoading(false);
+          return { success: false, error: res.message || 'Invalid CAPTCHA code. Please try again.' };
+        }
+
+        setResult(res);
+        setIsCaptchaModalOpen(false);
+        return { success: true };
+      } catch (err: any) {
+        return { success: false, error: err?.message || 'Verification failed.' };
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (captchaPendingAction === 'batch') {
+      const targetPanCard = pans[batchCurrentPanIndex];
+      if (!targetPanCard) {
+        setIsCaptchaModalOpen(false);
+        setIsBatchChecking(false);
+        return { success: true, done: true };
+      }
+
+      try {
+        const res = await liveIpoService.checkAllotment(
+          currentIpo.id,
+          'pan',
+          targetPanCard.pan,
+          ipos,
+          currentIpo.kfinClientId,
+          currentIpo.name,
+          currentIpo.mufgClientId,
+          currentIpo.bigshareCompanyId,
+          token,
+          answer
+        );
+
+        if (res.status === 'CAPTCHA_INVALID') {
+          return { success: false, error: res.message || 'Invalid CAPTCHA code. Please try again.' };
+        }
+
+        setBatchResults(prev =>
+          prev.map((br, i) => (i === batchCurrentPanIndex ? { ...br, result: res, loading: false } : br))
+        );
+
+        if (batchCurrentPanIndex + 1 < pans.length) {
+          setBatchCurrentPanIndex(prev => prev + 1);
+          return { success: true, hasMore: true };
+        } else {
+          setIsCaptchaModalOpen(false);
+          setIsBatchChecking(false);
+          return { success: true, done: true };
+        }
+      } catch (err: any) {
+        setBatchResults(prev =>
+          prev.map((br, i) => (i === batchCurrentPanIndex ? { ...br, loading: false, error: 'Check failed' } : br))
+        );
+        if (batchCurrentPanIndex + 1 < pans.length) {
+          setBatchCurrentPanIndex(prev => prev + 1);
+          return { success: true, hasMore: true };
+        } else {
+          setIsCaptchaModalOpen(false);
+          setIsBatchChecking(false);
+          return { success: true, done: true };
+        }
+      }
+    }
+
+    return { success: false, error: 'Unknown action' };
+  };
+
+  const handleSkipBatchPan = () => {
+    setBatchResults(prev =>
+      prev.map((br, i) => (i === batchCurrentPanIndex ? { ...br, loading: false, error: 'Skipped' } : br))
+    );
+    if (batchCurrentPanIndex + 1 < pans.length) {
+      setBatchCurrentPanIndex(prev => prev + 1);
+    } else {
+      setIsCaptchaModalOpen(false);
+      setIsBatchChecking(false);
+    }
+  };
+
+  const handleCloseCaptchaModal = () => {
+    setIsCaptchaModalOpen(false);
+    if (captchaPendingAction === 'batch') {
+      setBatchResults(prev =>
+        prev.map(br => (br.loading ? { ...br, loading: false, error: 'Cancelled' } : br))
+      );
+      setIsBatchChecking(false);
+    }
+    setCaptchaPendingAction(null);
+  };
 
   const registrars = [
     { name: 'MUFG Intime India (Link Intime)', url: 'https://in.mpms.mufg.com/Initial_Offer/public-issues.html', tag: 'Real-Time API Connected' },
     { name: 'KFin Technologies Ltd', url: 'https://ipostatus.kfintech.com/', tag: 'Real-Time API Connected' },
-    { name: 'Bigshare Services Pvt Ltd', url: 'https://ipo.bigshareonline.com/', tag: 'Visual CAPTCHA Portal' },
-    { name: 'Skyline Financial Services', url: 'https://www.skylinerta.com/ipo.php', tag: 'SME Registrar' },
-    { name: 'Cameo Corporate Services', url: 'https://ipo.cameoindia.com/', tag: 'Regional Registrar' }
+    { name: 'Bigshare Services Pvt Ltd', url: 'https://ipo.bigshareonline.com/', tag: 'In-App CAPTCHA Verified' }
   ];
 
   return (
@@ -555,7 +868,7 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
           </div>
           <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold border border-emerald-500/20">
             <Zap className="w-3.5 h-3.5" />
-            <span>MUFG Intime & KFintech Live APIs Connected</span>
+            <span>MUFG, KFintech & Bigshare Live APIs Connected</span>
           </div>
         </div>
         <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
@@ -619,9 +932,11 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
                                 ? 'bg-blue-500/15 text-blue-600 dark:text-blue-400'
                                 : opt.badge.includes('KFin')
                                   ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
-                                  : 'bg-indigo-500/15 text-indigo-600 dark:text-indigo-400'
+                                  : opt.badge.includes('Bigshare')
+                                    ? 'bg-violet-500/15 text-violet-600 dark:text-violet-400'
+                                    : 'bg-indigo-500/15 text-indigo-600 dark:text-indigo-400'
                           }`}>
-                            {opt.badge.includes('MUFG') ? 'MUFG' : opt.badge.includes('KFin') ? 'KFin' : 'Out'}
+                            {opt.badge.includes('MUFG') ? 'MUFG' : opt.badge.includes('KFin') ? 'KFin' : opt.badge.includes('Bigshare') ? 'Bigshare' : 'Out'}
                           </span>
                         </button>
                       );
@@ -1211,7 +1526,7 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
 
               {!batchChecked && (
                 <p className="text-[11px] text-slate-400 text-center">
-                  Click <strong>Check All</strong> to auto-check allotment for all your saved PANs via the live {currentIpo ? (isKfinIssue ? 'KFintech' : 'MUFG Intime') : ''} API.
+                  Click <strong>Check All</strong> to auto-check allotment for all your saved PANs via the live {currentIpo ? (isKfinIssue ? 'KFintech' : isBigshareIssue ? 'Bigshare' : 'MUFG Intime') : ''} API.
                 </p>
               )}
             </div>
@@ -1241,7 +1556,7 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
                     <div className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 flex items-center gap-1">
                       <span>{reg.name}</span>
                     </div>
-                    <div className={`text-[10px] ${reg.tag.includes('API') ? 'text-emerald-500 font-semibold' : 'text-slate-400'}`}>
+                    <div className={`text-[10px] ${reg.tag.includes('API') || reg.tag.includes('CAPTCHA') ? 'text-emerald-500 font-semibold' : 'text-slate-400'}`}>
                       {reg.tag}
                     </div>
                   </div>
@@ -1256,7 +1571,7 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
                 Real-Time Registrar Integration
               </div>
               <p className="text-[11px] leading-relaxed text-emerald-900 dark:text-emerald-300/90">
-                When an application is processed, <strong>MUFG Intime</strong> and <strong>KFintech</strong> verify your PAN directly against their live allotment databases, displaying your registered application number, category, allocated shares, and refund amount.
+                When an application is processed, <strong>MUFG Intime</strong> and <strong>KFintech</strong> verify your PAN directly against their live allotment databases. <strong>Bigshare Services</strong> is queried in-app with verified security authentication.
               </p>
             </div>
 
@@ -1273,6 +1588,20 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
         </div>
 
       </div>
+
+      {/* Bigshare In-App CAPTCHA Modal */}
+      <BigshareCaptchaModal
+        isOpen={isCaptchaModalOpen}
+        onClose={handleCloseCaptchaModal}
+        onSubmit={handleCaptchaModalSubmit}
+        ipoName={currentIpo?.name || 'Bigshare Issue'}
+        isBatch={captchaPendingAction === 'batch'}
+        batchCount={pans.length}
+        currentPanIndex={batchCurrentPanIndex}
+        currentPanName={pans[batchCurrentPanIndex]?.name || pans[batchCurrentPanIndex]?.nickname || 'Applicant'}
+        currentPanNumber={pans[batchCurrentPanIndex]?.pan}
+        onSkipCurrentPan={handleSkipBatchPan}
+      />
 
     </div>
   );

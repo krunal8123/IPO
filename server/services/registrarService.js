@@ -1,5 +1,6 @@
 import { findKfinIssue, queryKfintechAllotment } from './kfintechService.js';
 import { findMufgIssue, queryMufgAllotment } from './mufgService.js';
+import { findBigshareIssue, queryBigshareAllotment } from './bigshareService.js';
 
 export function getRegistrarUrl(registrarName = '') {
   const name = (registrarName || '').toLowerCase();
@@ -27,7 +28,7 @@ export function getRegistrarUrl(registrarName = '') {
   return 'https://in.mpms.mufg.com/Initial_Offer/public-issues.html';
 }
 
-export async function checkRegistrarAllotment(ipo, queryType = 'pan', queryValue = '') {
+export async function checkRegistrarAllotment(ipo, queryType = 'pan', queryValue = '', extraOptions = {}) {
   const query = (queryValue || '').trim().toUpperCase();
   const registrar = ipo?.registrar || 'Link Intime India Pvt Ltd';
   const ipoName = ipo?.name || 'IPO Issue';
@@ -142,47 +143,65 @@ export async function checkRegistrarAllotment(ipo, queryType = 'pan', queryValue
     };
   }
 
-  // 4. Check if the IPO is managed by MUFG / Link Intime
-  let mufgClientId = ipo?.mufgClientId;
+  // Check explicit registrar flags first
+  const isBigshareRegistrar = (registrar || '').toLowerCase().includes('bigshare');
   const isMufgRegistrar = (registrar || '').toLowerCase().includes('mufg') || 
                           (registrar || '').toLowerCase().includes('link intime') || 
                           (registrar || '').toLowerCase().includes('linkintime');
+  const isKfinRegistrar = (registrar || '').toLowerCase().includes('kfin') || 
+                          (registrar || '').toLowerCase().includes('karvy');
 
-  if (!mufgClientId) {
-    const matchedMufg = await findMufgIssue(ipoName, ipo?.symbol);
-    if (matchedMufg) {
-      mufgClientId = matchedMufg.clientId;
+  let bigshareCompanyId = ipo?.bigshareCompanyId || extraOptions?.bigshareCompanyId;
+  let mufgClientId = ipo?.mufgClientId;
+  let kfinClientId = ipo?.kfinClientId;
+
+  // 4. Branch by explicit registrar affinity
+  if (bigshareCompanyId || isBigshareRegistrar) {
+    if (!bigshareCompanyId) {
+      const matchedBigshare = await findBigshareIssue(ipoName, ipo?.symbol);
+      if (matchedBigshare) bigshareCompanyId = matchedBigshare.companyId;
+    }
+    if (bigshareCompanyId) {
+      console.log(`[RegistrarService] Executing Bigshare query for ${ipoName} (companyId: ${bigshareCompanyId})`);
+      return await queryBigshareAllotment({
+        companyId: bigshareCompanyId,
+        queryType,
+        queryValue: query,
+        captchaToken: extraOptions?.captchaToken,
+        captchaAnswer: extraOptions?.captchaAnswer,
+        ipoName,
+        lotSize: ipo?.lotSize,
+        priceBandMax: ipo?.priceBandMax
+      });
     }
   }
 
-  if (mufgClientId || (isMufgRegistrar && mufgClientId)) {
-    console.log(`[RegistrarService] Executing real-time MUFG Intime query for ${ipoName} (clientId: ${mufgClientId})`);
-    const mufgResult = await queryMufgAllotment({
-      clientId: mufgClientId,
-      queryType,
-      queryValue: query,
-      ipoName,
-      lotSize: ipo?.lotSize,
-      priceBandMax: ipo?.priceBandMax
-    });
-    return mufgResult;
-  }
-
-  // 5. Check if the IPO is managed by KFintech (or matched to a KFintech issue)
-  let kfinClientId = ipo?.kfinClientId;
-  const isKfinRegistrar = (registrar || '').toLowerCase().includes('kfin') || (registrar || '').toLowerCase().includes('karvy');
-
-  if (!kfinClientId) {
-    const matchedKfin = await findKfinIssue(ipoName, ipo?.symbol);
-    if (matchedKfin) {
-      kfinClientId = matchedKfin.clientId;
+  if (mufgClientId || isMufgRegistrar) {
+    if (!mufgClientId) {
+      const matchedMufg = await findMufgIssue(ipoName, ipo?.symbol);
+      if (matchedMufg) mufgClientId = matchedMufg.clientId;
+    }
+    if (mufgClientId) {
+      console.log(`[RegistrarService] Executing real-time MUFG Intime query for ${ipoName} (clientId: ${mufgClientId})`);
+      return await queryMufgAllotment({
+        clientId: mufgClientId,
+        queryType,
+        queryValue: query,
+        ipoName,
+        lotSize: ipo?.lotSize,
+        priceBandMax: ipo?.priceBandMax
+      });
     }
   }
 
   if (kfinClientId || isKfinRegistrar) {
+    if (!kfinClientId) {
+      const matchedKfin = await findKfinIssue(ipoName, ipo?.symbol);
+      if (matchedKfin) kfinClientId = matchedKfin.clientId;
+    }
     if (kfinClientId) {
       console.log(`[RegistrarService] Executing real-time KFintech query for ${ipoName} (clientId: ${kfinClientId})`);
-      const kfinResult = await queryKfintechAllotment({
+      return await queryKfintechAllotment({
         clientId: kfinClientId,
         queryType,
         queryValue: query,
@@ -190,12 +209,55 @@ export async function checkRegistrarAllotment(ipo, queryType = 'pan', queryValue
         lotSize: ipo?.lotSize,
         priceBandMax: ipo?.priceBandMax
       });
-      return kfinResult;
     }
   }
 
-  // 6. Other Registrars (Bigshare, Skyline, Cameo, etc.)
-  // Official SEBI portals require visual CAPTCHA verification to prevent automated scraping
+  // 5. Fallback across registrars if registrar was unspecified
+  const [matchedBigshare, matchedMufg, matchedKfin] = await Promise.all([
+    findBigshareIssue(ipoName, ipo?.symbol),
+    findMufgIssue(ipoName, ipo?.symbol),
+    findKfinIssue(ipoName, ipo?.symbol)
+  ]);
+
+  if (matchedBigshare) {
+    console.log(`[RegistrarService] Discovered Bigshare issue match for ${ipoName} (companyId: ${matchedBigshare.companyId})`);
+    return await queryBigshareAllotment({
+      companyId: matchedBigshare.companyId,
+      queryType,
+      queryValue: query,
+      captchaToken: extraOptions?.captchaToken,
+      captchaAnswer: extraOptions?.captchaAnswer,
+      ipoName,
+      lotSize: ipo?.lotSize,
+      priceBandMax: ipo?.priceBandMax
+    });
+  }
+
+  if (matchedMufg) {
+    console.log(`[RegistrarService] Discovered MUFG issue match for ${ipoName} (clientId: ${matchedMufg.clientId})`);
+    return await queryMufgAllotment({
+      clientId: matchedMufg.clientId,
+      queryType,
+      queryValue: query,
+      ipoName,
+      lotSize: ipo?.lotSize,
+      priceBandMax: ipo?.priceBandMax
+    });
+  }
+
+  if (matchedKfin) {
+    console.log(`[RegistrarService] Discovered KFintech issue match for ${ipoName} (clientId: ${matchedKfin.clientId})`);
+    return await queryKfintechAllotment({
+      clientId: matchedKfin.clientId,
+      queryType,
+      queryValue: query,
+      ipoName,
+      lotSize: ipo?.lotSize,
+      priceBandMax: ipo?.priceBandMax
+    });
+  }
+
+  // 7. Other Registrars (Skyline, Cameo, etc.)
   return {
     ipoId: ipo?.id || 'ipo',
     ipoName,
@@ -207,7 +269,7 @@ export async function checkRegistrarAllotment(ipo, queryType = 'pan', queryValue
     sharesAllotted: 0,
     status: 'Not Found',
     refundAmount: 0,
-    message: `${registrar} requires visual image CAPTCHA authentication on their official portal to view individual allotment results. Please click the button below to verify your PAN directly on ${registrar}.`,
+    message: `${registrar} portal requires verification on their official website. Please click the button below to verify your application directly on ${registrar}.`,
     registrar,
     finalizedDate: ipo?.allotmentDate,
     registrarPortalUrl: regUrl

@@ -1,5 +1,5 @@
 import { Capacitor } from '@capacitor/core';
-import { IpoItem, AllotmentResult, KfinIssue, MufgIssue, IpoStatus } from '../types/ipo';
+import { IpoItem, AllotmentResult, KfinIssue, MufgIssue, BigshareIssue, IpoStatus } from '../types/ipo';
 
 export const DEFAULT_SERVER = 'https://ipo-wire.onrender.com';
 export const DEFAULT_LAN_SERVER = 'http://10.202.144.96:5001';
@@ -77,6 +77,14 @@ const BASELINE_MUFG_ISSUES: MufgIssue[] = [
   { clientId: '11930', name: 'Qualiance International Limited - SME IPO' },
   { clientId: '11929', name: 'Phychem Technologies Limited - SME IPO' },
   { clientId: '11927', name: 'ESDS Software Solution Limited - IPO' }
+];
+
+const BASELINE_BIGSHARE_ISSUES: BigshareIssue[] = [
+  { companyId: '596', name: 'RAKSAN TRANSFORMERS LIMITED' },
+  { companyId: '597', name: 'OM GALAXY LIMITED' },
+  { companyId: '595', name: 'INFRAX RENEWABLE LIMITED' },
+  { companyId: '9048', name: 'DEEPA JEWELLERS LIMITED' },
+  { companyId: '9047', name: 'LUMINO INDUSTRIES LIMITED' }
 ];
 
 const BASELINE_KFIN_ISSUES: KfinIssue[] = [
@@ -245,7 +253,8 @@ async function evaluateLocalAllotment(
   ipoList: IpoItem[] = [],
   kfinClientId?: string,
   ipoNameParam?: string,
-  mufgClientId?: string
+  mufgClientId?: string,
+  bigshareCompanyId?: string
 ): Promise<AllotmentResult> {
   const query = (queryValue || '').trim().toUpperCase();
 
@@ -269,13 +278,19 @@ async function evaluateLocalAllotment(
   const kfinId = kfinClientId || (/^\d+$/.test(ipoId) && BASELINE_KFIN_ISSUES.some(k => k.clientId === ipoId) ? ipoId : null);
   const kfinIssue = kfinId ? BASELINE_KFIN_ISSUES.find(k => k.clientId === kfinId) : null;
 
+  // 5. Bigshare Issue matching
+  const bigshareId = bigshareCompanyId || (/^\d+$/.test(ipoId) && BASELINE_BIGSHARE_ISSUES.some(b => b.companyId === ipoId) ? ipoId : null);
+  const bigshareIssue = bigshareId ? BASELINE_BIGSHARE_ISSUES.find(b => b.companyId === bigshareId) : null;
+
   // Final extracted metadata - NEVER fall back to ipoList[0]!
-  const ipoName = ipoNameParam || mufgIssue?.name || kfinIssue?.name || ipo?.name || 'IPO Issue';
+  const ipoName = ipoNameParam || mufgIssue?.name || kfinIssue?.name || bigshareIssue?.name || ipo?.name || 'IPO Issue';
   const registrar = mufgIssue || mufgId 
     ? 'MUFG Intime India Pvt Ltd' 
     : kfinIssue || kfinId 
       ? 'KFin Technologies Ltd' 
-      : (ipo?.registrar || 'Link Intime India Pvt Ltd');
+      : bigshareIssue || bigshareId
+        ? 'Bigshare Services Pvt Ltd'
+        : (ipo?.registrar || 'Link Intime India Pvt Ltd');
   const regUrl = getRegistrarUrl(registrar);
   const lotSize = ipo?.lotSize || 100;
   const priceBandMax = ipo?.priceBandMax || 140;
@@ -567,6 +582,48 @@ export const liveIpoService = {
     return BASELINE_MUFG_ISSUES;
   },
 
+  // Fetch all active Bigshare issues directly from backend API
+  async getBigshareIssues(): Promise<BigshareIssue[]> {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+      const res = await fetch(`${getApiBaseUrl()}/allotment/bigshare-issues`, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          return json.data;
+        }
+      }
+    } catch {
+      // Fall through
+    }
+    return BASELINE_BIGSHARE_ISSUES;
+  },
+
+  // Fetch fresh Bigshare CAPTCHA challenge
+  async getBigshareCaptcha(): Promise<{ token: string; image: string } | null> {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+      const res = await fetch(`${getApiBaseUrl()}/allotment/bigshare-captcha`, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.token && json.image) {
+          return { token: json.token, image: json.image };
+        }
+      }
+    } catch (e) {
+      console.warn('[LiveService] Failed to fetch Bigshare CAPTCHA:', e);
+    }
+    return null;
+  },
+
   // Live registrar allotment check
   async checkAllotment(
     ipoId: string, 
@@ -575,7 +632,10 @@ export const liveIpoService = {
     ipoList: IpoItem[] = [],
     kfinClientId?: string,
     ipoName?: string,
-    mufgClientId?: string
+    mufgClientId?: string,
+    bigshareCompanyId?: string,
+    captchaToken?: string,
+    captchaAnswer?: string
   ): Promise<AllotmentResult> {
     try {
       const controller = new AbortController();
@@ -584,7 +644,7 @@ export const liveIpoService = {
       const res = await fetch(`${getApiBaseUrl()}/allotment/check`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ipoId, queryType, queryValue, kfinClientId, mufgClientId, ipoName }),
+        body: JSON.stringify({ ipoId, queryType, queryValue, kfinClientId, mufgClientId, bigshareCompanyId, captchaToken, captchaAnswer, ipoName }),
         signal: controller.signal
       });
       clearTimeout(timeoutId);
@@ -599,7 +659,7 @@ export const liveIpoService = {
       console.warn('[LiveService] Backend allotment endpoint unreachable, running browser registrar engine');
     }
 
-    return evaluateLocalAllotment(ipoId, queryType, queryValue, ipoList, kfinClientId, ipoName, mufgClientId);
+    return evaluateLocalAllotment(ipoId, queryType, queryValue, ipoList, kfinClientId, ipoName, mufgClientId, bigshareCompanyId);
   },
 
   // Health check
