@@ -49,24 +49,29 @@ function parseDates(dateStr) {
   };
 }
 
-function determineStatus(openStr, closeStr, rawStatus) {
+function determineStatus(openStr, closeStr, listingStr, rawStatus) {
   try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
+    const now = new Date();
     const openDate = new Date(openStr);
     const closeDate = new Date(closeStr);
+    const listingDate = listingStr ? new Date(listingStr) : null;
 
-    if (!isNaN(closeDate.getTime()) && closeDate < today) {
+    closeDate.setHours(17, 0, 0, 0); // 5:00 PM cutoff
+    openDate.setHours(10, 0, 0, 0);
+
+    if (listingDate && !isNaN(listingDate.getTime()) && now >= listingDate) {
+      return 'listed';
+    }
+    if (!isNaN(closeDate.getTime()) && now > closeDate) {
       return 'closed';
     }
-    if (!isNaN(openDate.getTime()) && openDate > today) {
-      return 'upcoming';
-    }
     if (!isNaN(openDate.getTime()) && !isNaN(closeDate.getTime())) {
-      if (today >= openDate && today <= closeDate) {
+      if (now >= openDate && now <= closeDate) {
         return 'live';
       }
+    }
+    if (!isNaN(openDate.getTime()) && openDate > now) {
+      return 'upcoming';
     }
   } catch {}
 
@@ -173,9 +178,18 @@ export function buildDynamicIpoFromScraped(scraped, kfinIssues = [], liveSubscri
   const category = (scraped.type || 'mainboard').toLowerCase().includes('sme') ? 'sme' : 'mainboard';
   const { min, max } = parsePriceBand(scraped.priceText);
   const dates = parseDates(scraped.dateText);
-  const status = determineStatus(dates.open, dates.close, scraped.status);
+  const status = determineStatus(dates.open, dates.close, dates.listing, scraped.status);
   
-  const lotSize = category === 'sme' ? Math.max(500, Math.round(120000 / max / 100) * 100) : Math.max(10, Math.round(14500 / max));
+  // SEBI ICDR Regulation Mandate:
+  // For Mainboard IPOs, 1 Lot Retail Bid must NEVER exceed ₹15,000 (SEBI statutory range ₹10,000 - ₹15,000).
+  // High-priced IPOs (e.g., ₹1,785) have lot sizes like 8 shares (8 * 1785 = ₹14,280 <= ₹15,000).
+  let lotSize;
+  if (category === 'sme') {
+    lotSize = Math.max(100, Math.round(120000 / max / 100) * 100);
+  } else {
+    const maxAllowedShares = Math.floor(15000 / max);
+    lotSize = Math.max(1, maxAllowedShares);
+  }
   const minInvestment = lotSize * max;
   const branding = resolveCompanyBranding(cleanName, id, scraped);
 

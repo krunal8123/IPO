@@ -46,7 +46,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'subscription', label: 'Subscription', icon: BarChart3 },
     { id: 'allotment', label: 'Allotment', icon: CheckCircle2 },
     { id: 'calendar', label: 'Calendar', icon: Calendar },
-    // { id: 'buyback', label: 'Buybacks', icon: Coins } // Temporarily hidden
+    // { id: 'buyback', label: 'Buybacks', icon: Coins } // Hidden for now
   ];
 
   return (

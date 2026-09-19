@@ -3,13 +3,16 @@ import ReactDOM from 'react-dom/client';
 import { App } from './App';
 import { ThemeProvider } from './context/ThemeContext';
 import { WatchlistProvider } from './context/WatchlistContext';
+import { PanProvider } from './context/PanContext';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ThemeProvider>
       <WatchlistProvider>
-        <App />
+        <PanProvider>
+          <App />
+        </PanProvider>
       </WatchlistProvider>
     </ThemeProvider>
   </React.StrictMode>,

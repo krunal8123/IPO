@@ -81,7 +81,10 @@ export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({
   const lotMatrix = useMemo(() => {
     if (!activeIpo) return [];
     const price = activeIpo.cutOffPrice || activeIpo.priceBandMax;
-    const lotSize = activeIpo.lotSize;
+    let lotSize = activeIpo.lotSize;
+    if (activeIpo.category !== 'sme' && price > 0 && lotSize * price > 15000) {
+      lotSize = Math.max(1, Math.floor(15000 / price));
+    }
     const rows = [];
 
     if (activeIpo.category === 'sme') {
@@ -277,8 +280,12 @@ export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({
 
   if (!activeIpo) return null;
 
-  const minInvest = activeIpo.priceBandMax * activeIpo.lotSize;
-  const maxInvest = activeIpo.category === 'sme' ? minInvest : minInvest * 13;
+  const effectiveLot = (activeIpo.category !== 'sme' && activeIpo.priceBandMax > 0 && activeIpo.lotSize * activeIpo.priceBandMax > 15000)
+    ? Math.max(1, Math.floor(15000 / activeIpo.priceBandMax))
+    : activeIpo.lotSize;
+  const minInvest = activeIpo.priceBandMax * effectiveLot;
+  const maxRetailLots = activeIpo.category === 'sme' ? 1 : Math.max(1, Math.floor(200000 / minInvest));
+  const maxInvest = minInvest * maxRetailLots;
 
   return (
     <div 
@@ -552,14 +559,14 @@ export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-400 block">Min Retail Bid (1 Lot)</span>
-                    <strong className="text-slate-800 dark:text-slate-200">₹{minInvest.toLocaleString('en-IN')} ({activeIpo.lotSize} shares)</strong>
+                    <strong className="text-slate-800 dark:text-slate-200">₹{minInvest.toLocaleString('en-IN')} ({effectiveLot} shares)</strong>
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-400 block">Max Retail Bid</span>
                     <strong className="text-slate-800 dark:text-slate-200">
                       {activeIpo.category === 'sme' 
                         ? `₹${minInvest.toLocaleString('en-IN')} (1 Lot)` 
-                        : `₹${maxInvest.toLocaleString('en-IN')} (13 Lots)`}
+                        : `₹${maxInvest.toLocaleString('en-IN')} (${maxRetailLots} Lots)`}
                     </strong>
                   </div>
                   {activeIpo.minimumQuantity && activeIpo.minimumQuantity !== activeIpo.lotSize && (

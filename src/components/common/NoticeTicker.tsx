@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import { IpoItem } from '../../types/ipo';
-import { mockIpoList } from '../../data/mockIpoData';
 import { Megaphone, Sparkles, TrendingUp, Clock, X, Radio } from 'lucide-react';
 
 interface NoticeTickerProps {
@@ -10,7 +9,7 @@ interface NoticeTickerProps {
 }
 
 export const NoticeTicker: React.FC<NoticeTickerProps> = ({
-  ipos = mockIpoList,
+  ipos = [],
   isLive = true,
   onSelectIpo
 }) => {
@@ -18,7 +17,7 @@ export const NoticeTicker: React.FC<NoticeTickerProps> = ({
 
   // Generate dynamic live ticker items from real dataset
   const tickerItems = useMemo(() => {
-    const list = ipos && ipos.length > 0 ? ipos : mockIpoList;
+    const list = ipos || [];
     const items: {
       id: string;
       ipo: IpoItem;

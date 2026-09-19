@@ -42,7 +42,11 @@ export function getUpstoxConfig() {
 
 export function saveAccessToken(token) {
   cachedAccessToken = token;
-  if (fs.existsSync(ENV_PATH)) {
+  upstoxIposCache = [];
+  lastFetchTime = 0;
+  if (!fs.existsSync(ENV_PATH)) {
+    fs.writeFileSync(ENV_PATH, `UPSTOX_ACCESS_TOKEN=${token}\n`, 'utf-8');
+  } else {
     let content = fs.readFileSync(ENV_PATH, 'utf-8');
     if (content.includes('UPSTOX_ACCESS_TOKEN=')) {
       content = content.replace(/UPSTOX_ACCESS_TOKEN=.*/, `UPSTOX_ACCESS_TOKEN=${token}`);
@@ -50,8 +54,30 @@ export function saveAccessToken(token) {
       content += `\nUPSTOX_ACCESS_TOKEN=${token}`;
     }
     fs.writeFileSync(ENV_PATH, content, 'utf-8');
-    console.log('[UpstoxService] Successfully persisted new access_token to .env');
   }
+  console.log('[UpstoxService] Successfully persisted new access_token to .env');
+}
+
+export function saveUpstoxCredentials({ accessToken, apiKey, apiSecret }) {
+  if (accessToken) {
+    cachedAccessToken = accessToken.trim();
+  }
+  upstoxIposCache = [];
+  lastFetchTime = 0;
+  let envLines = {};
+  if (fs.existsSync(ENV_PATH)) {
+    fs.readFileSync(ENV_PATH, 'utf-8').split('\n').forEach(l => {
+      const m = l.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
+      if (m) envLines[m[1]] = (m[2] || '').trim();
+    });
+  }
+  if (accessToken) envLines['UPSTOX_ACCESS_TOKEN'] = accessToken.trim();
+  if (apiKey) envLines['UPSTOX_API_KEY'] = apiKey.trim();
+  if (apiSecret) envLines['UPSTOX_API_SECRET'] = apiSecret.trim();
+  
+  const content = Object.entries(envLines).map(([k, v]) => `${k}=${v}`).join('\n') + '\n';
+  fs.writeFileSync(ENV_PATH, content, 'utf-8');
+  console.log('[UpstoxService] Successfully saved Upstox credentials to .env');
 }
 
 export function getUpstoxLoginUrl() {
@@ -198,19 +224,75 @@ function resolveCompanyBranding(item, cleanName) {
   };
 }
 
+function parseDateBoundary(dateStr, defaultHour = 0, defaultMin = 0) {
+  if (!dateStr || dateStr === 'Active' || dateStr.includes('T+') || dateStr === 'N/A') return null;
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return null;
+  d.setHours(defaultHour, defaultMin, 0, 0);
+  return d;
+}
+
+export function evaluateIpoStatus(openStr, closeStr, listingStr, dailyEndTime, rawStatus) {
+  const now = new Date();
+  const openDate = parseDateBoundary(openStr, 10, 0);
+  let closeH = 17, closeM = 0;
+  if (dailyEndTime) {
+    const parts = dailyEndTime.split(':').map(Number);
+    if (!isNaN(parts[0])) closeH = parts[0];
+    if (!isNaN(parts[1])) closeM = parts[1];
+  }
+  const closeDate = parseDateBoundary(closeStr, closeH, closeM);
+  const listingDate = parseDateBoundary(listingStr, 10, 0);
+
+  if (listingDate && now >= listingDate) {
+    return { status: 'listed', badge: 'Listed' };
+  }
+  if (closeDate && now > closeDate) {
+    return { status: 'closed', badge: 'Closed / Allotment' };
+  }
+  if (openDate && closeDate && now >= openDate && now <= closeDate) {
+    return { status: 'live', badge: 'Bidding Live' };
+  }
+  if (openDate && now < openDate) {
+    return { status: 'upcoming', badge: 'Upcoming' };
+  }
+
+  const fallback = (rawStatus === 'open' || rawStatus === 'live') ? 'live' : rawStatus === 'upcoming' ? 'upcoming' : 'closed';
+  return {
+    status: fallback,
+    badge: fallback === 'live' ? 'Bidding Live' : fallback === 'upcoming' ? 'Upcoming' : 'Closed'
+  };
+}
+
 export function mapUpstoxToIpoItem(item, kfinIssues = []) {
   const cleanName = item.name || item.id || 'IPO Issue';
   const id = item.id || slugify(cleanName);
   const isSme = (item.issue_type || '').toLowerCase().includes('sme');
   const category = isSme ? 'sme' : 'mainboard';
-  const status = item.status === 'open' ? 'live' : item.status === 'upcoming' ? 'upcoming' : 'listed';
+
+  const openDate = item.timeline?.application_start_date || item.bidding_start_date || 'Active';
+  const closeDate = item.timeline?.application_end_date || item.bidding_end_date || 'Active';
+  const listingDate = item.timeline?.listing_date || 'T+3';
+  const dailyStartTime = item.daily_start_time || '10:00:00';
+  const dailyEndTime = item.daily_end_time || '17:00:00';
+
+  const { status, badge } = evaluateIpoStatus(openDate, closeDate, listingDate, dailyEndTime, item.status);
   
   const minPrice = parseFloat(item.minimum_price) || 100;
   const maxPrice = parseFloat(item.maximum_price) || minPrice || 100;
   
-  const exactLot = parseInt(item.lot_size) || (isSme 
-    ? Math.max(500, Math.round(120000 / maxPrice / 100) * 100) 
-    : Math.max(10, Math.round(14500 / maxPrice)));
+  let exactLot = parseInt(item.lot_size);
+  if (!exactLot || exactLot <= 0) {
+    if (isSme) {
+      exactLot = Math.max(100, Math.round(120000 / maxPrice / 100) * 100);
+    } else {
+      exactLot = Math.max(1, Math.floor(15000 / maxPrice));
+    }
+  }
+  // SEBI ICDR Regulation Mandate: Mainboard 1-lot retail bid cannot exceed ₹15,000
+  if (!isSme && exactLot * maxPrice > 15000) {
+    exactLot = Math.max(1, Math.floor(15000 / maxPrice));
+  }
   const minInvestment = exactLot * maxPrice;
 
   // Match against KFintech issues
@@ -241,7 +323,7 @@ export function mapUpstoxToIpoItem(item, kfinIssues = []) {
     name: cleanName,
     category,
     status,
-    badge: status === 'live' ? 'Bidding Live' : status === 'upcoming' ? 'Upcoming' : 'New Issue',
+    badge,
     logo: branding.logo,
     companyWebsite: branding.companyWebsite,
     sector: item.industry || (isSme ? 'SME Enterprise' : 'Mainboard Corporate'),

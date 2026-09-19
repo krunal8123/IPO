@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layers, Flame, BarChart3, CheckCircle2, Calendar } from 'lucide-react';
+import { Layers, Flame, BarChart3, CheckCircle2, Calendar, Coins } from 'lucide-react';
 
 interface MobileBottomNavProps {
   activeTab: string;
@@ -13,6 +13,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({ activeTab, set
     { id: 'subscription', label: 'Bidding', icon: BarChart3 },
     { id: 'allotment', label: 'Allotment', icon: CheckCircle2 },
     { id: 'calendar', label: 'Calendar', icon: Calendar }
+    // { id: 'buyback', label: 'Buyback', icon: Coins }
   ];
 
   return (

@@ -130,15 +130,32 @@ export interface AllotmentResult {
   registrar: string;
 }
 
+export interface PanCard {
+  id: string;
+  pan: string;        // e.g. ABCDE1234F
+  name?: string;      // optional applicant name
+  nickname?: string;  // optional label e.g. "Dad", "Wife"
+}
+
+export interface BatchAllotmentResult {
+  panCard: PanCard;
+  result: AllotmentResult | null;
+  loading: boolean;
+  error?: string;
+}
+
 export interface BuybackItem {
   id: string;
   companyName: string;
   symbol: string;
+  logoUrl?: string;
   status: 'open' | 'upcoming' | 'closed';
   buybackPrice: number;
   currentMarketPrice: number;
   premiumPercent: number;
   recordDate: string;
+  issueDate?: string;
+  closeDate?: string;
   issueSizeCr: number;
   type: 'Tender Offer' | 'Open Market';
 }

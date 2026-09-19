@@ -10,13 +10,16 @@ import {
   getUpstoxLoginUrl,
   exchangeCodeForToken,
   getUpstoxConfig,
-  saveAccessToken
+  saveAccessToken,
+  saveUpstoxCredentials,
+  evaluateIpoStatus
 } from './services/upstoxService.js';
 import express from 'express';
 import cors from 'cors';
 import { fetchLiveGmp } from './services/gmpService.js';
 import { fetchLiveExchangeIpos, fetchLiveBidding } from './services/nseService.js';
 import { fetchLiveSubscription } from './services/subscriptionService.js';
+import { fetchLiveBuybacks } from './services/buybackService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -122,8 +125,23 @@ app.get('/api/upstox/status', (req, res) => {
     success: true,
     hasAccessToken: !!config.accessToken,
     hasApiKey: !!config.apiKey,
-    hasApiSecret: !!config.apiSecret
+    hasApiSecret: !!config.apiSecret,
+    source: config.accessToken ? 'Upstox Official API (api.upstox.com)' : 'Live Market Feed'
   });
+});
+
+// POST /api/upstox/token - Save or update Upstox credentials
+app.post('/api/upstox/token', (req, res) => {
+  try {
+    const { accessToken, apiKey, apiSecret } = req.body;
+    saveUpstoxCredentials({ accessToken, apiKey, apiSecret });
+    res.json({
+      success: true,
+      message: 'Upstox credentials updated successfully. Next fetch will query Upstox API directly.'
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 // GET /api/upstox/login - Redirects to Upstox login dialog
@@ -188,17 +206,46 @@ app.get('/api/ipos', async (req, res) => {
 
     if (Array.isArray(upstoxList) && upstoxList.length > 0) {
       currentLiveIpos = overlayGmp(upstoxList, liveGmpList);
-      source = 'Live Real-Time Market Feed';
+      source = 'Upstox Official API (api.upstox.com)';
     } else if (Array.isArray(liveGmpList) && liveGmpList.length > 0) {
       currentLiveIpos = liveGmpList.map(scraped => buildDynamicIpoFromScraped(scraped, kfinIssues, liveSubscriptions));
     }
+
+    // Dynamically evaluate status and enforce SEBI retail rules for every issue
+    const normalizedIpos = currentLiveIpos.map(ipo => {
+      const isSme = ipo.category === 'sme';
+      const price = ipo.cutOffPrice || ipo.priceBandMax || 100;
+      let lot = ipo.lotSize;
+      if (!isSme && price > 0) {
+        const maxAllowed = Math.max(1, Math.floor(15000 / price));
+        if (!lot || lot <= 0 || (lot * price > 15000)) {
+          lot = maxAllowed;
+        }
+      }
+      const minInvestment = lot * price;
+      const { status, badge } = evaluateIpoStatus(
+        ipo.openDate,
+        ipo.closeDate,
+        ipo.listingDate,
+        ipo.dailyEndTime,
+        ipo.status
+      );
+      return {
+        ...ipo,
+        lotSize: lot,
+        minInvestment,
+        minimumQuantity: (!isSme && ipo.minimumQuantity && ipo.minimumQuantity * price > 15000) ? lot : (ipo.minimumQuantity || lot),
+        status,
+        badge
+      };
+    });
 
     res.json({
       success: true,
       timestamp: new Date().toISOString(),
       source,
-      count: currentLiveIpos.length,
-      data: currentLiveIpos
+      count: normalizedIpos.length,
+      data: normalizedIpos
     });
   } catch (error) {
     console.error('[API Error /api/ipos]:', error.message);
@@ -226,9 +273,25 @@ app.get('/api/ipos/gmp', async (req, res) => {
   }
 });
 
-// GET /api/ipos/buybacks - Hidden / Clean
-app.get('/api/ipos/buybacks', (req, res) => {
-  res.json({ success: true, count: 0, data: [] });
+// GET /api/buybacks - Live buyback data scraped from live market feed
+app.get('/api/buybacks', async (req, res) => {
+  try {
+    const buybacks = await fetchLiveBuybacks();
+    res.json({ success: true, count: buybacks.length, data: buybacks });
+  } catch (err) {
+    console.error('[API Error /api/buybacks]:', err.message);
+    res.status(500).json({ success: false, error: err.message, data: [] });
+  }
+});
+
+// GET /api/ipos/buybacks - Legacy alias for backward compatibility
+app.get('/api/ipos/buybacks', async (req, res) => {
+  try {
+    const buybacks = await fetchLiveBuybacks();
+    res.json({ success: true, count: buybacks.length, data: buybacks });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message, data: [] });
+  }
 });
 
 // GET /api/ipos/calendar - Dynamically generated from live active market issues

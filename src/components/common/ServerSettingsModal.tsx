@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { X, Server, CheckCircle2, AlertCircle, RefreshCw, Wifi } from 'lucide-react';
-import { DEFAULT_SERVER, DEFAULT_LAN_SERVER, getCustomServerHost, setCustomServerHost, testServerHost } from '../../services/liveIpoService';
+import React, { useState, useEffect } from 'react';
+import { X, Server, CheckCircle2, AlertCircle, RefreshCw, Wifi, ShieldCheck, ExternalLink } from 'lucide-react';
+import { DEFAULT_SERVER, DEFAULT_LAN_SERVER, getCustomServerHost, setCustomServerHost, testServerHost, liveIpoService, getApiBaseUrl } from '../../services/liveIpoService';
 
 interface ServerSettingsModalProps {
   isOpen: boolean;
@@ -12,6 +12,31 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({ isOpen
   const [hostInput, setHostInput] = useState<string>(() => getCustomServerHost());
   const [testing, setTesting] = useState<boolean>(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [upstoxToken, setUpstoxToken] = useState<string>('');
+  const [upstoxStatus, setUpstoxStatus] = useState<{ hasAccessToken?: boolean; hasApiKey?: boolean } | null>(null);
+  const [savingToken, setSavingToken] = useState<boolean>(false);
+  const [tokenSaveMessage, setTokenSaveMessage] = useState<string>('');
+
+  useEffect(() => {
+    if (isOpen) {
+      liveIpoService.getUpstoxStatus().then(st => setUpstoxStatus(st));
+    }
+  }, [isOpen]);
+
+  const handleSaveUpstoxToken = async () => {
+    if (!upstoxToken.trim()) return;
+    setSavingToken(true);
+    setTokenSaveMessage('');
+    const ok = await liveIpoService.saveUpstoxCredentials({ accessToken: upstoxToken.trim() });
+    setSavingToken(false);
+    if (ok) {
+      setTokenSaveMessage('✓ Access Token saved! Re-fetching live data directly from Upstox API.');
+      setUpstoxStatus(prev => ({ ...(prev || {}), hasAccessToken: true }));
+      onSaved();
+    } else {
+      setTokenSaveMessage('Could not save token to server. Check server connection.');
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -107,6 +132,7 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({ isOpen
           </div>
 
           {/* Test Feedback */}
+          {/* Test Feedback */}
           {testResult && (
             <div
               className={`p-3 rounded-xl flex items-start gap-2 text-[11px] font-medium ${
@@ -123,6 +149,65 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({ isOpen
               <span>{testResult.message}</span>
             </div>
           )}
+
+          {/* Upstox API Direct Integration Box */}
+          <div className="p-3.5 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/40 border border-indigo-200/60 dark:border-indigo-800/40 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 font-extrabold text-slate-900 dark:text-white text-xs">
+                <ShieldCheck className="w-4 h-4 text-indigo-500" />
+                <span>Upstox Official API (Direct Feed)</span>
+              </div>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                upstoxStatus?.hasAccessToken 
+                  ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                  : 'bg-amber-500/20 text-amber-600 dark:text-amber-400'
+              }`}>
+                {upstoxStatus?.hasAccessToken ? '● Connected' : '○ Token Required'}
+              </span>
+            </div>
+
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              IPORadar streams official IPO data directly from Upstox API v2. Paste your 24-hour access token below or connect via OAuth:
+            </p>
+
+            <div className="space-y-2">
+              <div className="flex gap-1.5">
+                <input
+                  type="password"
+                  value={upstoxToken}
+                  onChange={(e) => setUpstoxToken(e.target.value)}
+                  placeholder="Paste Upstox Access Token..."
+                  className="flex-1 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-mono text-[11px] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                />
+                <button
+                  type="button"
+                  onClick={handleSaveUpstoxToken}
+                  disabled={savingToken || !upstoxToken.trim()}
+                  className="px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[11px] transition-colors disabled:opacity-50 cursor-pointer shrink-0"
+                >
+                  {savingToken ? 'Saving...' : 'Save Token'}
+                </button>
+              </div>
+
+              {tokenSaveMessage && (
+                <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                  {tokenSaveMessage}
+                </p>
+              )}
+
+              <div className="pt-1 flex items-center justify-between text-[10px]">
+                <a
+                  href={`${getApiBaseUrl()}/upstox/login`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-indigo-600 dark:text-indigo-400 hover:underline font-bold inline-flex items-center gap-1"
+                >
+                  <span>Authorize via Upstox Login Dialog</span>
+                  <ExternalLink className="w-2.5 h-2.5" />
+                </a>
+              </div>
+            </div>
+          </div>
 
           {/* Help Info & Presets */}
           <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60 space-y-2 text-[11px] text-slate-500 dark:text-slate-400">
