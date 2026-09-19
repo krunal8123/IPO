@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import { IpoItem, AllotmentResult, KfinIssue, MufgIssue, BigshareIssue, BatchAllotmentResult } from '../../types/ipo';
+import { IpoItem, AllotmentResult, KfinIssue, MufgIssue, BigshareIssue, BatchAllotmentResult, BigshareServerId } from '../../types/ipo';
 import { liveIpoService } from '../../services/liveIpoService';
 import { usePan } from '../../context/PanContext';
 import { PanCardManager } from './PanCardManager';
@@ -733,7 +733,11 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
     setIsBatchChecking(false);
   }, [currentIpo, pans, ipos, isBigshareIssue]);
 
-  const handleCaptchaModalSubmit = async (token: string, answer: string): Promise<{ success: boolean; error?: string; hasMore?: boolean; done?: boolean }> => {
+  const handleCaptchaModalSubmit = async (
+    token: string,
+    answer: string,
+    serverId?: BigshareServerId
+  ): Promise<{ success: boolean; error?: string; hasMore?: boolean; done?: boolean }> => {
     if (!currentIpo) return { success: false, error: 'No IPO selected' };
 
     if (captchaPendingAction === 'single') {
@@ -750,7 +754,8 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
           currentIpo.mufgClientId,
           currentIpo.bigshareCompanyId,
           token,
-          answer
+          answer,
+          serverId
         );
 
         if (res.status === 'CAPTCHA_INVALID') {
@@ -787,7 +792,8 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
           currentIpo.mufgClientId,
           currentIpo.bigshareCompanyId,
           token,
-          answer
+          answer,
+          serverId
         );
 
         if (res.status === 'CAPTCHA_INVALID') {
@@ -1290,15 +1296,59 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
                 <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 text-[11px] font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                   <Calendar className="w-3 h-3 text-slate-400" /> {currentIpo.allotmentDate || 'Declared'}
                 </span>
-                <a
-                  href={isMufgIssue ? 'https://in.mpms.mufg.com/Initial_Offer/public-issues.html' : isKfinIssue ? 'https://ipostatus.kfintech.com/' : (currentIpo.registrar || '').toLowerCase().includes('bigshare') ? 'https://ipo.bigshareonline.com/' : 'https://in.mpms.mufg.com/Initial_Offer/public-issues.html'}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold transition-colors min-h-[32px]"
-                >
-                  <span>Portal</span>
-                  <ExternalLink className="w-3 h-3" />
-                </a>
+                {isBigshareIssue ? (
+                  <div className="flex items-center gap-1.5">
+                    <a
+                      href="https://www.bigshareonline.com/ipo_Allotment.html"
+                      target="_blank"
+                      rel="noreferrer"
+                      title="Open Bigshare Official Portal (All Servers)"
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold transition-colors min-h-[32px]"
+                    >
+                      <span>Portal</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                    <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[10px] font-bold">
+                      <a
+                        href="https://ipo.bigshareonline.com/"
+                        target="_blank"
+                        rel="noreferrer"
+                        title="Open Server 1"
+                        className="px-1.5 py-1 rounded text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-slate-700 transition-colors"
+                      >
+                        S1
+                      </a>
+                      <a
+                        href="https://ipo1.bigshareonline.com/ipo_status.html"
+                        target="_blank"
+                        rel="noreferrer"
+                        title="Open Server 2"
+                        className="px-1.5 py-1 rounded text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-slate-700 transition-colors"
+                      >
+                        S2
+                      </a>
+                      <a
+                        href="https://ipo2.bigshareonline.com/ipo_status.html"
+                        target="_blank"
+                        rel="noreferrer"
+                        title="Open Server 3"
+                        className="px-1.5 py-1 rounded text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-slate-700 transition-colors"
+                      >
+                        S3
+                      </a>
+                    </div>
+                  </div>
+                ) : (
+                  <a
+                    href={isMufgIssue ? 'https://in.mpms.mufg.com/Initial_Offer/public-issues.html' : isKfinIssue ? 'https://ipostatus.kfintech.com/' : 'https://in.mpms.mufg.com/Initial_Offer/public-issues.html'}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold transition-colors min-h-[32px]"
+                  >
+                    <span>Portal</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                )}
               </div>
             </div>
           )}

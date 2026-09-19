@@ -162,7 +162,7 @@ export async function checkRegistrarAllotment(ipo, queryType = 'pan', queryValue
       if (matchedBigshare) bigshareCompanyId = matchedBigshare.companyId;
     }
     if (bigshareCompanyId) {
-      console.log(`[RegistrarService] Executing Bigshare query for ${ipoName} (companyId: ${bigshareCompanyId})`);
+      console.log(`[RegistrarService] Executing Bigshare query for ${ipoName} (companyId: ${bigshareCompanyId}, server: ${extraOptions?.bigshareServerId || 'default'})`);
       return await queryBigshareAllotment({
         companyId: bigshareCompanyId,
         queryType,
@@ -171,7 +171,8 @@ export async function checkRegistrarAllotment(ipo, queryType = 'pan', queryValue
         captchaAnswer: extraOptions?.captchaAnswer,
         ipoName,
         lotSize: ipo?.lotSize,
-        priceBandMax: ipo?.priceBandMax
+        priceBandMax: ipo?.priceBandMax,
+        serverId: extraOptions?.bigshareServerId
       });
     }
   }
@@ -220,7 +221,7 @@ export async function checkRegistrarAllotment(ipo, queryType = 'pan', queryValue
   ]);
 
   if (matchedBigshare) {
-    console.log(`[RegistrarService] Discovered Bigshare issue match for ${ipoName} (companyId: ${matchedBigshare.companyId})`);
+    console.log(`[RegistrarService] Discovered Bigshare issue match for ${ipoName} (companyId: ${matchedBigshare.companyId}, server: ${extraOptions?.bigshareServerId || 'default'})`);
     return await queryBigshareAllotment({
       companyId: matchedBigshare.companyId,
       queryType,
@@ -229,7 +230,8 @@ export async function checkRegistrarAllotment(ipo, queryType = 'pan', queryValue
       captchaAnswer: extraOptions?.captchaAnswer,
       ipoName,
       lotSize: ipo?.lotSize,
-      priceBandMax: ipo?.priceBandMax
+      priceBandMax: ipo?.priceBandMax,
+      serverId: extraOptions?.bigshareServerId
     });
   }
 

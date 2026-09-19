@@ -1,5 +1,5 @@
 import { Capacitor } from '@capacitor/core';
-import { IpoItem, AllotmentResult, KfinIssue, MufgIssue, BigshareIssue, IpoStatus } from '../types/ipo';
+import { IpoItem, AllotmentResult, KfinIssue, MufgIssue, BigshareIssue, IpoStatus, BigshareServerId, BigshareServerInfo } from '../types/ipo';
 import {
   getStoredUpstoxToken,
   setStoredUpstoxToken,
@@ -599,19 +599,59 @@ export const liveIpoService = {
     return BASELINE_BIGSHARE_ISSUES;
   },
 
+  // Fetch real-time health and latency across Bigshare servers
+  async getBigshareServers(): Promise<BigshareServerInfo[]> {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
+      const res = await fetch(`${getApiBaseUrl()}/allotment/bigshare-servers`, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          return json.data;
+        }
+      }
+    } catch {
+      // Fall through
+    }
+    return [
+      { id: 'server1', name: 'Server 1', url: 'https://ipo.bigshareonline.com', portalUrl: 'https://ipo.bigshareonline.com/', status: 'online' },
+      { id: 'server2', name: 'Server 2', url: 'https://ipo1.bigshareonline.com', portalUrl: 'https://ipo1.bigshareonline.com/ipo_status.html', status: 'online' },
+      { id: 'server3', name: 'Server 3', url: 'https://ipo2.bigshareonline.com', portalUrl: 'https://ipo2.bigshareonline.com/ipo_status.html', status: 'online' }
+    ];
+  },
+
   // Fetch fresh Bigshare CAPTCHA challenge
-  async getBigshareCaptcha(): Promise<{ token: string; image: string } | null> {
+  async getBigshareCaptcha(preferredServerId?: BigshareServerId): Promise<{
+    token: string;
+    image: string;
+    serverId?: BigshareServerId;
+    serverName?: string;
+    serverUrl?: string;
+    portalUrl?: string;
+  } | null> {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 6000);
+      const url = preferredServerId
+        ? `${getApiBaseUrl()}/allotment/bigshare-captcha?server=${preferredServerId}`
+        : `${getApiBaseUrl()}/allotment/bigshare-captcha`;
 
-      const res = await fetch(`${getApiBaseUrl()}/allotment/bigshare-captcha`, { signal: controller.signal });
+      const res = await fetch(url, { signal: controller.signal });
       clearTimeout(timeoutId);
 
       if (res.ok) {
         const json = await res.json();
         if (json.success && json.token && json.image) {
-          return { token: json.token, image: json.image };
+          return {
+            token: json.token,
+            image: json.image,
+            serverId: json.serverId,
+            serverName: json.serverName,
+            serverUrl: json.serverUrl,
+            portalUrl: json.portalUrl
+          };
         }
       }
     } catch (e) {
@@ -631,7 +671,8 @@ export const liveIpoService = {
     mufgClientId?: string,
     bigshareCompanyId?: string,
     captchaToken?: string,
-    captchaAnswer?: string
+    captchaAnswer?: string,
+    bigshareServerId?: BigshareServerId
   ): Promise<AllotmentResult> {
     try {
       const controller = new AbortController();
@@ -640,7 +681,18 @@ export const liveIpoService = {
       const res = await fetch(`${getApiBaseUrl()}/allotment/check`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ipoId, queryType, queryValue, kfinClientId, mufgClientId, bigshareCompanyId, captchaToken, captchaAnswer, ipoName }),
+        body: JSON.stringify({
+          ipoId,
+          queryType,
+          queryValue,
+          kfinClientId,
+          mufgClientId,
+          bigshareCompanyId,
+          captchaToken,
+          captchaAnswer,
+          ipoName,
+          bigshareServerId
+        }),
         signal: controller.signal
       });
       clearTimeout(timeoutId);

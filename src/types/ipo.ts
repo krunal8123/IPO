@@ -119,10 +119,26 @@ export interface BigshareIssue {
   name: string;
 }
 
+export type BigshareServerId = 'server1' | 'server2' | 'server3';
+
+export interface BigshareServerInfo {
+  id: BigshareServerId;
+  name: string;
+  url: string;
+  portalUrl: string;
+  status: 'online' | 'offline' | 'degraded';
+  latencyMs?: number;
+  error?: string;
+}
+
 export interface BigshareCaptchaResponse {
   success: boolean;
   token?: string;
   image?: string;
+  serverId?: BigshareServerId;
+  serverName?: string;
+  serverUrl?: string;
+  portalUrl?: string;
   error?: string;
 }
 

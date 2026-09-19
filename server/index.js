@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 import { checkRegistrarAllotment } from './services/registrarService.js';
 import { fetchKfinIssues, queryKfintechAllotment, findKfinIssue } from './services/kfintechService.js';
 import { fetchMufgIssues, queryMufgAllotment, findMufgIssue } from './services/mufgService.js';
-import { fetchBigshareIssues, queryBigshareAllotment, findBigshareIssue, fetchBigshareCaptcha } from './services/bigshareService.js';
+import { fetchBigshareIssues, queryBigshareAllotment, findBigshareIssue, fetchBigshareCaptcha, checkBigshareServersHealth, BIGSHARE_SERVERS } from './services/bigshareService.js';
 import {
   fetchUpstoxIpos,
   fetchUpstoxIpoDetails,
@@ -396,12 +396,32 @@ app.get('/api/allotment/bigshare-issues', async (req, res) => {
   }
 });
 
+// GET /api/allotment/bigshare-servers - Returns real-time health & latency across Bigshare servers
+app.get('/api/allotment/bigshare-servers', async (req, res) => {
+  try {
+    const servers = await checkBigshareServersHealth();
+    res.json({ success: true, data: servers });
+  } catch (error) {
+    console.error('[API Error /api/allotment/bigshare-servers]:', error.message);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // GET /api/allotment/bigshare-captcha - Generates fresh CAPTCHA token and base64 challenge image
 app.get('/api/allotment/bigshare-captcha', async (req, res) => {
   try {
-    const captcha = await fetchBigshareCaptcha();
+    const preferredServer = req.query.server ? String(req.query.server).toLowerCase() : undefined;
+    const captcha = await fetchBigshareCaptcha(preferredServer);
     if (captcha.success) {
-      res.json({ success: true, token: captcha.token, image: captcha.image });
+      res.json({
+        success: true,
+        token: captcha.token,
+        image: captcha.image,
+        serverId: captcha.serverId,
+        serverName: captcha.serverName,
+        serverUrl: captcha.serverUrl,
+        portalUrl: captcha.portalUrl
+      });
     } else {
       res.status(500).json({ success: false, error: captcha.error });
     }
@@ -414,7 +434,7 @@ app.get('/api/allotment/bigshare-captcha', async (req, res) => {
 // POST /api/allotment/check - Verifies against live market issues, KFintech, MUFG Intime, or Bigshare
 app.post('/api/allotment/check', async (req, res) => {
   try {
-    const { ipoId, queryType, queryValue, kfinClientId, mufgClientId, bigshareCompanyId, captchaToken, captchaAnswer, ipoName } = req.body;
+    const { ipoId, queryType, queryValue, kfinClientId, mufgClientId, bigshareCompanyId, captchaToken, captchaAnswer, ipoName, bigshareServerId } = req.body;
     if (!queryValue) {
       return res.status(400).json({ success: false, error: 'Missing queryValue' });
     }
@@ -560,7 +580,8 @@ app.post('/api/allotment/check', async (req, res) => {
     const result = await checkRegistrarAllotment(targetIpo, queryType || 'pan', queryValue, {
       bigshareCompanyId: targetIpo?.bigshareCompanyId || bigshareCompanyId,
       captchaToken,
-      captchaAnswer
+      captchaAnswer,
+      bigshareServerId
     });
     res.json({ success: true, data: result });
   } catch (error) {
