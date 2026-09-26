@@ -15,12 +15,15 @@ import { GmpTracker } from './components/gmp/GmpTracker';
 import { SubscriptionView } from './components/subscription/SubscriptionView';
 import { AllotmentChecker } from './components/allotment/AllotmentChecker';
 import { IpoCalendar } from './components/calendar/IpoCalendar';
+import { AnalyticsView } from './components/analytics/AnalyticsView';
+import { IpoCompareView } from './components/compare/IpoCompareView';
 import { BuybackTracker } from './components/buyback/BuybackTracker';
 import { ServerSettingsModal } from './components/common/ServerSettingsModal';
 import { InstallPwaBanner } from './components/common/InstallPwaBanner';
 import { RefreshCw, Radio, Sparkles, Settings } from 'lucide-react';
+import { PushNotificationBanner } from './components/common/PushNotificationBanner';
 
-const VALID_TABS = ['ipos', 'gmp', 'subscription', 'allotment', 'calendar', 'buyback'] as const;
+const VALID_TABS = ['ipos', 'gmp', 'subscription', 'allotment', 'calendar', 'analytics', 'compare', 'buyback'] as const;
 type TabType = typeof VALID_TABS[number];
 
 function getInitialTab(): TabType {
@@ -87,6 +90,7 @@ export const App: React.FC = () => {
   const [isLive, setIsLive] = useState<boolean>(false);
   const [lastSyncTime, setLastSyncTime] = useState<string>('');
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
+  const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true);
   const [dataSource, setDataSource] = useState<string>('Verified Market Feed');
 
   const { isInWatchlist } = useWatchlist();
@@ -107,6 +111,7 @@ export const App: React.FC = () => {
       console.warn('Failed to sync live data:', e);
     } finally {
       setIsSyncing(false);
+      setIsInitialLoad(false);
     }
   };
 
@@ -217,6 +222,9 @@ export const App: React.FC = () => {
           onOpenWatchlist={handleOpenWatchlist}
           ipos={ipos}
           onSelectIpo={(ipo) => setSelectedIpo(ipo)}
+          isSyncing={isSyncing}
+          lastSyncTime={lastSyncTime}
+          onRefresh={syncLiveData}
         />
       </div>
 
@@ -230,12 +238,15 @@ export const App: React.FC = () => {
           ipos={ipos}
           onSelectIpo={(ipo) => setSelectedIpo(ipo)}
           onNavigateToIpos={() => setActiveTab('ipos')}
+          isSyncing={isSyncing}
+          lastSyncTime={lastSyncTime}
+          onRefresh={syncLiveData}
         />
         <NoticeTicker ipos={ipos} isLive={isLive} onSelectIpo={(ipo) => setSelectedIpo(ipo)} />
       </div>
 
       {/* 4. Main Body Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-24 md:pb-12">
 
         {/* IPOs Tab */}
         {activeTab === 'ipos' && (
@@ -292,16 +303,16 @@ export const App: React.FC = () => {
             </div>
 
             {/* IPO Cards Grid */}
-            {ipos.length === 0 && isSyncing ? (
+            {(ipos.length === 0 && isSyncing) || (ipos.length === 0 && isInitialLoad) ? (
               <div className="glass-card rounded-3xl p-12 text-center border border-slate-200 dark:border-slate-800 my-8 max-w-lg mx-auto animate-fade-in">
                 <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-500 flex items-center justify-center mx-auto mb-4">
                   <RefreshCw className="w-7 h-7 animate-spin" />
                 </div>
                 <h3 className="text-lg font-black text-slate-900 dark:text-white mb-1">
-                  Connecting to Live Upstox API
+                  Fetching Latest IPO Data
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Streaming real-time IPO and market data directly from Upstox...
+                  Loading live market data from Upstox...
                 </p>
               </div>
             ) : filteredIpos.length > 0 ? (
@@ -378,6 +389,22 @@ export const App: React.FC = () => {
           />
         )}
 
+        {/* Analytics Tab */}
+        {activeTab === 'analytics' && (
+          <AnalyticsView
+            ipos={ipos}
+            onSelectIpo={(i) => setSelectedIpo(i)}
+          />
+        )}
+
+        {/* Compare Tab */}
+        {activeTab === 'compare' && (
+          <IpoCompareView
+            ipos={ipos}
+            onSelectIpo={(i) => setSelectedIpo(i)}
+          />
+        )}
+
         {/* Buybacks Tab */}
         {activeTab === 'buyback' && (
           <BuybackTracker
@@ -410,7 +437,7 @@ export const App: React.FC = () => {
         onSaved={syncLiveData}
       />
 
-      {/* 6. Mobile Bottom Tab Bar & PWA Banner (hidden when detail modal is open to prevent overlapping) */}
+      {/* 6. Mobile Bottom Tab Bar, PWA Banner & Push Notification Banner */}
       {!selectedIpo && (
         <>
           <MobileBottomNav
@@ -418,6 +445,7 @@ export const App: React.FC = () => {
             setActiveTab={setActiveTab}
           />
           <InstallPwaBanner />
+          <PushNotificationBanner />
         </>
       )}
 

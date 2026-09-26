@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { useWatchlist } from '../../context/WatchlistContext';
-import { Sun, Moon, Bookmark, Search, X, Radar } from 'lucide-react';
+import { Sun, Moon, Bookmark, Search, X, Radar, RefreshCw } from 'lucide-react';
 import { IpoItem } from '../../types/ipo';
 import { CompanyLogo } from './CompanyLogo';
 
@@ -13,6 +13,9 @@ interface MobileHeaderProps {
   ipos?: IpoItem[];
   onSelectIpo?: (ipo: IpoItem) => void;
   onNavigateToIpos?: () => void;
+  isSyncing?: boolean;
+  lastSyncTime?: string;
+  onRefresh?: () => void;
 }
 
 export const MobileHeader: React.FC<MobileHeaderProps> = ({
@@ -22,7 +25,10 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
   setSearchQuery,
   ipos = [],
   onSelectIpo,
-  onNavigateToIpos
+  onNavigateToIpos,
+  isSyncing = false,
+  lastSyncTime = '',
+  onRefresh
 }) => {
   const { theme, toggleTheme } = useTheme();
   const { watchlist } = useWatchlist();
@@ -66,13 +72,37 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
               <h1 className="text-base font-bold leading-tight text-slate-900 dark:text-white">
                 {titles[activeTab] || 'IPORadar'}
               </h1>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400">
-                Real-time Indian Stock Market Intelligence
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                {isSyncing ? (
+                  <>
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                    <span>Fetching latest data…</span>
+                  </>
+                ) : lastSyncTime ? (
+                  <>
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    <span>Updated {lastSyncTime}</span>
+                  </>
+                ) : (
+                  'Real-time Indian Stock Market Intelligence'
+                )}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-1.5">
+            {/* Refresh Button */}
+            {onRefresh && (
+              <button
+                onClick={onRefresh}
+                disabled={isSyncing}
+                className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Refresh data"
+              >
+                <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin text-indigo-500' : ''}`} />
+              </button>
+            )}
+
             {/* Search Toggle Button */}
             <button
               onClick={() => setIsSearchOpen(true)}

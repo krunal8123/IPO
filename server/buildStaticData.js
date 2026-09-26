@@ -8,6 +8,7 @@ import { fetchLiveSubscription } from './services/subscriptionService.js';
 import { fetchUpstoxIpos, saveAccessToken } from './services/upstoxService.js';
 import { buildDynamicIpoFromScraped } from './services/ipoAutoBuilder.js';
 import { getFreshUpstoxToken } from './upstoxAuth.js';
+import { notifyIpoChanges } from './services/pushService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -98,6 +99,17 @@ async function buildStaticData() {
 
     fs.writeFileSync(path.join(outputDir, 'ipos.json'), JSON.stringify(iposPayload, null, 2), 'utf8');
     console.log(`✅ [ipos.json] Saved ${ipos.length} IPOs with GMP and authentic logos`);
+
+    // Fire push notifications for any detected changes (new IPOs, allotments, GMP spikes, etc.)
+    try {
+      const pushResult = await notifyIpoChanges(ipos);
+      if (pushResult) {
+        console.log(`📲 [Push] ${pushResult.notificationsSent} notification type(s) sent to ${pushResult.devicesSent} device(s)`);
+      }
+    } catch (pushErr) {
+      console.warn('⚠️ [Push] Notification dispatch warning:', pushErr.message);
+    }
+
 
     // Write KFin & MUFG lists
     fs.writeFileSync(path.join(outputDir, 'kfin.json'), JSON.stringify({ success: true, count: kfinIssues.length, data: kfinIssues }, null, 2), 'utf8');

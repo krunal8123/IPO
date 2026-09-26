@@ -4,6 +4,7 @@ import { Badge } from '../common/Badge';
 import { CompanyLogo } from '../common/CompanyLogo';
 import { useWatchlist } from '../../context/WatchlistContext';
 import { liveIpoService } from '../../services/liveIpoService';
+import { HealthScorecard } from './HealthScorecard';
 import { 
   X, Bookmark, Calendar, CheckCircle2, Building2, ShieldCheck, 
   TrendingUp, BarChart3, AlertCircle, Sparkles, ArrowUpRight, 
@@ -25,7 +26,7 @@ export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({
   onOpenSubscription,
   onOpenAllotment
 }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'overview' | 'bidding' | 'financials' | 'timeline' | 'gmp'>('overview');
+  const [activeSubTab, setActiveSubTab] = useState<'overview' | 'bidding' | 'financials' | 'timeline' | 'gmp' | 'health'>('overview');
   const [copiedIsin, setCopiedIsin] = useState(false);
   const [detailedIpo, setDetailedIpo] = useState<IpoItem | null>(ipo);
   const [isFetchingDetail, setIsFetchingDetail] = useState(false);
@@ -404,14 +405,15 @@ export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({
               { id: 'bidding', short: 'Lots', full: 'Lots & Bidding' },
               { id: 'financials', short: 'Financials', full: 'Financials' },
               { id: 'timeline', short: 'Timeline', full: 'Timeline & Schedule' },
-              { id: 'gmp', short: 'GMP', full: 'GMP Details' }
+              { id: 'gmp', short: 'GMP', full: 'GMP Details' },
+              { id: 'health', short: '🏥 Health', full: '🏥 Health Score' },
             ].map(tab => {
               const isActive = activeSubTab === tab.id;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveSubTab(tab.id as any)}
-                  className={`flex-1 py-2 sm:py-2.5 px-2 sm:px-3 text-center text-xs font-bold rounded-xl transition-all whitespace-nowrap cursor-pointer select-none ${
+                  className={`flex-1 min-w-[62px] sm:min-w-0 py-2 sm:py-2.5 px-1.5 sm:px-3 text-center text-xs font-bold rounded-xl transition-all whitespace-nowrap cursor-pointer select-none ${
                     isActive
                       ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -1019,6 +1021,13 @@ export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({
                 </div>
               </div>
 
+            </div>
+          )}
+
+          {/* ==================== TAB 6: HEALTH SCORECARD ==================== */}
+          {activeSubTab === 'health' && (
+            <div className="space-y-6">
+              <HealthScorecard ipo={activeIpo} />
             </div>
           )}
 

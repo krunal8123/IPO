@@ -4,6 +4,7 @@ import { App } from './App';
 import { ThemeProvider } from './context/ThemeContext';
 import { WatchlistProvider } from './context/WatchlistContext';
 import { PanProvider } from './context/PanContext';
+import { FamilyBiddingProvider } from './context/FamilyBiddingContext';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -11,7 +12,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <ThemeProvider>
       <WatchlistProvider>
         <PanProvider>
-          <App />
+          <FamilyBiddingProvider>
+            <App />
+          </FamilyBiddingProvider>
         </PanProvider>
       </WatchlistProvider>
     </ThemeProvider>

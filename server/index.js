@@ -21,6 +21,7 @@ import { fetchLiveGmp } from './services/gmpService.js';
 import { fetchLiveExchangeIpos, fetchLiveBidding } from './services/nseService.js';
 import { fetchLiveSubscription } from './services/subscriptionService.js';
 import { fetchLiveBuybacks } from './services/buybackService.js';
+import { addSubscription, removeSubscription, getSubscriberCount, getVapidPublicKey, sendPushToAll } from './services/pushService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -115,9 +116,61 @@ app.get('/api/health', (req, res) => {
     time: new Date().toISOString(),
     service: 'IPORadar Hybrid Feed Engine (Upstox API + KFintech RTA + MUFG + Live GMP)',
     hasUpstoxAuth: !!upstoxConfig.accessToken,
-    liveCount: currentLiveIpos.length
+    liveCount: currentLiveIpos.length,
+    pushSubscribers: getSubscriberCount()
   });
 });
+
+// ── Push Notification Routes ─────────────────────────────────────────────────
+
+// GET /api/push/vapid-public-key  →  return VAPID public key to browser
+app.get('/api/push/vapid-public-key', (req, res) => {
+  res.json({ success: true, publicKey: getVapidPublicKey() });
+});
+
+// POST /api/push/subscribe  →  save a new push subscription
+app.post('/api/push/subscribe', (req, res) => {
+  try {
+    const sub = req.body;
+    if (!sub || !sub.endpoint || !sub.keys) {
+      return res.status(400).json({ success: false, error: 'Invalid subscription object' });
+    }
+    const total = addSubscription(sub);
+    console.log(`[Push] New subscriber registered. Total: ${total}`);
+    res.json({ success: true, total });
+  } catch (err) {
+    console.error('[Push] Subscribe error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// DELETE /api/push/unsubscribe  →  remove a push subscription
+app.delete('/api/push/unsubscribe', (req, res) => {
+  try {
+    const { endpoint } = req.body;
+    if (!endpoint) return res.status(400).json({ success: false, error: 'endpoint required' });
+    removeSubscription(endpoint);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// POST /api/push/test  →  send a test notification (admin use)
+app.post('/api/push/test', async (req, res) => {
+  try {
+    const result = await sendPushToAll({
+      title: 'IPORadar Test Notification',
+      body: 'Push notifications are working! You will now get live IPO alerts.',
+      tag: 'test',
+      url: '/#ipos'
+    });
+    res.json({ success: true, ...result });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 
 // GET /api/upstox/status
 app.get('/api/upstox/status', (req, res) => {

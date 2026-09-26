@@ -197,3 +197,105 @@ export interface CalendarEvent {
     type: 'Open' | 'Close' | 'Allotment' | 'Refund' | 'Credit' | 'Listing';
   }[];
 }
+
+// ─── Advanced Feature Types ─────────────────────────────────────────────────
+
+// Anchor Lock-In Expiry Tracker
+export interface AnchorLockIn {
+  ipoId: string;
+  ipoName: string;
+  symbol: string;
+  logo?: string;
+  listingDate: string;
+  anchorAllotmentDate?: string;
+  lockIn30DayDate: string;  // listing + 30 days
+  lockIn90DayDate: string;  // listing + 90 days
+  anchorInvestors?: string[];
+  issueSizeCr: number;
+  category: IpoCategory;
+  currentPrice?: number;
+  listingPrice?: number;
+}
+
+// GMP Historical Snapshot
+export interface GmpHistoryPoint {
+  date: string;         // YYYY-MM-DD
+  gmpPrice: number;     // INR
+  gmpPercent: number;   // %
+  source?: string;
+}
+
+// Health Scorecard
+export type RedFlagSeverity = 'high' | 'medium' | 'low';
+export interface HealthFlag {
+  id: string;
+  type: 'red' | 'green';
+  severity: RedFlagSeverity;
+  title: string;
+  description: string;
+  value?: string;
+}
+export interface HealthScorecard {
+  totalScore: number;        // 0–100
+  valuationScore: number;    // 0–25
+  growthScore: number;       // 0–25
+  financialHealthScore: number; // 0–25
+  demandScore: number;       // 0–25
+  flags: HealthFlag[];
+  verdict: 'Strong Buy' | 'Buy' | 'Neutral' | 'Avoid' | 'High Risk';
+  peRatio?: number;
+  pbRatio?: number;
+  revenueCagr?: number;
+  patMargin?: number;
+  debtToEquity?: number;
+  ofsPercent?: number;
+}
+
+// Family Bidding Hub
+export type MandateStatus = 'Requested' | 'Authorized' | 'Blocked' | 'Released' | 'Pending';
+export type BrokerName = 'Zerodha' | 'Groww' | 'Upstox' | 'Angel One' | 'Dhan' | 'HDFC Securities' | 'ICICI Direct' | 'SBI Securities' | 'Other';
+
+export interface FamilyBid {
+  id: string;
+  panId: string;            // references PanCard.id
+  panNumber: string;        // denormalized for display
+  applicantName: string;
+  nickname?: string;
+  ipoId: string;
+  ipoName: string;
+  broker: BrokerName;
+  lotsApplied: number;
+  priceApplied: number;     // cut-off or specific price
+  capitalBlocked: number;   // INR
+  mandateStatus: MandateStatus;
+  applicationNo?: string;
+  upiRefNo?: string;
+  appliedAt: string;        // ISO timestamp
+  category: 'Retail' | 'sHNI' | 'bHNI';
+}
+
+// Family P&L Ledger Entry
+export interface FamilyPnlEntry {
+  id: string;
+  panId: string;
+  panNumber: string;
+  applicantName: string;
+  nickname?: string;
+  ipoId: string;
+  ipoName: string;
+  ipoSymbol: string;
+  appliedDate: string;
+  listingDate: string;
+  lotsApplied: number;
+  lotsAllotted: number;
+  applicationPrice: number;
+  listingPrice: number;
+  currentPrice?: number;
+  capitalInvested: number;
+  refundReceived: number;
+  listingDayProfit: number;
+  overallProfit?: number;
+  status: 'Allotted' | 'Not Allotted' | 'Pending';
+  broker: BrokerName;
+  fiscalYear: string;       // e.g. '2025-26'
+}

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { IpoItem } from '../../types/ipo';
-import { Flame, Calculator, TrendingUp, ArrowUpRight, Search, Sparkles, Minus, Plus, ChevronRight } from 'lucide-react';
+import { Flame, Calculator, TrendingUp, ArrowUpRight, Search, Sparkles, Minus, Plus, ChevronRight, BarChart3 } from 'lucide-react';
 import { Badge } from '../common/Badge';
 import { CompanyLogo } from '../common/CompanyLogo';
+import { GmpHistoryChart } from './GmpHistoryChart';
 
 interface GmpTrackerProps {
   ipos: IpoItem[];
@@ -11,6 +12,7 @@ interface GmpTrackerProps {
 }
 
 export const GmpTracker: React.FC<GmpTrackerProps> = ({ ipos, onSelectIpo, searchQuery = '' }) => {
+  const [gmpView, setGmpView] = useState<'live' | 'history'>('live');
   const [calcLots, setCalcLots] = useState<number>(1);
   const [selectedCalcIpo, setSelectedCalcIpo] = useState<string>(ipos[0]?.id || '');
   const [filterCat, setFilterCat] = useState<'all' | 'mainboard' | 'sme'>('all');
@@ -58,52 +60,89 @@ export const GmpTracker: React.FC<GmpTrackerProps> = ({ ipos, onSelectIpo, searc
             </p>
           </div>
 
-          {/* Category Pill Toggle */}
-          <div className="flex items-center p-1 rounded-xl bg-slate-200/80 dark:bg-slate-800/80 text-xs font-bold">
-            <button
-              onClick={() => setFilterCat('all')}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
-                filterCat === 'all'
-                  ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-xs'
-                  : 'text-slate-600 dark:text-slate-400'
-              }`}
-            >
-              All GMP
-            </button>
-            <button
-              onClick={() => setFilterCat('mainboard')}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
-                filterCat === 'mainboard'
-                  ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-xs'
-                  : 'text-slate-600 dark:text-slate-400'
-              }`}
-            >
-              Mainboard
-            </button>
-            <button
-              onClick={() => setFilterCat('sme')}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
-                filterCat === 'sme'
-                  ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-xs'
-                  : 'text-slate-600 dark:text-slate-400'
-              }`}
-            >
-              SME
-            </button>
+          {/* View Mode & Category Controls */}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center p-1 rounded-xl bg-slate-200/80 dark:bg-slate-800/80 text-xs font-bold">
+              <button
+                onClick={() => setGmpView('live')}
+                className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
+                  gmpView === 'live'
+                    ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400'
+                }`}
+              >
+                <Flame className="w-3.5 h-3.5 text-rose-500" />
+                Live Rates
+              </button>
+              <button
+                onClick={() => setGmpView('history')}
+                className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
+                  gmpView === 'history'
+                    ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400'
+                }`}
+              >
+                <BarChart3 className="w-3.5 h-3.5 text-indigo-500" />
+                Radar & Timeline
+              </button>
+            </div>
+
+            {gmpView === 'live' && (
+              <div className="flex items-center p-1 rounded-xl bg-slate-200/80 dark:bg-slate-800/80 text-xs font-bold">
+                <button
+                  onClick={() => setFilterCat('all')}
+                  className={`px-3 py-1.5 rounded-lg transition-all ${
+                    filterCat === 'all'
+                      ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400'
+                  }`}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => setFilterCat('mainboard')}
+                  className={`px-3 py-1.5 rounded-lg transition-all ${
+                    filterCat === 'mainboard'
+                      ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400'
+                  }`}
+                >
+                  Mainboard
+                </button>
+                <button
+                  onClick={() => setFilterCat('sme')}
+                  className={`px-3 py-1.5 rounded-lg transition-all ${
+                    filterCat === 'sme'
+                      ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400'
+                  }`}
+                >
+                  SME
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Interactive Profit Calculator */}
-      <div className="glass-card rounded-2xl p-4 sm:p-5 border border-indigo-200/80 dark:border-indigo-900/60 bg-gradient-to-r from-indigo-50/50 via-purple-50/30 to-white dark:from-indigo-950/20 dark:via-purple-950/20 dark:to-slate-900/40">
-        <div className="flex items-center gap-2 mb-3">
-          <Calculator className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-          <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
-            Live Expected Profit Calculator
-          </h3>
-        </div>
+      {/* Historical Radar View */}
+      {gmpView === 'history' && (
+        <GmpHistoryChart ipos={ipos} onSelectIpo={onSelectIpo} />
+      )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
+      {/* Live Rates & Profit Calculator View */}
+      {gmpView === 'live' && (
+        <>
+          {/* Interactive Profit Calculator */}
+          <div className="glass-card rounded-2xl p-4 sm:p-5 border border-indigo-200/80 dark:border-indigo-900/60 bg-gradient-to-r from-indigo-50/50 via-purple-50/30 to-white dark:from-indigo-950/20 dark:via-purple-950/20 dark:to-slate-900/40">
+            <div className="flex items-center gap-2 mb-3">
+              <Calculator className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+              <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                Live Expected Profit Calculator
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
           <div>
             <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block mb-1">
               Select IPO Issue
@@ -350,6 +389,8 @@ export const GmpTracker: React.FC<GmpTrackerProps> = ({ ipos, onSelectIpo, searc
           </table>
         </div>
       </div>
+      </>
+      )}
 
     </div>
   );

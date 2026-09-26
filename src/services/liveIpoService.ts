@@ -13,6 +13,24 @@ import {
 
 export const DEFAULT_LAN_SERVER = 'http://10.202.144.96:5001';
 
+// GitHub Pages CDN base — always has the latest scraped JSON baked by GitHub Actions
+const GITHUB_PAGES_BASE = 'https://krunal8123.github.io/IPO';
+
+// Fetch fresh data from the GitHub Pages CDN (cache-busted). Returns null on failure.
+async function fetchFromGithubPages(filename: string): Promise<{ json: unknown } | null> {
+  try {
+    const url = `${GITHUB_PAGES_BASE}/data/${filename}?t=${Date.now()}`;
+    const res = await fetch(url, { cache: 'no-store', signal: AbortSignal.timeout(6000) });
+    if (!res.ok) return null;
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('application/json') && contentType.includes('text/html')) return null;
+    const json = await res.json();
+    return { json };
+  } catch {
+    return null;
+  }
+}
+
 export function getApiBaseUrl(): string {
   // 1. User manual override stored in localStorage
   if (typeof window !== 'undefined') {
@@ -460,10 +478,27 @@ export const liveIpoService = {
         }
       }
     } catch (err) {
-      // Direct API unreachable, fall through to static / cached
+      // Direct API unreachable, fall through
     }
 
-    // 3. Try static data on GitHub Pages / mobile assets (built by GitHub Actions scraper with real Upstox/GMP data)
+    // 3. Fetch fresh JSON from GitHub Pages CDN (cache-busted) — always reflects the latest
+    //    GitHub Actions scraper run, regardless of what was bundled at APK build time.
+    const remoteResult = await fetchFromGithubPages('ipos.json');
+    if (remoteResult) {
+      const json = remoteResult.json as { success?: boolean; data?: unknown[]; timestamp?: string; source?: string };
+      if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+        const sanitized = (json.data as IpoItem[]).map(sanitizeIpoData);
+        setCachedUpstoxIpos(sanitized);
+        return {
+          ipos: sanitized,
+          isLive: true,
+          timestamp: new Date(json.timestamp || Date.now()).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          source: json.source || 'Upstox Verified Market Feed'
+        };
+      }
+    }
+
+    // 4. Try static/bundled data on GitHub Pages / mobile assets (same origin, cached copy)
     try {
       const staticRes = await fetch(getStaticDataUrl('ipos.json'), { cache: 'no-cache' });
       if (staticRes.ok) {
@@ -487,7 +522,7 @@ export const liveIpoService = {
       // Fall through
     }
 
-    // 4. Try local cached IPOs from previous fetch
+    // 5. Try local cached IPOs from previous fetch
     const cached = getCachedUpstoxIpos();
     if (cached.length > 0) {
       return {

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, Server, CheckCircle2, AlertCircle, RefreshCw, Wifi, ShieldCheck, ExternalLink } from 'lucide-react';
+import { X, Server, CheckCircle2, AlertCircle, RefreshCw, Wifi, ShieldCheck, ExternalLink, Bell } from 'lucide-react';
 import { DEFAULT_LAN_SERVER, getCustomServerHost, setCustomServerHost, testServerHost, liveIpoService, getApiBaseUrl } from '../../services/liveIpoService';
 import { testUpstoxToken, getStoredUpstoxToken } from '../../services/upstoxDirectService';
+import { PushToggleButton } from './PushNotificationBanner';
 
 interface ServerSettingsModalProps {
   isOpen: boolean;
@@ -241,6 +242,18 @@ export const ServerSettingsModal: React.FC<ServerSettingsModalProps> = ({ isOpen
                 <div className="text-[10px] text-slate-400 mt-0.5">Use when testing local Node backend server from your phone on the same Wi-Fi.</div>
               </button>
             </div>
+          </div>
+
+          {/* Push Notifications Section */}
+          <div className="p-3.5 rounded-xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-200/60 dark:border-indigo-800/40 space-y-2">
+            <div className="flex items-center gap-1.5 font-extrabold text-slate-900 dark:text-white text-xs mb-2">
+              <Bell className="w-4 h-4 text-indigo-500" />
+              <span>Push Notifications</span>
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-2">
+              Get real-time IPO alerts — new listings, allotment results, GMP spikes, and subscription milestones — delivered directly to your phone.
+            </p>
+            <PushToggleButton />
           </div>
         </div>
 

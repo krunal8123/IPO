@@ -4,6 +4,7 @@ import { liveIpoService } from '../../services/liveIpoService';
 import { usePan } from '../../context/PanContext';
 import { PanCardManager } from './PanCardManager';
 import { BigshareCaptchaModal } from './BigshareCaptchaModal';
+import { FamilyBiddingHub } from './FamilyBiddingHub';
 import {
   CheckCircle2,
   Search,
@@ -91,6 +92,7 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const queryInputRef = useRef<HTMLInputElement>(null);
+  const [allotmentViewMode, setAllotmentViewMode] = useState<'check' | 'family'>('check');
 
   useEffect(() => {
     liveIpoService.getKfinIssues().then(issues => {
@@ -1061,6 +1063,36 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
         </p>
       </div>
 
+      {/* View Switcher: Registrar Status Checker vs Family Bidding Hub */}
+      <div className="flex items-center justify-between p-1.5 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 gap-2">
+        <button
+          onClick={() => setAllotmentViewMode('check')}
+          className={`flex-1 py-2.5 px-4 text-center text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            allotmentViewMode === 'check'
+              ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+          }`}
+        >
+          <Search className="w-4 h-4" />
+          <span>Registrar Allotment Checker</span>
+        </button>
+        <button
+          onClick={() => setAllotmentViewMode('family')}
+          className={`flex-1 py-2.5 px-4 text-center text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            allotmentViewMode === 'family'
+              ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          <span>Multi-PAN Family Bidding & P&L Hub</span>
+          <span className="hidden sm:inline-block px-1.5 py-0.5 rounded text-[10px] bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-extrabold">NEW</span>
+        </button>
+      </div>
+
+      {allotmentViewMode === 'family' ? (
+        <FamilyBiddingHub ipos={ipos} />
+      ) : (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
 
         {/* Main Content Area */}
@@ -1738,6 +1770,7 @@ export const AllotmentChecker: React.FC<AllotmentCheckerProps> = ({ ipos, initia
         </div>
 
       </div>
+      )}
 
       {/* Bigshare In-App CAPTCHA Modal */}
       <BigshareCaptchaModal

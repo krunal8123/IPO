@@ -13,9 +13,12 @@ import {
   Building2,
   CheckCircle2,
   Check,
-  AlertCircle
+  AlertCircle,
+  Download,
+  Lock
 } from 'lucide-react';
 import { CompanyLogo } from '../common/CompanyLogo';
+import { AnchorLockInTracker } from './AnchorLockInTracker';
 
 interface IpoCalendarProps {
   ipos?: IpoItem[];
@@ -195,10 +198,61 @@ const MONTH_NAMES = [
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+function exportCalendarToIcs(events: FlattenedCalendarEvent[]) {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const formatIcsDate = (d: Date) => {
+    return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
+  };
+
+  const lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//IPORadar//IPO Calendar//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'X-WR-CALNAME:Indian IPO Milestones',
+    'X-WR-TIMEZONE:Asia/Kolkata',
+  ];
+
+  events.forEach((ev, i) => {
+    const startStr = formatIcsDate(ev.dateObj);
+    const endDate = new Date(ev.dateObj);
+    endDate.setDate(endDate.getDate() + 1);
+    const endStr = formatIcsDate(endDate);
+
+    const summary = `IPO ${ev.type}: ${ev.ipoName} (${ev.category.toUpperCase()})`;
+    const desc = `${ev.ipoName} - Milestone: ${ev.type}\\nCategory: ${ev.category.toUpperCase()}\\nPrice Band: ₹${ev.priceBandMax}\\nLot Size: ${ev.lotSize} shares\\nOfficial Details on IPORadar`;
+
+    lines.push(
+      'BEGIN:VEVENT',
+      `UID:ipo-${ev.ipoId}-${ev.type}-${i}@iporadar.com`,
+      `DTSTAMP:${formatIcsDate(new Date())}T000000Z`,
+      `DTSTART;VALUE=DATE:${startStr}`,
+      `DTEND;VALUE=DATE:${endStr}`,
+      `SUMMARY:${summary}`,
+      `DESCRIPTION:${desc}`,
+      'STATUS:CONFIRMED',
+      'TRANSP:TRANSPARENT',
+      'END:VEVENT'
+    );
+  });
+
+  lines.push('END:VCALENDAR');
+  const blob = new Blob([lines.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `ipo_calendar_${new Date().toISOString().slice(0, 10)}.ics`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 export const IpoCalendar: React.FC<IpoCalendarProps> = ({ ipos = [], events = [], onSelectIpo }) => {
   const [filterType, setFilterType] = useState<'all' | 'Open' | 'Close' | 'Allotment' | 'Listing'>('all');
   const [filterCat, setFilterCat] = useState<'all' | 'mainboard' | 'sme'>('all');
-  const [viewMode, setViewMode] = useState<'calendar' | 'agenda'>('calendar');
+  const [viewMode, setViewMode] = useState<'calendar' | 'agenda' | 'lockin'>('calendar');
 
   const agendaRef = useRef<HTMLDivElement>(null);
 
@@ -481,11 +535,11 @@ export const IpoCalendar: React.FC<IpoCalendarProps> = ({ ipos = [], events = []
           {/* View Mode & Category Controls */}
           <div className="flex items-center gap-2 flex-wrap">
             {/* View Switcher: Calendar Grid vs Agenda List */}
-            <div className="flex items-center p-1 rounded-xl bg-slate-200/80 dark:bg-slate-800/80 text-xs font-bold">
+            <div className="flex items-center p-1 rounded-xl bg-slate-200/80 dark:bg-slate-800/80 text-xs font-bold overflow-x-auto no-scrollbar max-w-full">
               <button
                 type="button"
                 onClick={() => setViewMode('calendar')}
-                className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${
+                className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
                   viewMode === 'calendar'
                     ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-xs font-black'
                     : 'text-slate-600 dark:text-slate-400'
@@ -497,7 +551,7 @@ export const IpoCalendar: React.FC<IpoCalendarProps> = ({ ipos = [], events = []
               <button
                 type="button"
                 onClick={() => setViewMode('agenda')}
-                className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${
+                className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
                   viewMode === 'agenda'
                     ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-xs font-black'
                     : 'text-slate-600 dark:text-slate-400'
@@ -505,6 +559,19 @@ export const IpoCalendar: React.FC<IpoCalendarProps> = ({ ipos = [], events = []
               >
                 <List className="w-3.5 h-3.5" />
                 <span>Agenda</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('lockin')}
+                className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
+                  viewMode === 'lockin'
+                    ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-xs font-black'
+                    : 'text-slate-600 dark:text-slate-400'
+                }`}
+              >
+                <Lock className="w-3.5 h-3.5 text-amber-500" />
+                <span>Anchor Lock-In</span>
+                <span className="text-[9px] px-1 py-0.2 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-extrabold">NEW</span>
               </button>
             </div>
 
@@ -541,6 +608,17 @@ export const IpoCalendar: React.FC<IpoCalendarProps> = ({ ipos = [], events = []
                 SME
               </button>
             </div>
+
+            {/* 1-Click .ICS Export Button */}
+            <button
+              type="button"
+              onClick={() => exportCalendarToIcs(allEvents)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 text-xs font-bold border border-indigo-200/60 dark:border-indigo-800/60 transition-colors shadow-xs cursor-pointer ml-auto sm:ml-0"
+              title="Export all IPO dates to Apple Calendar, Google Calendar, or Outlook (.ics)"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Export .ICS</span>
+            </button>
           </div>
         </div>
 
@@ -920,6 +998,11 @@ export const IpoCalendar: React.FC<IpoCalendarProps> = ({ ipos = [], events = []
             </div>
           )}
         </div>
+      )}
+
+      {/* VIEW MODE 3: ANCHOR INVESTOR LOCK-IN EXPIRY TRACKER */}
+      {viewMode === 'lockin' && (
+        <AnchorLockInTracker ipos={ipos} onSelectIpo={onSelectIpo} />
       )}
     </div>
   );
