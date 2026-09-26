@@ -1,6 +1,7 @@
 import React from 'react';
 import { IpoCategory, IpoStatus } from '../../types/ipo';
 import { Bookmark } from 'lucide-react';
+import { useWatchlist } from '../../context/WatchlistContext';
 
 interface FilterBarProps {
   category: 'all' | IpoCategory;
@@ -28,6 +29,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   setShowWatchlistOnly,
   countMap
 }) => {
+  const { watchlist } = useWatchlist();
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-2">
       
@@ -143,6 +145,11 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         >
           <Bookmark className={`w-3 h-3 ${showWatchlistOnly ? 'fill-white' : ''}`} />
           <span>Watchlist</span>
+          {watchlist.length > 0 && (
+            <span className={`text-[10px] ml-0.5 font-bold ${showWatchlistOnly ? 'text-indigo-100' : 'text-indigo-600 dark:text-indigo-400'}`}>
+              ({watchlist.length})
+            </span>
+          )}
         </button>
       </div>
 

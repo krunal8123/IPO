@@ -4,6 +4,8 @@ import { fileURLToPath } from 'url';
 import { fetchLiveGmp } from './services/gmpService.js';
 import { fetchKfinIssues } from './services/kfintechService.js';
 import { fetchMufgIssues } from './services/mufgService.js';
+import { fetchBigshareIssues } from './services/bigshareService.js';
+import { fetchLiveBuybacks } from './services/buybackService.js';
 import { fetchLiveSubscription } from './services/subscriptionService.js';
 import { fetchUpstoxIpos, saveAccessToken } from './services/upstoxService.js';
 import { buildDynamicIpoFromScraped } from './services/ipoAutoBuilder.js';
@@ -60,14 +62,16 @@ async function buildStaticData() {
   }
 
   try {
-    const [liveGmpList, kfinIssues, liveSubscriptions, mufgIssues] = await Promise.all([
+    const [liveGmpList, kfinIssues, liveSubscriptions, mufgIssues, bigshareIssues, liveBuybacks] = await Promise.all([
       fetchLiveGmp().catch(e => { console.warn('GMP fetch warning:', e.message); return []; }),
       fetchKfinIssues().catch(e => { console.warn('KFin fetch warning:', e.message); return []; }),
       fetchLiveSubscription().catch(e => { console.warn('Subscription fetch warning:', e.message); return []; }),
-      fetchMufgIssues().catch(e => { console.warn('MUFG fetch warning:', e.message); return []; })
+      fetchMufgIssues().catch(e => { console.warn('MUFG fetch warning:', e.message); return []; }),
+      fetchBigshareIssues().catch(e => { console.warn('Bigshare fetch warning:', e.message); return []; }),
+      fetchLiveBuybacks().catch(e => { console.warn('Buyback fetch warning:', e.message); return []; })
     ]);
 
-    console.log(`📊 Scraped raw items: GMP=${liveGmpList.length}, KFin=${kfinIssues.length}, Subs=${liveSubscriptions.length}, MUFG=${mufgIssues.length}`);
+    console.log(`📊 Scraped raw items: GMP=${liveGmpList.length}, KFin=${kfinIssues.length}, Subs=${liveSubscriptions.length}, MUFG=${mufgIssues.length}, Bigshare=${bigshareIssues.length}, Buybacks=${liveBuybacks.length}`);
 
     // Fetch official Upstox IPOs
     let upstoxList = [];
@@ -110,14 +114,15 @@ async function buildStaticData() {
       console.warn('⚠️ [Push] Notification dispatch warning:', pushErr.message);
     }
 
-
-    // Write KFin & MUFG lists
+    // Write all data feeds
     fs.writeFileSync(path.join(outputDir, 'kfin.json'), JSON.stringify({ success: true, count: kfinIssues.length, data: kfinIssues }, null, 2), 'utf8');
     fs.writeFileSync(path.join(outputDir, 'mufg.json'), JSON.stringify({ success: true, count: mufgIssues.length, data: mufgIssues }, null, 2), 'utf8');
     fs.writeFileSync(path.join(outputDir, 'subscription.json'), JSON.stringify({ success: true, count: liveSubscriptions.length, data: liveSubscriptions }, null, 2), 'utf8');
+    fs.writeFileSync(path.join(outputDir, 'bigshare.json'), JSON.stringify({ success: true, count: bigshareIssues.length, data: bigshareIssues }, null, 2), 'utf8');
+    fs.writeFileSync(path.join(outputDir, 'buybacks.json'), JSON.stringify({ success: true, count: liveBuybacks.length, data: liveBuybacks }, null, 2), 'utf8');
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(1);
-    console.log(`🎉 [Static Data Complete] All 4 data feeds generated in ${duration}s -> public/data/`);
+    console.log(`🎉 [Static Data Complete] All 6 data feeds generated in ${duration}s -> public/data/`);
   } catch (error) {
     console.error('❌ [Build Static Data Error]:', error);
     process.exit(1);

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { IpoItem } from '../../types/ipo';
 import {
   Calculator, Users, TrendingUp, Info, AlertCircle, ChevronDown,
@@ -67,6 +67,13 @@ export const AllotmentOddsCalculator: React.FC<AllotmentOddsCalculatorProps> = (
   const [hniApplicationLakhs, setHniApplicationLakhs] = useState<number>(14);
   const [listingPriceExpected, setListingPriceExpected] = useState<number>(0);
   const [hniSubMultiplier, setHniSubMultiplier] = useState<number>(30);
+
+  // Synchronize selection dynamically when IPO feed loads
+  useEffect(() => {
+    if (!selectedId && liveAndUpcoming.length > 0) {
+      setSelectedId(liveAndUpcoming[0].id);
+    }
+  }, [liveAndUpcoming, selectedId]);
 
   const ipo = liveAndUpcoming.find(i => i.id === selectedId) || liveAndUpcoming[0];
 

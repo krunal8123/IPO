@@ -1,0 +1,14 @@
+{
+  "success": true,
+  "count": 2,
+  "data": [
+    {
+      "companyId": "9049",
+      "name": "JINDAL SUPREME (INDIA) LIMITED"
+    },
+    {
+      "companyId": "9047",
+      "name": "LUMINO INDUSTRIES LIMITED"
+    }
+  ]
+}

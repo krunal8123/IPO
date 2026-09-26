@@ -99,79 +99,7 @@ export interface LiveFetchResult {
   source: string;
 }
 
-const BASELINE_MUFG_ISSUES: MufgIssue[] = [
-  { clientId: '11932', name: 'Glass Wall Systems (India) Limited - IPO' },
-  { clientId: '11931', name: 'Kanohar Electricals Limited - IPO' },
-  { clientId: '11930', name: 'Qualiance International Limited - SME IPO' },
-  { clientId: '11929', name: 'Phychem Technologies Limited - SME IPO' },
-  { clientId: '11927', name: 'ESDS Software Solution Limited - IPO' }
-];
 
-const BASELINE_BIGSHARE_ISSUES: BigshareIssue[] = [
-  { companyId: '596', name: 'RAKSAN TRANSFORMERS LIMITED' },
-  { companyId: '597', name: 'OM GALAXY LIMITED' },
-  { companyId: '595', name: 'INFRAX RENEWABLE LIMITED' },
-  { companyId: '9048', name: 'DEEPA JEWELLERS LIMITED' },
-  { companyId: '9047', name: 'LUMINO INDUSTRIES LIMITED' }
-];
-
-const BASELINE_KFIN_ISSUES: KfinIssue[] = [
-  { clientId: '75003530500', name: 'PRASOL CHEMICALS LIMITED' },
-  { clientId: '95527153360', name: 'KLM AXIVA FINVEST LIMITED NCD14 AUGUST 2026' },
-  { clientId: '58129803280', name: 'PRANAV CONSTRUCTIONS LIMITED' },
-  { clientId: '33631182620', name: 'APANA LOGISTICS LIMITED' },
-  { clientId: '40580036070', name: 'FLY HI MARITIME TRAVELS LIMITED' },
-  { clientId: '60121009540', name: 'RAYS OF BELIEF LIMITED' },
-  { clientId: '34024394990', name: 'ASHUTOSH FIBRE LIMITED SME' },
-  { clientId: '64793825640', name: 'ASHUTOSH FIBRE LIMITED' },
-  { clientId: '85357713080', name: 'SHANTI INORGANICS LIMITED' },
-  { clientId: '95989183810', name: 'PURPLE STYLE LABS LIMITED' },
-  { clientId: '63488567220', name: 'ANNU PROJECTS LIMITED' },
-  { clientId: '29984512460', name: 'SUMAX ENGINEERING LIMITED' },
-  { clientId: '61328680581', name: 'TEMPSENS INSTRUMENTS (INDIA) LIMITED' },
-  { clientId: '54923077460', name: 'SHANKESH JEWELLERS LIMITED' },
-  { clientId: '52457887480', name: 'HORIZON INDUSTRIAL PARKS LIMITED' },
-  { clientId: '58583640510', name: 'CHEMMANUR CREDITS AND INVESTMENTS LIMITED AUGUST2026' },
-  { clientId: '12562536840', name: 'CREDENT CONNECT N CARE LIMITED' },
-  { clientId: '86153103110', name: 'SHIPROCKET LIMITED' },
-  { clientId: '29849673370', name: 'MILKY MIST DAIRY FOOD LIMITED' },
-  { clientId: '81387868980', name: 'MOLBIO DIAGNOSTICS LIMITED' },
-  { clientId: '94818267561', name: 'DHOOT TRANSMISSION LIMITED' },
-  { clientId: '62198153830', name: 'ARDEE INDUSTRIES LIMITED' },
-  { clientId: '44065980180', name: 'MV ELECTROSYSTEMS LIMITED' },
-  { clientId: '53707331280', name: 'JUNIPER GREEN ENERGY LIMITED' },
-  { clientId: '67709372110', name: 'DHAVAL PACKAGING LIMITED' },
-  { clientId: '43836057990', name: 'MANIPAL HEALTH ENTERPRISES LIMITED' },
-  { clientId: '42817695520', name: 'ADVANCE TECHNOFORG LIMITED' },
-  { clientId: '55385908200', name: 'CUBE HIGHWAYS TRUST - INVIT' },
-  { clientId: '94419360500', name: 'XTRANET TECHNOLOGIES LIMITED' },
-  { clientId: '63734978420', name: 'SHREE BALAJI MALA TEXTILES LIMITED' },
-  { clientId: '19193086920', name: 'GULF LLOYDS INDIA LIMITED' },
-  { clientId: '89605487720', name: 'CALIBER MINING AND LOGISTICS LIMITED IPO' },
-  { clientId: '89468061991', name: 'SBI FUNDS MANAGMENT LIMITED IPO' },
-  { clientId: '41422222050', name: 'ALPINE TEXWORLD LIMITED IPO' },
-  { clientId: '73206134640', name: 'KRATIKAL TECH LIMITED SME' },
-  { clientId: '17643901490', name: 'TEJA ENGINEERING INDUSTRIES LIMITED SME IPO' },
-  { clientId: '65065971040', name: 'ADON AGRO COMMODITIES LIMITED SME IPO' },
-  { clientId: '39751101520', name: 'CRAZY SNACKS LIMITED SME IPO' },
-  { clientId: '89075375160', name: 'CSM TECHNOLOGIES LIMITED IPO' },
-  { clientId: '10609640970', name: 'TURTLEMINT FINTECH SOLUTIONS LIMITED IPO' },
-  { clientId: '82984397570', name: 'CLAY CRAFT INDIA LIMITED SME IPO' },
-  { clientId: '41208427340', name: 'LIOTECH INDUSTRIES LIMITED SME IPO' },
-  { clientId: '34105687640', name: 'HORIZON RECLAIM INDIA LIMITED' },
-  { clientId: '70806992450', name: 'HEXAGON NUTRITION LIMITED' },
-  { clientId: '28962929970', name: 'VAHH CHEMICALS LIMITED' },
-  { clientId: '65310715440', name: 'CMR GREEN TECHNOLOGIES LIMITED' },
-  { clientId: '53483362510', name: 'TEAMTECH FORMWORK SOLUTIONS LIMITED' },
-  { clientId: '26859517830', name: 'RFBL FLEXI PACK LIMITED' },
-  { clientId: '28267215520', name: 'BAGMANE PRIME OFFICE REIT' },
-  { clientId: '34561715130', name: 'VALUE 360 COMMUNICATIONS LIMITED' },
-  { clientId: '54450217260', name: 'ONEMI TECHNOLOGY SOLUTIONS LIMITED' },
-  { clientId: '92634312570', name: 'ADISOFT TECHNOLOGIES LIMITED' },
-  { clientId: '73146088770', name: 'CITIUS TRANSNET INVESTMENT TRUST' },
-  { clientId: '80184898770', name: 'MEHUL TELECOM LIMITED' },
-  { clientId: '51817446680', name: 'PROPSHARE CELESTIA SM REIT 2026' }
-];
 
 export function getRegistrarUrl(registrarName: string = ''): string {
   const name = (registrarName || '').toLowerCase();
@@ -298,25 +226,18 @@ async function evaluateLocalAllotment(
     });
   }
 
-  // 3. MUFG Issue matching
-  const mufgId = mufgClientId || (/^\d+$/.test(ipoId) && BASELINE_MUFG_ISSUES.some(m => m.clientId === ipoId) ? ipoId : null);
-  const mufgIssue = mufgId ? BASELINE_MUFG_ISSUES.find(m => m.clientId === mufgId) : null;
-
-  // 4. KFintech Issue matching
-  const kfinId = kfinClientId || (/^\d+$/.test(ipoId) && BASELINE_KFIN_ISSUES.some(k => k.clientId === ipoId) ? ipoId : null);
-  const kfinIssue = kfinId ? BASELINE_KFIN_ISSUES.find(k => k.clientId === kfinId) : null;
-
-  // 5. Bigshare Issue matching
-  const bigshareId = bigshareCompanyId || (/^\d+$/.test(ipoId) && BASELINE_BIGSHARE_ISSUES.some(b => b.companyId === ipoId) ? ipoId : null);
-  const bigshareIssue = bigshareId ? BASELINE_BIGSHARE_ISSUES.find(b => b.companyId === bigshareId) : null;
+  // 3. Registrar IDs from params or IPO
+  const mufgId = mufgClientId || ipo?.mufgClientId;
+  const kfinId = kfinClientId || ipo?.kfinClientId;
+  const bigshareId = bigshareCompanyId || ipo?.bigshareCompanyId;
 
   // Final extracted metadata - NEVER fall back to ipoList[0]!
-  const ipoName = ipoNameParam || mufgIssue?.name || kfinIssue?.name || bigshareIssue?.name || ipo?.name || 'IPO Issue';
-  const registrar = mufgIssue || mufgId 
+  const ipoName = ipoNameParam || ipo?.name || 'IPO Issue';
+  const registrar = mufgId 
     ? 'MUFG Intime India Pvt Ltd' 
-    : kfinIssue || kfinId 
+    : kfinId 
       ? 'KFin Technologies Ltd' 
-      : bigshareIssue || bigshareId
+      : bigshareId
         ? 'Bigshare Services Pvt Ltd'
         : (ipo?.registrar || 'Link Intime India Pvt Ltd');
   const regUrl = getRegistrarUrl(registrar);
@@ -363,48 +284,7 @@ async function evaluateLocalAllotment(
     };
   }
 
-  // Demo simulation samples
-  const isDemoAllotted = query === 'ALLOT1234F' || query === 'WINNR1234A' || query.includes('WIN');
-  const isDemoNonAllotted = query === 'NONAL1234F' || query.includes('NONAL') || query.includes('DEMOREG');
 
-  if (isDemoAllotted) {
-    return {
-      ipoId: effectiveId,
-      ipoName,
-      applicantName: 'VERIFIED INVESTOR (ALLOTTEE)',
-      pan: queryType === 'pan' ? query : 'N/A',
-      applicationNo: `2026${Math.floor(100000 + Math.random() * 900000)}`,
-      dpId: `IN300126-${Math.floor(10000000 + Math.random() * 90000000)}`,
-      sharesApplied: lotSize,
-      sharesAllotted: lotSize,
-      status: 'Allotted',
-      refundAmount: 0,
-      message: `Congratulations! Your bid was successfully selected in the registrar basis of allotment for ${ipoName}. ${lotSize} shares at ₹${priceBandMax} have been allocated and will be credited to your Demat account prior to listing.`,
-      registrar,
-      finalizedDate,
-      registrarPortalUrl: regUrl
-    };
-  }
-
-  if (isDemoNonAllotted) {
-    const totalAmount = lotSize * priceBandMax;
-    return {
-      ipoId: effectiveId,
-      ipoName,
-      applicantName: 'REGISTERED BIDDER (NON-ALLOTTEE)',
-      pan: queryType === 'pan' ? query : 'N/A',
-      applicationNo: `2026${Math.floor(100000 + Math.random() * 900000)}`,
-      dpId: `IN300126-${Math.floor(10000000 + Math.random() * 90000000)}`,
-      sharesApplied: lotSize,
-      sharesAllotted: 0,
-      status: 'Not Allotted',
-      refundAmount: totalAmount,
-      message: `Your application was registered with ${registrar} for ${ipoName}, but due to heavy oversubscription, it was not selected in the computerized lottery draw. Your blocked bank UPI mandate of ₹${totalAmount.toLocaleString('en-IN')} has been unblocked/refunded.`,
-      registrar,
-      finalizedDate,
-      registrarPortalUrl: regUrl
-    };
-  }
 
   // Attempt direct browser query if it's KFintech
   if (kfinId) {
@@ -543,7 +423,16 @@ export const liveIpoService = {
 
   // Fetch all active KFintech issues (static cache first for mobile/web, then backend)
   async getKfinIssues(): Promise<KfinIssue[]> {
-    // 1. Try static data on GitHub Pages / app assets
+    // 1. Try GitHub Pages CDN (cache-busted)
+    const remote = await fetchFromGithubPages('kfin.json');
+    if (remote) {
+      const json = remote.json as { success?: boolean; data?: KfinIssue[] };
+      if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+        return json.data;
+      }
+    }
+
+    // 2. Try static data on app assets
     try {
       const staticRes = await fetch(getStaticDataUrl('kfin.json'), { cache: 'no-cache' });
       if (staticRes.ok) {
@@ -557,7 +446,7 @@ export const liveIpoService = {
       }
     } catch {}
 
-    // 2. Try backend API
+    // 3. Try backend API
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 4000);
@@ -571,15 +460,23 @@ export const liveIpoService = {
           return json.data;
         }
       }
-    } catch {
-      // Fall through
-    }
-    return BASELINE_KFIN_ISSUES;
+    } catch {}
+
+    return [];
   },
 
   // Fetch all active MUFG Intime issues (static cache first for mobile/web, then backend)
   async getMufgIssues(): Promise<MufgIssue[]> {
-    // 1. Try static data on GitHub Pages / app assets
+    // 1. Try GitHub Pages CDN (cache-busted)
+    const remote = await fetchFromGithubPages('mufg.json');
+    if (remote) {
+      const json = remote.json as { success?: boolean; data?: MufgIssue[] };
+      if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+        return json.data;
+      }
+    }
+
+    // 2. Try static data on app assets
     try {
       const staticRes = await fetch(getStaticDataUrl('mufg.json'), { cache: 'no-cache' });
       if (staticRes.ok) {
@@ -593,7 +490,7 @@ export const liveIpoService = {
       }
     } catch {}
 
-    // 2. Try backend API
+    // 3. Try backend API
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 4000);
@@ -607,14 +504,37 @@ export const liveIpoService = {
           return json.data;
         }
       }
-    } catch {
-      // Fall through
-    }
-    return BASELINE_MUFG_ISSUES;
+    } catch {}
+
+    return [];
   },
 
-  // Fetch all active Bigshare issues directly from backend API
+  // Fetch all active Bigshare issues (static cache first, then backend API)
   async getBigshareIssues(): Promise<BigshareIssue[]> {
+    // 1. Try GitHub Pages CDN (cache-busted)
+    const remote = await fetchFromGithubPages('bigshare.json');
+    if (remote) {
+      const json = remote.json as { success?: boolean; data?: BigshareIssue[] };
+      if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+        return json.data;
+      }
+    }
+
+    // 2. Try static data on app assets
+    try {
+      const staticRes = await fetch(getStaticDataUrl('bigshare.json'), { cache: 'no-cache' });
+      if (staticRes.ok) {
+        const contentType = staticRes.headers.get('content-type') || '';
+        if (contentType.includes('application/json') || !contentType.includes('text/html')) {
+          const json = await staticRes.json();
+          if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+            return json.data;
+          }
+        }
+      }
+    } catch {}
+
+    // 3. Try backend API
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 4000);
@@ -628,10 +548,9 @@ export const liveIpoService = {
           return json.data;
         }
       }
-    } catch {
-      // Fall through
-    }
-    return BASELINE_BIGSHARE_ISSUES;
+    } catch {}
+
+    return [];
   },
 
   // Fetch real-time health and latency across Bigshare servers
@@ -807,13 +726,13 @@ export const liveIpoService = {
     return true;
   },
 
-  // Fetch live buyback data (temporarily commented out)
+  // Fetch live buyback data across backend API, GitHub Pages CDN, and local static cache
   async fetchBuybacks(): Promise<import('../types/ipo').BuybackItem[]> {
-    /*
+    // 1. Try backend API
     try {
       const res = await fetch(`${getApiBaseUrl()}/buybacks`, {
         headers: { 'Accept': 'application/json' },
-        signal: AbortSignal.timeout(7000)
+        signal: AbortSignal.timeout(4000)
       });
       if (res.ok) {
         const json = await res.json();
@@ -821,10 +740,28 @@ export const liveIpoService = {
           return json.data;
         }
       }
-    } catch (err) {
-      console.warn('[LiveService] Buyback fetch failed:', err);
+    } catch {}
+
+    // 2. Try GitHub Pages CDN
+    const remote = await fetchFromGithubPages('buybacks.json');
+    if (remote) {
+      const json = remote.json as { success?: boolean; data?: import('../types/ipo').BuybackItem[] };
+      if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+        return json.data;
+      }
     }
-    */
+
+    // 3. Try static bundled data
+    try {
+      const staticRes = await fetch(getStaticDataUrl('buybacks.json'), { cache: 'no-cache' });
+      if (staticRes.ok) {
+        const json = await staticRes.json();
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          return json.data;
+        }
+      }
+    } catch {}
+
     return [];
   }
 };

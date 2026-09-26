@@ -20,7 +20,7 @@ import { IpoCompareView } from './components/compare/IpoCompareView';
 import { BuybackTracker } from './components/buyback/BuybackTracker';
 import { ServerSettingsModal } from './components/common/ServerSettingsModal';
 import { InstallPwaBanner } from './components/common/InstallPwaBanner';
-import { RefreshCw, Radio, Sparkles, Settings } from 'lucide-react';
+import { RefreshCw, Radio, Sparkles, Settings, Bookmark } from 'lucide-react';
 import { PushNotificationBanner } from './components/common/PushNotificationBanner';
 
 const VALID_TABS = ['ipos', 'gmp', 'subscription', 'allotment', 'calendar', 'analytics', 'compare', 'buyback'] as const;
@@ -93,20 +93,17 @@ export const App: React.FC = () => {
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true);
   const [dataSource, setDataSource] = useState<string>('Verified Market Feed');
 
-  const { isInWatchlist } = useWatchlist();
+  const { isInWatchlist, clearWatchlist, watchlist } = useWatchlist();
 
   // Fetch live market data
   const syncLiveData = async () => {
     setIsSyncing(true);
     try {
-      // Temporarily disabled buybacks API call
-      // const buybackRes = await liveIpoService.fetchBuybacks();
       const ipoRes = await liveIpoService.getLiveIpos();
       setIpos(ipoRes.ipos);
       setIsLive(ipoRes.isLive);
       setLastSyncTime(ipoRes.timestamp);
       setDataSource(ipoRes.source);
-      // if (buybackRes.length > 0) setBuybacks(buybackRes);
     } catch (e) {
       console.warn('Failed to sync live data:', e);
     } finally {
@@ -198,7 +195,21 @@ export const App: React.FC = () => {
 
   const handleOpenWatchlist = () => {
     setActiveTab('ipos');
-    setShowWatchlistOnly(true);
+    if (activeTab === 'ipos' && showWatchlistOnly) {
+      setShowWatchlistOnly(false);
+    } else {
+      setShowWatchlistOnly(true);
+    }
+  };
+
+  const handleResetFilters = () => {
+    setCategoryFilter('all');
+    setStatusFilter('all');
+    setSearchQuery('');
+    if (showWatchlistOnly) {
+      clearWatchlist();
+    }
+    setShowWatchlistOnly(false);
   };
 
   const handleFilterSelect = (cat?: 'all' | IpoCategory, stat?: 'all' | IpoStatus) => {
@@ -273,13 +284,24 @@ export const App: React.FC = () => {
             {/* Filter Result Header */}
             <div className="flex flex-wrap items-center justify-between gap-2 mb-4 px-1 text-xs text-slate-500 dark:text-slate-400">
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-slate-900 dark:text-white uppercase tracking-wider text-[11px]">
-                  {categoryFilter === 'all' ? 'All Issues' : categoryFilter === 'mainboard' ? 'Mainboard Issues' : 'SME Issues'}
+                <span className="font-extrabold text-slate-900 dark:text-white uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                  {showWatchlistOnly ? (
+                    <>
+                      <Bookmark className="w-3.5 h-3.5 fill-indigo-600 text-indigo-600 dark:fill-indigo-400 dark:text-indigo-400" />
+                      <span>Saved Watchlist</span>
+                    </>
+                  ) : categoryFilter === 'all' ? (
+                    'All Issues'
+                  ) : categoryFilter === 'mainboard' ? (
+                    'Mainboard Issues'
+                  ) : (
+                    'SME Issues'
+                  )}
                 </span>
                 <span>•</span>
                 <span>
                   Showing <strong className="text-slate-900 dark:text-white">{filteredIpos.length}</strong> {filteredIpos.length === 1 ? 'Tile' : 'Tiles'}
-                  {categoryFilter === 'all' && (
+                  {!showWatchlistOnly && categoryFilter === 'all' && (
                     <span className="opacity-80">
                       {' '}({filteredIpos.filter(i => i.category === 'mainboard').length} Mainboard • {filteredIpos.filter(i => i.category === 'sme').length} SME)
                     </span>
@@ -288,17 +310,29 @@ export const App: React.FC = () => {
               </div>
 
               {(categoryFilter !== 'all' || statusFilter !== 'all' || searchQuery || showWatchlistOnly) && (
-                <button
-                  onClick={() => {
-                    setCategoryFilter('all');
-                    setStatusFilter('all');
-                    setSearchQuery('');
-                    setShowWatchlistOnly(false);
-                  }}
-                  className="text-indigo-600 dark:text-indigo-400 hover:underline font-bold text-[11px] cursor-pointer"
-                >
-                  Reset All Filters
-                </button>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  {showWatchlistOnly && watchlist.length > 0 && (
+                    <button
+                      onClick={() => {
+                        clearWatchlist();
+                        setShowWatchlistOnly(false);
+                      }}
+                      className="text-rose-600 dark:text-rose-400 hover:underline font-bold text-[11px] cursor-pointer"
+                      title="Clear watchlist and reset count"
+                    >
+                      Clear Watchlist ({watchlist.length})
+                    </button>
+                  )}
+                  {showWatchlistOnly && watchlist.length > 0 && (
+                    <span className="text-slate-300 dark:text-slate-700">|</span>
+                  )}
+                  <button
+                    onClick={handleResetFilters}
+                    className="text-indigo-600 dark:text-indigo-400 hover:underline font-bold text-[11px] cursor-pointer"
+                  >
+                    Reset All Filters
+                  </button>
+                </div>
               )}
             </div>
 
@@ -339,15 +373,10 @@ export const App: React.FC = () => {
                     : "No IPOs matched your current filter criteria. Try clearing search or selecting 'All Status'."}
                 </p>
                 <button
-                  onClick={() => {
-                    setCategoryFilter('all');
-                    setStatusFilter('all');
-                    setSearchQuery('');
-                    setShowWatchlistOnly(false);
-                  }}
+                  onClick={handleResetFilters}
                   className="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold shadow-md hover:bg-indigo-700 transition-colors"
                 >
-                  Clear Filters
+                  {showWatchlistOnly ? 'Show All IPOs' : 'Clear Filters'}
                 </button>
               </div>
             )}

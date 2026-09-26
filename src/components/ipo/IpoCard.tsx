@@ -68,7 +68,7 @@ export const IpoCard: React.FC<IpoCardProps> = ({ ipo, onSelect }) => {
 
         {/* Company Identity */}
         <div className="flex items-start gap-3 mb-4">
-          <CompanyLogo logo={ipo.logo} name={ipo.name} symbol={ipo.symbol} size="md" />
+          <CompanyLogo ipo={ipo} logo={ipo.logo} name={ipo.name} symbol={ipo.symbol} size="md" />
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
               <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">

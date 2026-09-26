@@ -73,8 +73,13 @@ export function sanitizeIpoData(ipo: IpoItem): IpoItem {
     ipo.status
   );
 
+  const resolvedLogo = ipo.logo || (ipo as any).logo_url || (ipo as any).logoUrl || '';
+
   return {
     ...ipo,
+    logo: resolvedLogo,
+    logo_url: resolvedLogo,
+    logoUrl: resolvedLogo,
     lotSize: lot,
     minInvestment,
     minimumQuantity: minQty,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { IpoItem } from '../../types/ipo';
 import { Flame, Calculator, TrendingUp, ArrowUpRight, Search, Sparkles, Minus, Plus, ChevronRight, BarChart3 } from 'lucide-react';
 import { Badge } from '../common/Badge';
@@ -16,6 +16,13 @@ export const GmpTracker: React.FC<GmpTrackerProps> = ({ ipos, onSelectIpo, searc
   const [calcLots, setCalcLots] = useState<number>(1);
   const [selectedCalcIpo, setSelectedCalcIpo] = useState<string>(ipos[0]?.id || '');
   const [filterCat, setFilterCat] = useState<'all' | 'mainboard' | 'sme'>('all');
+
+  // Synchronize selection dynamically when IPO feed loads
+  useEffect(() => {
+    if (!selectedCalcIpo && ipos.length > 0) {
+      setSelectedCalcIpo(ipos[0].id);
+    }
+  }, [ipos, selectedCalcIpo]);
 
   const filtered = ipos
     .filter(i => {

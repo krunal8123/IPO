@@ -4,6 +4,7 @@ interface WatchlistContextType {
   watchlist: string[]; // array of ipo ids
   toggleWatchlist: (id: string) => void;
   isInWatchlist: (id: string) => boolean;
+  clearWatchlist: () => void;
 }
 
 const WatchlistContext = createContext<WatchlistContextType | undefined>(undefined);
@@ -28,10 +29,19 @@ export const WatchlistProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     );
   };
 
+  const clearWatchlist = () => {
+    setWatchlist([]);
+    try {
+      localStorage.removeItem('ipo_watchlist');
+    } catch {
+      // ignore
+    }
+  };
+
   const isInWatchlist = (id: string) => watchlist.includes(id);
 
   return (
-    <WatchlistContext.Provider value={{ watchlist, toggleWatchlist, isInWatchlist }}>
+    <WatchlistContext.Provider value={{ watchlist, toggleWatchlist, isInWatchlist, clearWatchlist }}>
       {children}
     </WatchlistContext.Provider>
   );

@@ -104,71 +104,32 @@ function resolveCompanyBranding(cleanName, id, scraped = {}) {
     };
   }
 
-  const knownDomains = {
-    'veegaland': 'veegaland.in',
-    'national-stock-exchange': 'nseindia.com',
-    'nse': 'nseindia.com',
-    'manika': 'manikaplastech.com',
-    'maharaja': 'maharajaspeedex.com',
-    'om-galaxy': 'omgalaxy.in',
-    'panchatv': 'panchatvbharat.com',
-    'raksan': 'raksantransformers.com',
-    'century': 'centurybusinessmedia.com',
-    'injecto': 'injecto.in',
-    'apana': 'apanalogistics.com',
-    'pranav': 'pranavconstructions.com',
-    'glass-wall': 'glasswallsystems.in',
-    'kanohar': 'kanohar.com',
-    'prasol': 'prasolchem.com',
-    'amtech': 'amtechesters.com',
-    'asset-reconstruction': 'arcil.co.in',
-    'infrax': 'infrax.in',
-    'karamtara': 'karamtara.com',
-    'lcc': 'lccprojects.com',
-    'manipal': 'manipalgroup.info',
-    'rentomojo': 'rentomojo.com',
-    'steamhouse': 'steamhouse.in',
-    'vinod': 'vinodtexworld.com',
-    'quanto': 'quantoagroworld.com',
-    'shakti': 'shaktipolytarp.com',
-    'vama': 'vamawovenfab.com',
-    'hero-motors': 'heromotors.com',
-    'jindal': 'jindalsupreme.com',
-    'ss-retail': 'ssmobile.com',
-    'sonaselection': 'sonaselection.com',
-    'kheria': 'kheriaautocomp.com',
-    'spectra': 'spectratechnology.com',
-    'axiom': 'axiomgas.com',
-    'a-one': 'aonesteels.com',
-    'parle': 'parleproducts.com',
-    'jio': 'jio.com',
-    'flipkart': 'flipkart.com',
-    'tata-capital': 'tatacapital.com',
-    'swiggy': 'swiggy.com',
-    'sbi': 'sbimf.com',
-    'hyundai': 'hyundai.com',
-    'waaree': 'waaree.com',
-    'afcons': 'afcons.com',
-    'acme': 'acmesolar.in',
-    'ntpc': 'ntpcgreen.com',
-    'yaashvi': 'yaashvijewellers.com',
-    'maniveni': 'manivenifoods.com'
-  };
-
-  const idLower = (id || cleanName || '').toLowerCase();
-  for (const [prefix, dom] of Object.entries(knownDomains)) {
-    if (idLower.includes(prefix)) {
-      return {
-        logo: `https://www.google.com/s2/favicons?domain=${dom}&sz=128`,
-        companyWebsite: `https://${dom}`
-      };
-    }
+  // 2. Derive dynamically from company website if present
+  const web = scraped.companyWebsite || scraped.website;
+  if (web) {
+    try {
+      const parsed = new URL(web.startsWith('http') ? web : `https://${web}`);
+      const host = parsed.hostname.replace(/^www\./, '');
+      if (host) {
+        return {
+          logo: `https://www.google.com/s2/favicons?domain=${host}&sz=128`,
+          companyWebsite: `https://${host}`
+        };
+      }
+    } catch {}
   }
 
-  const cleanDomain = cleanName.toLowerCase().replace(/[^a-z0-9]/g, '');
+  // 3. Algorithmically derive dynamic domain from company name (strip corporate noise dynamically)
+  const cleanDomain = cleanName
+    .toLowerCase()
+    .replace(/(indialimited|consultingserviceslimited|technologieslimited|industrieslimited|solutionslimited|serviceslimited|limited|pvt|ltd|india|technologies|solutions|infrastructure|logistics|consulting|services|industries|holdings|enterprises|international|corp|group|ipo|\(.*?\))/gi, '')
+    .trim()
+    .replace(/[^a-z0-9]/g, '');
+
+  const dom = cleanDomain ? `${cleanDomain}.com` : 'nseindia.com';
   return {
-    logo: `https://www.google.com/s2/favicons?domain=${cleanDomain}.com&sz=128`,
-    companyWebsite: `https://${cleanDomain}.com`
+    logo: `https://www.google.com/s2/favicons?domain=${dom}&sz=128`,
+    companyWebsite: `https://${dom}`
   };
 }
 

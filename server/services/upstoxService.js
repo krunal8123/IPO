@@ -74,7 +74,7 @@ export function saveUpstoxCredentials({ accessToken, apiKey, apiSecret }) {
   if (accessToken) envLines['UPSTOX_ACCESS_TOKEN'] = accessToken.trim();
   if (apiKey) envLines['UPSTOX_API_KEY'] = apiKey.trim();
   if (apiSecret) envLines['UPSTOX_API_SECRET'] = apiSecret.trim();
-  
+
   const content = Object.entries(envLines).map(([k, v]) => `${k}=${v}`).join('\n') + '\n';
   fs.writeFileSync(ENV_PATH, content, 'utf-8');
   console.log('[UpstoxService] Successfully saved Upstox credentials to .env');
@@ -140,72 +140,26 @@ function resolveCompanyBranding(item, cleanName) {
     };
   }
 
-  const knownDomains = {
-    'veegaland': 'veegaland.in',
-    'national-stock-exchange': 'nseindia.com',
-    'nse': 'nseindia.com',
-    'manika': 'manikaplastech.com',
-    'maharaja': 'maharajaspeedex.com',
-    'om-galaxy': 'omgalaxy.in',
-    'panchatv': 'panchatvbharat.com',
-    'raksan': 'raksantransformers.com',
-    'century': 'centurybusinessmedia.com',
-    'injecto': 'injecto.in',
-    'apana': 'apanalogistics.com',
-    'pranav': 'pranavconstructions.com',
-    'glass-wall': 'glasswallsystems.in',
-    'kanohar': 'kanohar.com',
-    'prasol': 'prasolchem.com',
-    'amtech': 'amtechesters.com',
-    'asset-reconstruction': 'arcil.co.in',
-    'infrax': 'infrax.in',
-    'karamtara': 'karamtara.com',
-    'lcc': 'lccprojects.com',
-    'manipal': 'manipalgroup.info',
-    'rentomojo': 'rentomojo.com',
-    'steamhouse': 'steamhouse.in',
-    'vinod': 'vinodtexworld.com',
-    'quanto': 'quantoagroworld.com',
-    'shakti': 'shaktipolytarp.com',
-    'vama': 'vamawovenfab.com',
-    'hero-motors': 'heromotors.com',
-    'jindal': 'jindalsupreme.com',
-    'ss-retail': 'ssmobile.com',
-    'sonaselection': 'sonaselection.com',
-    'kheria': 'kheriaautocomp.com',
-    'spectra': 'spectratechnology.com',
-    'axiom': 'axiomgas.com',
-    'a-one': 'aonesteels.com',
-    'parle': 'parleproducts.com',
-    'jio': 'jio.com',
-    'flipkart': 'flipkart.com',
-    'tata-capital': 'tatacapital.com',
-    'swiggy': 'swiggy.com',
-    'sbi': 'sbimf.com',
-    'hyundai': 'hyundai.com',
-    'waaree': 'waaree.com',
-    'afcons': 'afcons.com',
-    'acme': 'acmesolar.in',
-    'ntpc': 'ntpcgreen.com',
-    'yaashvi': 'yaashvijewellers.com',
-    'maniveni': 'manivenifoods.com'
-  };
-
-  const idLower = (item.id || item.symbol || cleanName || '').toLowerCase();
-  for (const [prefix, dom] of Object.entries(knownDomains)) {
-    if (idLower.includes(prefix)) {
-      return {
-        logo: `https://www.google.com/s2/favicons?domain=${dom}&sz=128`,
-        companyWebsite: `https://${dom}`
-      };
-    }
+  // 2. Extract from website if present
+  const web = item.company_website || item.website || item.company_details?.website;
+  if (web) {
+    try {
+      const parsed = new URL(web.startsWith('http') ? web : `https://${web}`);
+      const host = parsed.hostname.replace(/^www\./, '');
+      if (host) {
+        return {
+          logo: `https://www.google.com/s2/favicons?domain=${host}&sz=128`,
+          companyWebsite: `https://${host}`
+        };
+      }
+    } catch {}
   }
 
-  // Extract from RHP URL
+  // 3. Extract from RHP URL
   if (item.rhp_url) {
     try {
       const parsed = new URL(item.rhp_url);
-      const host = parsed.hostname.toLowerCase();
+      const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
       const skipHosts = ['sebi.gov.in', 'axiscapital.co.in', 'sarthi.in', 'bseindia.com', 'nseindia.com', 'kfintech.com', 'linkintime.co.in', 'bigshareonline.com', 'mufg.com'];
       if (!skipHosts.some(sh => host.includes(sh))) {
         return {
@@ -216,11 +170,17 @@ function resolveCompanyBranding(item, cleanName) {
     } catch {}
   }
 
-  // Try unavatar or clearbit based on sanitized company name domain
-  const cleanDomain = cleanName.toLowerCase().replace(/[^a-z0-9]/g, '');
+  // 4. Algorithmically derive dynamic domain from company name (strip corporate noise dynamically)
+  const cleanDomain = cleanName
+    .toLowerCase()
+    .replace(/(indialimited|consultingserviceslimited|technologieslimited|industrieslimited|solutionslimited|serviceslimited|limited|pvt|ltd|india|technologies|solutions|infrastructure|logistics|consulting|services|industries|holdings|enterprises|international|corp|group|ipo|\(.*?\))/gi, '')
+    .trim()
+    .replace(/[^a-z0-9]/g, '');
+
+  const dom = cleanDomain ? `${cleanDomain}.com` : 'nseindia.com';
   return {
-    logo: `https://www.google.com/s2/favicons?domain=${cleanDomain}.com&sz=128`,
-    companyWebsite: `https://${cleanDomain}.com`
+    logo: `https://www.google.com/s2/favicons?domain=${dom}&sz=128`,
+    companyWebsite: `https://${dom}`
   };
 }
 
@@ -277,10 +237,10 @@ export function mapUpstoxToIpoItem(item, kfinIssues = []) {
   const dailyEndTime = item.daily_end_time || '17:00:00';
 
   const { status, badge } = evaluateIpoStatus(openDate, closeDate, listingDate, dailyEndTime, item.status);
-  
+
   const minPrice = parseFloat(item.minimum_price) || 100;
   const maxPrice = parseFloat(item.maximum_price) || minPrice || 100;
-  
+
   let exactLot = parseInt(item.lot_size);
   if (!exactLot || exactLot <= 0) {
     if (isSme) {
@@ -305,8 +265,8 @@ export function mapUpstoxToIpoItem(item, kfinIssues = []) {
     });
   }
 
-  const registrar = item.registrar_info?.name || (matchedKfin 
-    ? 'KFin Technologies Ltd' 
+  const registrar = item.registrar_info?.name || (matchedKfin
+    ? 'KFin Technologies Ltd'
     : (isSme ? 'Bigshare Services Pvt Ltd' : 'Link Intime India Pvt Ltd'));
   const kfinClientId = matchedKfin ? matchedKfin.clientId : undefined;
 

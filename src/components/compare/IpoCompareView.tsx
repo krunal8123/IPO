@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { IpoItem } from '../../types/ipo';
 import {
   GitCompare, Plus, X, ArrowUpRight, TrendingUp, TrendingDown, Minus,
@@ -134,6 +134,15 @@ function CellComparison({ ipos, metric }: { ipos: (IpoItem | null)[]; metric: Co
 
 export const IpoCompareView: React.FC<IpoCompareViewProps> = ({ ipos, onSelectIpo }) => {
   const [selectedIds, setSelectedIds] = useState<string[]>(['', '', '']);
+
+  // Synchronize selection dynamically when IPO feed loads
+  useEffect(() => {
+    if (selectedIds.every(id => !id) && ipos.length >= 2) {
+      setSelectedIds([ipos[0].id, ipos[1].id, '']);
+    } else if (selectedIds.every(id => !id) && ipos.length === 1) {
+      setSelectedIds([ipos[0].id, '', '']);
+    }
+  }, [ipos, selectedIds]);
 
   const selectedIpos: (IpoItem | null)[] = selectedIds.map(id => ipos.find(i => i.id === id) || null);
   const activeIpos = selectedIpos.filter(Boolean) as IpoItem[];

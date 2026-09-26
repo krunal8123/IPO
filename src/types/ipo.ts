@@ -41,6 +41,7 @@ export interface IpoItem {
   badge?: string;
   logo: string;
   logo_url?: string;
+  logoUrl?: string;
   sector: string;
   priceBandMin: number;
   priceBandMax: number;

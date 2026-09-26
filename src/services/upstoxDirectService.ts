@@ -43,7 +43,7 @@ export function getCachedUpstoxIpos(): IpoItem[] {
     if (Array.isArray(parsed) && parsed.length > 0) {
       return parsed.map(sanitizeIpoData);
     }
-  } catch {}
+  } catch { }
   return [];
 }
 
@@ -51,7 +51,7 @@ export function setCachedUpstoxIpos(ipos: IpoItem[]): void {
   if (typeof window === 'undefined' || !Array.isArray(ipos) || ipos.length === 0) return;
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify(ipos));
-  } catch {}
+  } catch { }
 }
 
 export async function testUpstoxToken(token: string): Promise<{ success: boolean; message: string; count?: number }> {
@@ -103,17 +103,41 @@ function generateLogoSvg(name: string): string {
 }
 
 function resolveCompanyBranding(item: any, cleanName: string): { logo: string; companyWebsite?: string } {
-  const directLogo = item.logo_url || item.logo || item.icon_url || item.image_url || item.company_logo || item.company_logo_url;
+  const directLogo =
+    item.logo_url ||
+    item.logo ||
+    item.logoUrl ||
+    item.icon_url ||
+    item.iconUrl ||
+    item.image_url ||
+    item.imageUrl ||
+    item.company_logo ||
+    item.companyLogo ||
+    item.company_logo_url ||
+    item.companyLogoUrl ||
+    item.brand_logo ||
+    item.brandLogo ||
+    item.media?.logo_url ||
+    item.media?.logo ||
+    item.media?.icon ||
+    item.company_details?.logo ||
+    item.company_details?.logo_url ||
+    item.company_details?.company_logo ||
+    item.company_info?.logo_url ||
+    item.company_info?.logo ||
+    item.details?.logo ||
+    item.details?.logo_url;
+
   if (directLogo && typeof directLogo === 'string' && directLogo.trim().length > 0) {
     return {
       logo: directLogo.trim(),
-      companyWebsite: item.company_website || item.website
+      companyWebsite: item.company_website || item.website || item.company_details?.website
     };
   }
 
   return {
     logo: generateLogoSvg(cleanName),
-    companyWebsite: item.company_website || item.website
+    companyWebsite: item.company_website || item.website || item.company_details?.website
   };
 }
 
@@ -164,6 +188,8 @@ export function mapRawUpstoxToIpoItem(item: any): IpoItem {
     status,
     badge,
     logo: branding.logo,
+    logo_url: branding.logo,
+    logoUrl: branding.logo,
     companyWebsite: branding.companyWebsite,
     sector: item.industry || (isSme ? 'SME Enterprise' : 'Mainboard Corporate'),
     priceBandMin: minPrice,
@@ -255,7 +281,7 @@ export async function syncTokenFromStaticFeed(): Promise<string> {
         return data.access_token;
       }
     }
-  } catch {}
+  } catch { }
   return '';
 }
 

@@ -3,6 +3,22 @@
   "count": 8,
   "data": [
     {
+      "clientId": "11956",
+      "name": "Anand Seamless Limited - SME IPO"
+    },
+    {
+      "clientId": "11954",
+      "name": "Vivekanand Cotspin Limited - SME IPO"
+    },
+    {
+      "clientId": "11955",
+      "name": "FX Multitech Limited - SME IPO"
+    },
+    {
+      "clientId": "11953",
+      "name": "National Stock Exchange Of India Limited - IPO"
+    },
+    {
       "clientId": "11938",
       "name": "Quanto Agroworld Limited - SME IPO"
     },
@@ -17,22 +33,6 @@
     {
       "clientId": "11933",
       "name": "Manipal Payment And Identity Solutions Limited - IPO"
-    },
-    {
-      "clientId": "11934",
-      "name": "Asset Reconstruction Company (India) Limited - IPO"
-    },
-    {
-      "clientId": "11935",
-      "name": "Karamtara Engineering Limited - IPO"
-    },
-    {
-      "clientId": "11931",
-      "name": "Kanohar Electricals Limited - IPO"
-    },
-    {
-      "clientId": "11932",
-      "name": "Glass Wall Systems (India) Limited - IPO"
     }
   ]
 }

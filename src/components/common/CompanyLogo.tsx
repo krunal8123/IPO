@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { IpoItem } from '../../types/ipo';
 
 interface CompanyLogoProps {
@@ -10,55 +10,54 @@ interface CompanyLogoProps {
   className?: string;
 }
 
-const getCompanyDomain = (companyName: string, sym?: string): string => {
-  const clean = (companyName + ' ' + (sym || '')).toLowerCase().replace(/[^a-z0-9]/g, '');
-  if (clean.includes('nse') || clean.includes('nationalstockexchange')) return 'nseindia.com';
-  if (clean.includes('veegaland')) return 'veegaland.in';
-  if (clean.includes('manika')) return 'manikaplastech.com';
-  if (clean.includes('heromotor')) return 'heromotors.com';
-  if (clean.includes('jindal')) return 'jindalsupreme.com';
-  if (clean.includes('rentomojo')) return 'rentomojo.com';
-  if (clean.includes('steamhouse')) return 'steamhouse.in';
-  if (clean.includes('swiggy')) return 'swiggy.com';
-  if (clean.includes('hyundai')) return 'hyundai.com';
-  if (clean.includes('waaree')) return 'waaree.com';
-  if (clean.includes('ntpc')) return 'ntpcgreen.com';
-  if (clean.includes('afcons')) return 'afcons.com';
-  if (clean.includes('tata')) return 'tatacapital.com';
-  if (clean.includes('arcil') || clean.includes('assetreconstruction')) return 'arcil.co.in';
-  if (clean.includes('ssretail') || clean.includes('ssmobile')) return 'ssmobile.com';
-  if (clean.includes('glasswall')) return 'glasswallsystems.in';
-  if (clean.includes('kanohar')) return 'kanohar.com';
-  if (clean.includes('prasol')) return 'prasolchem.com';
-  if (clean.includes('amtech')) return 'amtechesters.com';
-  if (clean.includes('infrax')) return 'infrax.in';
-  if (clean.includes('karamtara')) return 'karamtara.com';
-  if (clean.includes('lccproject')) return 'lccprojects.com';
-  if (clean.includes('manipal')) return 'manipalgroup.info';
-  if (clean.includes('vinod')) return 'vinodtexworld.com';
-  if (clean.includes('quanto')) return 'quantoagroworld.com';
-  if (clean.includes('shakti')) return 'shaktipolytarp.com';
-  if (clean.includes('vama')) return 'vamawovenfab.com';
-  if (clean.includes('maharaja')) return 'maharajaspeedex.com';
-  if (clean.includes('omgalaxy')) return 'omgalaxy.in';
-  if (clean.includes('raksan')) return 'raksantransformers.com';
-  if (clean.includes('century')) return 'centurybusinessmedia.com';
-  if (clean.includes('injecto')) return 'injecto.in';
-  if (clean.includes('apana')) return 'apanalogistics.com';
-  if (clean.includes('pranav')) return 'pranavconstructions.com';
-  if (clean.includes('sonaselection')) return 'sonaselection.com';
-  if (clean.includes('kheria')) return 'kheriaautocomp.com';
-  if (clean.includes('spectra')) return 'spectratechnology.com';
-  if (clean.includes('axiom')) return 'axiomgas.com';
-  if (clean.includes('aonesteel')) return 'aonesteels.com';
-  if (clean.includes('parle')) return 'parleproducts.com';
-  if (clean.includes('jio')) return 'jio.com';
-  if (clean.includes('flipkart')) return 'flipkart.com';
-  if (clean.includes('sbi')) return 'sbimf.com';
+// Dynamically generate fallback domains by algorithmically stripping corporate noise (no hardcoded lists)
+function getDynamicDomainCandidates(rawLogoUrl: string, companyName: string, sym?: string): string[] {
+  const candidates: string[] = [];
 
-  const rawClean = companyName.toLowerCase().replace(/limited|pvt|ltd|india|ipo|\(.*?\)/gi, '').replace(/[^a-z0-9]/g, '');
-  return `${rawClean}.com`;
-};
+  // 1. If rawLogo is a Google Favicon URL, extract the domain parameter
+  if (rawLogoUrl && rawLogoUrl.includes('domain=')) {
+    const match = rawLogoUrl.match(/domain=([^&]+)/);
+    if (match && match[1]) {
+      const dom = match[1].toLowerCase().trim();
+      const base = dom.replace(/\.(com|in|co\.in|org|net|io|ai)$/i, '');
+
+      // Dynamically strip legal/corporate suffixes that often cause 404s
+      const cleanBase = base
+        .replace(/(indialimited|consultingserviceslimited|technologieslimited|industrieslimited|solutionslimited|holdingslimited|enterpriseslimited|serviceslimited|limited|pvt|ltd|india|technologies|solutions|infrastructure|logistics|consulting|services|industries|holdings|enterprises|international|corp|group)/gi, '')
+        .trim();
+
+      if (cleanBase && cleanBase !== base) {
+        candidates.push(`${cleanBase}.com`);
+        candidates.push(`${cleanBase}.in`);
+        candidates.push(`${cleanBase}group.com`);
+      }
+    }
+  }
+
+  // 2. Dynamically derive from company name
+  if (companyName) {
+    const cleanWords = companyName
+      .toLowerCase()
+      .replace(/limited|pvt|ltd|india|ipo|\(.*?\)/gi, '')
+      .trim()
+      .replace(/[^a-z0-9]/g, '');
+
+    if (cleanWords && !candidates.includes(`${cleanWords}.com`)) {
+      candidates.push(`${cleanWords}.com`);
+      candidates.push(`${cleanWords}.in`);
+    }
+  }
+
+  // 3. From symbol if available
+  if (sym) {
+    const cleanSym = sym.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (cleanSym && !candidates.includes(`${cleanSym}.com`)) {
+      candidates.push(`${cleanSym}.com`);
+    }
+  }
+
+  return candidates;
+}
 
 export const CompanyLogo: React.FC<CompanyLogoProps> = ({
   ipo,
@@ -68,10 +67,15 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = ({
   size = 'md',
   className = ''
 }) => {
-  const logo = directLogo || ipo?.logo_url || (ipo as any)?.logo;
+  // Bind logo dynamically from API response
+  const rawLogo = directLogo || ipo?.logo || ipo?.logo_url || (ipo as any)?.logoUrl || (ipo as any)?.company_logo || (ipo as any)?.icon_url || '';
   const name = directName || ipo?.name || '';
   const symbol = directSymbol || ipo?.symbol || '';
   const [errorCount, setErrorCount] = useState(0);
+
+  useEffect(() => {
+    setErrorCount(0);
+  }, [rawLogo, name, symbol]);
 
   const sizeClasses = {
     sm: 'w-9 h-9 rounded-xl text-xs',
@@ -81,11 +85,11 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = ({
   };
 
   const cleanName = (name || '').replace(/Limited|Pvt|Ltd|India|IPO|\(.*?\)/gi, '').trim();
-  const initials = symbol 
+  const initials = symbol
     ? symbol.slice(0, 2).toUpperCase()
     : cleanName.split(/\s+/).length >= 2
-    ? (cleanName.split(/\s+/)[0][0] + cleanName.split(/\s+/)[1][0]).toUpperCase()
-    : (cleanName.slice(0, 2) || 'IP').toUpperCase();
+      ? (cleanName.split(/\s+/)[0][0] + cleanName.split(/\s+/)[1][0]).toUpperCase()
+      : (cleanName.slice(0, 2) || 'IP').toUpperCase();
 
   const colors = [
     'from-blue-600 to-indigo-600',
@@ -97,28 +101,37 @@ export const CompanyLogo: React.FC<CompanyLogoProps> = ({
   const charCodeSum = (name || '').split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
   const gradient = colors[charCodeSum % colors.length];
 
-  // Resolve best logo source:
-  // 1. Direct real image URL if provided and not an initials SVG
-  // 2. Official Google favicon via resolved company domain
-  // 3. Unavatar fallback
-  const domain = getCompanyDomain(name, symbol);
-  const hasDirectHttpLogo = Boolean(logo && logo.startsWith('http'));
+  // Dynamic fallback candidate URLs
+  const dynamicCandidates = useMemo(() => {
+    return getDynamicDomainCandidates(rawLogo, name, symbol);
+  }, [rawLogo, name, symbol]);
 
+  // Determine active image source dynamically:
+  // - errorCount 0: Always use the exact logo coming from API response!
+  // - errorCount 1: If API logo fails, try dynamically cleaned Google Favicon
+  // - errorCount 2: Try next dynamic candidate or unavatar
+  // - errorCount >= 3: Fall back to styled gradient initials
   let activeImgSrc: string | null = null;
   if (errorCount === 0) {
-    if (hasDirectHttpLogo) {
-      activeImgSrc = logo!;
-    } else {
-      activeImgSrc = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+    if (rawLogo && rawLogo.trim().length > 0) {
+      activeImgSrc = rawLogo.trim();
+    } else if (dynamicCandidates.length > 0) {
+      activeImgSrc = `https://www.google.com/s2/favicons?domain=${dynamicCandidates[0]}&sz=128`;
     }
   } else if (errorCount === 1) {
-    activeImgSrc = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+    if (dynamicCandidates.length > 0) {
+      activeImgSrc = `https://www.google.com/s2/favicons?domain=${dynamicCandidates[0]}&sz=128`;
+    }
   } else if (errorCount === 2) {
-    activeImgSrc = `https://unavatar.io/${domain}?fallback=false`;
+    if (dynamicCandidates.length > 1) {
+      activeImgSrc = `https://www.google.com/s2/favicons?domain=${dynamicCandidates[1]}&sz=128`;
+    } else if (dynamicCandidates.length > 0) {
+      activeImgSrc = `https://unavatar.io/${dynamicCandidates[0]}?fallback=false`;
+    }
   }
 
   return (
-    <div 
+    <div
       className={`${sizeClasses[size]} bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700/80 flex items-center justify-center shrink-0 shadow-sm overflow-hidden p-1 select-none ${className}`}
     >
       {activeImgSrc && errorCount < 3 ? (

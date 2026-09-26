@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { IpoItem } from '../../types/ipo';
 import {
   TrendingUp, TrendingDown, Target, Zap, ShieldCheck,
@@ -29,19 +29,37 @@ export const GmpHistoryChart: React.FC<GmpHistoryChartProps> = ({ ipos, onSelect
   const [selectedIpoId, setSelectedIpoId] = useState<string>(ipos[0]?.id || '');
   const [viewSubSection, setViewSubSection] = useState<'progression' | 'radar'>('progression');
 
+  // Synchronize selection dynamically when IPO feed loads
+  useEffect(() => {
+    if (!selectedIpoId && ipos.length > 0) {
+      setSelectedIpoId(ipos[0].id);
+    }
+  }, [ipos, selectedIpoId]);
+
   const activeIpo = useMemo(() => {
     return ipos.find(i => i.id === selectedIpoId) || ipos[0];
   }, [ipos, selectedIpoId]);
 
-  // Generate realistic daily GMP progression data if not directly provided on ipo
+  // Generate dynamic daily GMP progression data from live IPO GMP
   const progressionData = useMemo(() => {
     if (!activeIpo) return [];
     
-    // Check if IPO already has gmpHistory array
-    const baseGmp = activeIpo.gmp.gmpPrice || 45;
-    const basePrice = activeIpo.priceBandMax || 100;
+    const baseGmp = activeIpo.gmp?.gmpPrice || 0;
+    const basePrice = activeIpo.priceBandMax || activeIpo.cutOffPrice || 1;
+
+    if (baseGmp <= 0) {
+      return [
+        { day: 'Day -6', gmp: 0, change: 0, percent: '0.0', barHeight: 8, estimatedPrice: basePrice },
+        { day: 'Day -5', gmp: 0, change: 0, percent: '0.0', barHeight: 8, estimatedPrice: basePrice },
+        { day: 'Day -4', gmp: 0, change: 0, percent: '0.0', barHeight: 8, estimatedPrice: basePrice },
+        { day: 'Day -3', gmp: 0, change: 0, percent: '0.0', barHeight: 8, estimatedPrice: basePrice },
+        { day: 'Day -2', gmp: 0, change: 0, percent: '0.0', barHeight: 8, estimatedPrice: basePrice },
+        { day: 'Yesterday', gmp: 0, change: 0, percent: '0.0', barHeight: 8, estimatedPrice: basePrice },
+        { day: 'Today (Live)', gmp: 0, change: 0, percent: '0.0', barHeight: 8, estimatedPrice: basePrice },
+      ];
+    }
     
-    // Daily history points (e.g. 7 days leading to close)
+    // Daily history points leading to current live rate
     const points = [
       { day: 'Day -6', gmp: Math.round(baseGmp * 0.72), change: 0 },
       { day: 'Day -5', gmp: Math.round(baseGmp * 0.78), change: Math.round(baseGmp * 0.06) },
@@ -105,11 +123,11 @@ export const GmpHistoryChart: React.FC<GmpHistoryChartProps> = ({ ipos, onSelect
   // Summary Radar Stats
   const radarStats = useMemo(() => {
     if (listedComparisons.length === 0) {
-      return { total: 0, spotOnRate: 85, avgVariance: 3.2 };
+      return { total: 0, spotOnRate: 0, avgVariance: 0 };
     }
     const spotOnCount = listedComparisons.filter(c => Math.abs(c.variancePercent) <= 6).length;
     const spotOnRate = Math.round((spotOnCount / listedComparisons.length) * 100);
-    const avgVariance = (listedComparisons.reduce((acc, c) => acc + Math.abs(c.variancePercent), 0) / listedComparisons.length).toFixed(1);
+    const avgVariance = parseFloat((listedComparisons.reduce((acc, c) => acc + Math.abs(c.variancePercent), 0) / listedComparisons.length).toFixed(1));
 
     return {
       total: listedComparisons.length,
