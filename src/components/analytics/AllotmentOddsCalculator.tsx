@@ -54,13 +54,122 @@ function atLeastOneProb(p: number, n: number): number {
   return 1 - Math.pow(1 - p, n);
 }
 
-export const AllotmentOddsCalculator: React.FC<AllotmentOddsCalculatorProps> = ({ ipos }) => {
-  const liveAndUpcoming = useMemo(() =>
-    ipos.filter(i => i.status === 'live' || i.status === 'upcoming'),
-    [ipos]
-  );
+// Helper to parse diverse date strings
+function parseDateBoundary(dateStr?: string, defaultHour: number = 0, defaultMin: number = 0): Date | null {
+  if (!dateStr || dateStr === 'Active' || dateStr.includes('T+') || dateStr === 'N/A' || dateStr === 'Declared') return null;
+  const parts = dateStr.trim().split(/[-/ ]+/);
+  if (parts.length === 3 && parts[0].length <= 2 && parts[2].length === 4 && !isNaN(Number(parts[0])) && !isNaN(Number(parts[1]))) {
+    const d = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10) - 1;
+    const y = parseInt(parts[2], 10);
+    const dt = new Date(y, m, d, defaultHour, defaultMin, 0, 0);
+    if (!isNaN(dt.getTime())) return dt;
+  }
+  const d = new Date(dateStr);
+  if (!isNaN(d.getTime())) {
+    if (!dateStr.includes(':')) {
+      d.setHours(defaultHour, defaultMin, 0, 0);
+    }
+    return d;
+  }
+  return null;
+}
 
-  const [selectedId, setSelectedId] = useState<string>(liveAndUpcoming[0]?.id || '');
+type IpoCalcEligibility = 'live' | 'recently_closed' | 'exclude';
+
+function getIpoEligibility(ipo: IpoItem, now: Date = new Date()): IpoCalcEligibility {
+  let openH = 10, openM = 0;
+  if (ipo.dailyStartTime) {
+    const parts = ipo.dailyStartTime.split(':').map(Number);
+    if (!isNaN(parts[0])) openH = parts[0];
+    if (!isNaN(parts[1])) openM = parts[1];
+  }
+
+  let closeH = 17, closeM = 0;
+  if (ipo.dailyEndTime) {
+    const parts = ipo.dailyEndTime.split(':').map(Number);
+    if (!isNaN(parts[0])) closeH = parts[0];
+    if (!isNaN(parts[1])) closeM = parts[1];
+  }
+
+  const openDate = parseDateBoundary(ipo.openDate, openH, openM);
+  const closeDate = parseDateBoundary(ipo.closeDate, closeH, closeM);
+  const listingDate = parseDateBoundary(ipo.listingDate, 10, 0);
+
+  // 1. Exclude upcoming IPOs (bidding hasn't started yet)
+  if (openDate && now < openDate) {
+    return 'exclude';
+  }
+  if (ipo.status === 'upcoming' && (!openDate || now < openDate)) {
+    return 'exclude';
+  }
+
+  // 2. Check if currently LIVE (within open and close window)
+  if (openDate && closeDate && now >= openDate && now <= closeDate) {
+    return 'live';
+  }
+  if (ipo.status === 'live' && (!closeDate || now <= closeDate)) {
+    return 'live';
+  }
+
+  // 3. Check if CLOSED / RECENTLY CLOSED
+  const isClosed = (closeDate && now > closeDate) || ipo.status === 'closed' || ipo.status === 'listed';
+  if (isClosed) {
+    // Recently closed criteria:
+    // a) Closed within the last 30 days based on closeDate
+    if (closeDate) {
+      const daysSinceClose = (now.getTime() - closeDate.getTime()) / (1000 * 60 * 60 * 24);
+      if (daysSinceClose >= 0 && daysSinceClose <= 30) {
+        return 'recently_closed';
+      }
+    } else if (listingDate) {
+      // If closeDate wasn't parsed, check listing date proximity (within 14 days)
+      const daysSinceListing = (now.getTime() - listingDate.getTime()) / (1000 * 60 * 60 * 24);
+      if (daysSinceListing <= 14) {
+        return 'recently_closed';
+      }
+    } else if (ipo.status === 'closed') {
+      return 'recently_closed';
+    }
+  }
+
+  return 'exclude';
+}
+
+export const AllotmentOddsCalculator: React.FC<AllotmentOddsCalculatorProps> = ({ ipos }) => {
+  const eligibleIpos = useMemo(() => {
+    const live: IpoItem[] = [];
+    const closed: IpoItem[] = [];
+    const now = new Date();
+
+    ipos.forEach(item => {
+      const eligibility = getIpoEligibility(item, now);
+      if (eligibility === 'live') live.push(item);
+      else if (eligibility === 'recently_closed') closed.push(item);
+    });
+
+    // Sort live by closeDate ascending (earliest closing first)
+    live.sort((a, b) => {
+      const ta = parseDateBoundary(a.closeDate, 17, 0)?.getTime() || 0;
+      const tb = parseDateBoundary(b.closeDate, 17, 0)?.getTime() || 0;
+      return ta - tb;
+    });
+
+    // Sort recently closed by closeDate descending (most recently closed first)
+    closed.sort((a, b) => {
+      const ta = parseDateBoundary(a.closeDate, 17, 0)?.getTime() || 0;
+      const tb = parseDateBoundary(b.closeDate, 17, 0)?.getTime() || 0;
+      return tb - ta;
+    });
+
+    return {
+      all: [...live, ...closed],
+      live,
+      closed,
+    };
+  }, [ipos]);
+
+  const [selectedId, setSelectedId] = useState<string>('');
   const [familyCount, setFamilyCount] = useState<number>(3);
   const [lotsPerApp, setLotsPerApp] = useState<number>(1);
   const [hniLoanRate, setHniLoanRate] = useState<number>(9.5);
@@ -68,14 +177,32 @@ export const AllotmentOddsCalculator: React.FC<AllotmentOddsCalculatorProps> = (
   const [listingPriceExpected, setListingPriceExpected] = useState<number>(0);
   const [hniSubMultiplier, setHniSubMultiplier] = useState<number>(30);
 
-  // Synchronize selection dynamically when IPO feed loads
+  // Synchronize selection dynamically when IPO feed loads or changes
   useEffect(() => {
-    if (!selectedId && liveAndUpcoming.length > 0) {
-      setSelectedId(liveAndUpcoming[0].id);
+    if ((!selectedId || !eligibleIpos.all.some(i => i.id === selectedId)) && eligibleIpos.all.length > 0) {
+      setSelectedId(eligibleIpos.all[0].id);
     }
-  }, [liveAndUpcoming, selectedId]);
+  }, [eligibleIpos, selectedId]);
 
-  const ipo = liveAndUpcoming.find(i => i.id === selectedId) || liveAndUpcoming[0];
+  const ipo = eligibleIpos.all.find(i => i.id === selectedId) || eligibleIpos.all[0];
+
+  // Dynamically update HNI multiplier and expected listing price when IPO selection changes
+  useEffect(() => {
+    if (ipo) {
+      if (ipo.subscription?.nii > 0 || ipo.subscription?.total > 0) {
+        setHniSubMultiplier(Math.max(1, Math.round(ipo.subscription.nii || ipo.subscription.total)));
+      }
+      const estPrice = ipo.gmp?.estimatedListingPrice || (ipo.priceBandMax + (ipo.gmp?.gmpPrice || 0));
+      if (estPrice > 0) {
+        setListingPriceExpected(estPrice);
+      }
+    }
+  }, [ipo?.id]);
+
+  const isLive = useMemo(() => {
+    if (!ipo) return false;
+    return getIpoEligibility(ipo, new Date()) === 'live';
+  }, [ipo]);
 
   const odds = useMemo(() => {
     if (!ipo) return null;
@@ -142,19 +269,46 @@ export const AllotmentOddsCalculator: React.FC<AllotmentOddsCalculatorProps> = (
 
           {/* IPO Selector */}
           <div>
-            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wide">
-              Select IPO
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                Select IPO
+              </label>
+              {ipo && (
+                <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full inline-flex items-center gap-1.5 ${
+                  isLive
+                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                    : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
+                }`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${isLive ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+                  {isLive ? `LIVE (Closes ${ipo.closeDate})` : `CLOSED (Allotment: ${ipo.allotmentDate || 'T+1'})`}
+                </span>
+              )}
+            </div>
             <div className="relative">
               <select
                 value={selectedId}
                 onChange={e => setSelectedId(e.target.value)}
-                className="w-full appearance-none pl-3 pr-8 py-2.5 text-sm rounded-xl bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500/50 cursor-pointer"
+                className="w-full appearance-none pl-3 pr-8 py-2.5 text-sm rounded-xl bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500/50 cursor-pointer font-medium"
               >
-                {liveAndUpcoming.length === 0 && <option value="">No live/upcoming IPOs</option>}
-                {liveAndUpcoming.map(i => (
-                  <option key={i.id} value={i.id}>{i.name} ({i.category.toUpperCase()})</option>
-                ))}
+                {eligibleIpos.all.length === 0 && <option value="">No live or recently closed IPOs</option>}
+                {eligibleIpos.live.length > 0 && (
+                  <optgroup label="🟢 Live Bidding IPOs">
+                    {eligibleIpos.live.map(i => (
+                      <option key={i.id} value={i.id}>
+                        {i.name} ({i.category.toUpperCase()}) — Closes {i.closeDate}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+                {eligibleIpos.closed.length > 0 && (
+                  <optgroup label="✓ Recently Closed IPOs (Awaiting Allotment / Listing)">
+                    {eligibleIpos.closed.map(i => (
+                      <option key={i.id} value={i.id}>
+                        {i.name} ({i.category.toUpperCase()}) — Closed {i.closeDate}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
               </select>
               <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
             </div>
@@ -165,7 +319,11 @@ export const AllotmentOddsCalculator: React.FC<AllotmentOddsCalculatorProps> = (
               {/* Key stats */}
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { label: 'Retail Sub', value: `${ipo.subscription.retail.toFixed(1)}x`, color: 'text-rose-600 dark:text-rose-400' },
+                  { 
+                    label: isLive ? 'Retail Sub (Live)' : 'Retail Sub (Final)', 
+                    value: `${ipo.subscription.retail.toFixed(1)}x`, 
+                    color: 'text-rose-600 dark:text-rose-400' 
+                  },
                   { label: 'Odds Ratio', value: odds.oddsRatio, color: 'text-amber-600 dark:text-amber-400' },
                   { label: 'Win Chance', value: odds.winOddsDisplay, color: 'text-violet-600 dark:text-violet-400' },
                 ].map(s => (
@@ -244,7 +402,7 @@ export const AllotmentOddsCalculator: React.FC<AllotmentOddsCalculatorProps> = (
             </>
           ) : (
             <div className="text-center py-8 text-slate-400 text-sm">
-              No live or upcoming IPOs available.
+              No live or recently closed IPOs available.
             </div>
           )}
         </div>
