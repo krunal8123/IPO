@@ -6,11 +6,11 @@ const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 
 let gmpCache = [];
 let lastGmpFetchTime = 0;
-const CACHE_TTL_MS = 2 * 60 * 1000; // 2 minutes live cache
+const CACHE_TTL_MS = 90 * 1000; // 90 seconds live cache
 
-export async function fetchLiveGmp() {
+export async function fetchLiveGmp(force = false) {
   const now = Date.now();
-  if (gmpCache && gmpCache.length > 0 && (now - lastGmpFetchTime < CACHE_TTL_MS)) {
+  if (!force && gmpCache && gmpCache.length > 0 && (now - lastGmpFetchTime < CACHE_TTL_MS)) {
     return gmpCache;
   }
 

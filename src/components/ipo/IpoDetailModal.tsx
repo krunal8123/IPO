@@ -5,9 +5,9 @@ import { CompanyLogo } from '../common/CompanyLogo';
 import { useWatchlist } from '../../context/WatchlistContext';
 import { liveIpoService } from '../../services/liveIpoService';
 import { HealthScorecard } from './HealthScorecard';
-import { 
-  X, Bookmark, Calendar, CheckCircle2, Building2, ShieldCheck, 
-  TrendingUp, BarChart3, AlertCircle, Sparkles, ArrowUpRight, 
+import {
+  X, Bookmark, Calendar, CheckCircle2, Building2, ShieldCheck,
+  TrendingUp, BarChart3, AlertCircle, Sparkles, ArrowUpRight,
   Clock, Check, Flame, FileText, DollarSign, AlertTriangle, Info,
   FileDown, Mail, Phone, ExternalLink, Globe, Copy, CheckCheck,
   Calculator, Layers, Users, PieChart, RefreshCw
@@ -20,8 +20,8 @@ interface IpoDetailModalProps {
   onOpenAllotment?: (ipo: IpoItem) => void;
 }
 
-export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({ 
-  ipo, 
+export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({
+  ipo,
   onClose,
   onOpenSubscription,
   onOpenAllotment
@@ -111,7 +111,7 @@ export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({
 
     // Mainboard calculations
     const maxRetailLots = Math.max(1, Math.floor(200000 / (lotSize * price)));
-    
+
     rows.push({
       category: 'Retail (Minimum)',
       lots: 1,
@@ -289,22 +289,22 @@ export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({
   const maxInvest = minInvest * maxRetailLots;
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-[80] flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in"
       onClick={onClose}
     >
-      <div 
+      <div
         className="w-full max-w-3xl max-h-[92vh] sm:max-h-[90vh] rounded-2xl sm:rounded-3xl overflow-hidden flex flex-col shadow-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Top Header with Logo and Company Identity */}
         <div className="p-3.5 sm:p-5 border-b border-slate-200 dark:border-slate-800 flex items-start justify-between gap-3 sm:gap-4 bg-slate-50/90 dark:bg-slate-950/90">
           <div className="flex items-center gap-3 min-w-0">
-            <CompanyLogo 
-              logo={activeIpo.logo} 
-              name={activeIpo.name} 
-              symbol={activeIpo.symbol} 
-              size="md" 
+            <CompanyLogo
+              logo={activeIpo.logo}
+              name={activeIpo.name}
+              symbol={activeIpo.symbol}
+              size="md"
               className="ring-2 ring-indigo-500/20 shrink-0"
             />
             <div className="min-w-0">
@@ -315,13 +315,12 @@ export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({
                 <Badge variant={activeIpo.category === 'mainboard' ? 'primary' : 'purple'} size="sm">
                   {activeIpo.category.toUpperCase()}
                 </Badge>
-                <span className={`text-[9px] sm:text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
-                  activeIpo.status === 'live' 
-                    ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 animate-pulse' 
+                <span className={`text-[9px] sm:text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${activeIpo.status === 'live'
+                    ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 animate-pulse'
                     : activeIpo.status === 'upcoming'
-                    ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400'
-                    : 'bg-indigo-500/20 text-indigo-600 dark:text-indigo-400'
-                }`}>
+                      ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400'
+                      : 'bg-indigo-500/20 text-indigo-600 dark:text-indigo-400'
+                  }`}>
                   {activeIpo.status === 'live' ? 'Bidding Live' : activeIpo.status === 'upcoming' ? 'Upcoming' : 'Closed / Listed'}
                 </span>
 
@@ -342,7 +341,7 @@ export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({
                 <span>Symbol: <strong className="text-slate-800 dark:text-slate-200 font-mono">{activeIpo.symbol}</strong></span>
                 <span>•</span>
                 <span>Exchange: <strong className="text-slate-800 dark:text-slate-200">{activeIpo.exchange.join(', ')}</strong></span>
-                
+
                 {activeIpo.isin && (
                   <>
                     <span className="hidden sm:inline">•</span>
@@ -379,11 +378,10 @@ export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               onClick={() => toggleWatchlist(activeIpo.id)}
-              className={`p-2 sm:p-2.5 rounded-xl transition-colors cursor-pointer ${
-                bookmarked
+              className={`p-2 sm:p-2.5 rounded-xl transition-colors cursor-pointer ${bookmarked
                   ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-              }`}
+                }`}
               title={bookmarked ? "Remove from Watchlist" : "Bookmark to Watchlist"}
             >
               <Bookmark className={`w-4 h-4 ${bookmarked ? 'fill-current' : ''}`} />
@@ -413,11 +411,10 @@ export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({
                 <button
                   key={tab.id}
                   onClick={() => setActiveSubTab(tab.id as any)}
-                  className={`flex-1 min-w-[62px] sm:min-w-0 py-2 sm:py-2.5 px-1.5 sm:px-3 text-center text-xs font-bold rounded-xl transition-all whitespace-nowrap cursor-pointer select-none ${
-                    isActive
+                  className={`flex-1 min-w-[62px] sm:min-w-0 py-2 sm:py-2.5 px-1.5 sm:px-3 text-center text-xs font-bold rounded-xl transition-all whitespace-nowrap cursor-pointer select-none ${isActive
                       ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                  }`}
+                    }`}
                 >
                   <span className="sm:hidden">{tab.short}</span>
                   <span className="hidden sm:inline">{tab.full}</span>
@@ -566,8 +563,8 @@ export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({
                   <div>
                     <span className="text-[10px] text-slate-400 block">Max Retail Bid</span>
                     <strong className="text-slate-800 dark:text-slate-200">
-                      {activeIpo.category === 'sme' 
-                        ? `₹${minInvest.toLocaleString('en-IN')} (1 Lot)` 
+                      {activeIpo.category === 'sme'
+                        ? `₹${minInvest.toLocaleString('en-IN')} (1 Lot)`
                         : `₹${maxInvest.toLocaleString('en-IN')} (${maxRetailLots} Lots)`}
                     </strong>
                   </div>
@@ -895,13 +892,12 @@ export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({
                 {timelineSteps.map((step, idx) => (
                   <div key={idx} className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs">
                     <div className="flex items-start gap-3">
-                      <span className={`absolute -left-6 w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                        step.status === 'completed'
+                      <span className={`absolute -left-6 w-4 h-4 rounded-full border-2 flex items-center justify-center ${step.status === 'completed'
                           ? 'bg-emerald-500 border-emerald-200 dark:border-emerald-900'
                           : step.status === 'active'
-                          ? 'bg-amber-500 border-amber-200 dark:border-amber-900 animate-pulse'
-                          : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700'
-                      }`} />
+                            ? 'bg-amber-500 border-amber-200 dark:border-amber-900 animate-pulse'
+                            : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700'
+                        }`} />
                       <div>
                         <span className="font-bold text-slate-900 dark:text-white block">{step.label}</span>
                         <span className="text-[10px] text-slate-400">{step.sub}</span>
@@ -910,13 +906,12 @@ export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({
 
                     <div className="flex items-center gap-2 pl-7 sm:pl-0">
                       <span className="font-extrabold text-indigo-600 dark:text-indigo-400">{step.date}</span>
-                      <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
-                        step.status === 'completed'
+                      <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${step.status === 'completed'
                           ? 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-300'
                           : step.status === 'active'
-                          ? 'bg-amber-100 dark:bg-amber-950/50 text-amber-600 dark:text-amber-300'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
-                      }`}>
+                            ? 'bg-amber-100 dark:bg-amber-950/50 text-amber-600 dark:text-amber-300'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                        }`}>
                         {step.status === 'completed' ? 'Completed' : step.status === 'active' ? 'In Progress' : 'Scheduled'}
                       </span>
                     </div>
@@ -929,7 +924,7 @@ export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({
                   <strong>Registrar:</strong> {activeIpo.registrar} is officially appointed by SEBI to process applications and manage allotments.
                 </div>
                 {activeIpo.status === 'live' && onOpenSubscription && (
-                  <button 
+                  <button
                     onClick={() => { onClose(); onOpenSubscription(activeIpo); }}
                     className="shrink-0 px-3 py-1 rounded-lg bg-indigo-600 text-white font-bold text-[11px] hover:bg-indigo-700 cursor-pointer"
                   >
@@ -937,7 +932,7 @@ export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({
                   </button>
                 )}
                 {(activeIpo.status === 'closed' || activeIpo.status === 'listed') && onOpenAllotment && (
-                  <button 
+                  <button
                     onClick={() => { onClose(); onOpenAllotment(activeIpo); }}
                     className="shrink-0 px-3 py-1 rounded-lg bg-indigo-600 text-white font-bold text-[11px] hover:bg-indigo-700 cursor-pointer"
                   >
@@ -959,7 +954,7 @@ export const IpoDetailModal: React.FC<IpoDetailModalProps> = ({
                   </div>
                   <span className="text-[10px] text-slate-400">Verified via Grey Market Brokers: {activeIpo.gmp.lastUpdated}</span>
                 </div>
-                
+
                 <div className="text-right">
                   <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Estimated Gain Per Retail Lot</span>
                   <div className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">

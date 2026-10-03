@@ -319,10 +319,12 @@ import { sanitizeIpoData } from './ipoSanitizer';
 
 export const liveIpoService = {
   // Fetch real-time IPOs directly from Upstox API / backend
-  async getLiveIpos(): Promise<LiveFetchResult> {
+  // Set force=true to bypass all backend caches and guarantee fresh data
+  async getLiveIpos(force = false): Promise<LiveFetchResult> {
     // 1. Direct browser fetch to api.upstox.com if Upstox token is present (zero server in between)
     const storedToken = getStoredUpstoxToken();
-    if (storedToken) {
+    if (storedToken && !force) {
+      // Skip direct Upstox path on force-refresh since we want backend re-scraping too
       try {
         const directResult = await fetchUpstoxDirectIpos(storedToken);
         if (directResult.success && directResult.data.length > 0) {
@@ -338,9 +340,23 @@ export const liveIpoService = {
       }
     }
 
-    // 2. Try primary API endpoint (local dev server on localhost or configured backend)
+    // 2. Try primary API endpoint — pass force=true to bypass all backend caches
     try {
-      const res = await fetch(`${getApiBaseUrl()}/ipos`, { signal: AbortSignal.timeout(4000) });
+      const apiUrl = force
+        ? `${getApiBaseUrl()}/ipos?force=true&_t=${Date.now()}`
+        : `${getApiBaseUrl()}/ipos`;
+
+      const fetchHeaders: Record<string, string> = { 'Accept': 'application/json' };
+      if (force) {
+        fetchHeaders['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+        fetchHeaders['Pragma'] = 'no-cache';
+      }
+
+      const res = await fetch(apiUrl, {
+        headers: fetchHeaders,
+        cache: force ? 'no-store' : 'default',
+        signal: AbortSignal.timeout(force ? 20000 : 8000)  // longer timeout for cold fetch
+      });
       if (res.ok) {
         const contentType = res.headers.get('content-type') || '';
         if (contentType.includes('application/json')) {
@@ -359,6 +375,7 @@ export const liveIpoService = {
       }
     } catch (err) {
       // Direct API unreachable, fall through
+      console.warn('[LiveService] Backend API fetch failed:', err);
     }
 
     // 3. Fetch fresh JSON from GitHub Pages CDN (cache-busted) — always reflects the latest

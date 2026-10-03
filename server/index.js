@@ -247,15 +247,17 @@ app.get('/api/upstox/callback', async (req, res) => {
 
 // GET /api/ipos - Primary Hybrid Feed (Upstox Official + Live GMP + KFintech + Live Subscription)
 app.get('/api/ipos', async (req, res) => {
+  // Support ?force=true to bypass all caches and fetch fresh data
+  const force = req.query.force === 'true' || req.query.force === '1';
   try {
     const [liveGmpList, kfinIssues, liveSubscriptions] = await Promise.all([
-      fetchLiveGmp(),
-      fetchKfinIssues(),
+      fetchLiveGmp(force),
+      fetchKfinIssues(force),
       fetchLiveSubscription()
     ]);
 
     // Try official Upstox API first
-    const upstoxList = await fetchUpstoxIpos(kfinIssues);
+    const upstoxList = await fetchUpstoxIpos(kfinIssues, force);
     let source = 'Live Real-Time Market Feed';
 
     if (Array.isArray(upstoxList) && upstoxList.length > 0) {
@@ -298,6 +300,7 @@ app.get('/api/ipos', async (req, res) => {
       success: true,
       timestamp: new Date().toISOString(),
       source,
+      forced: force,
       count: normalizedIpos.length,
       data: normalizedIpos
     });
@@ -529,11 +532,11 @@ app.post('/api/allotment/check', async (req, res) => {
         priceBandMax: targetIpo?.priceBandMax || 140
       };
     } else {
-      // 2. Check if ipoId directly matches a registrar issue ID
+      // 2. Check if ipoId directly matches a registrar issue ID — always fetch fresh on allotment check
       const [bigshareIssues, mufgIssues, kfinIssues] = await Promise.all([
         fetchBigshareIssues(),
-        fetchMufgIssues(),
-        fetchKfinIssues()
+        fetchMufgIssues(true),   // force-fresh for allotment check
+        fetchKfinIssues(true)    // force-fresh for allotment check
       ]);
 
       const matchedBigshare = bigshareIssues.find(b => b.companyId === String(ipoId));
@@ -551,6 +554,18 @@ app.post('/api/allotment/check', async (req, res) => {
           lotSize: targetIpo?.lotSize || 100,
           priceBandMax: targetIpo?.priceBandMax || 140
         };
+      } else if (matchedKfin) {
+        // KFintech checked before MUFG (more common registrar)
+        targetIpo = {
+          id: matchedKfin.clientId,
+          name: ipoName || matchedKfin.name,
+          registrar: 'KFin Technologies Ltd',
+          kfinClientId: matchedKfin.clientId,
+          status: targetIpo?.status || 'listed',
+          allotmentDate: targetIpo?.allotmentDate || 'Declared',
+          lotSize: targetIpo?.lotSize || 100,
+          priceBandMax: targetIpo?.priceBandMax || 140
+        };
       } else if (matchedMufg) {
         targetIpo = {
           id: matchedMufg.clientId,
@@ -562,43 +577,32 @@ app.post('/api/allotment/check', async (req, res) => {
           lotSize: targetIpo?.lotSize || 100,
           priceBandMax: targetIpo?.priceBandMax || 140
         };
-      } else if (matchedKfin) {
-        targetIpo = {
-          id: matchedKfin.clientId,
-          name: ipoName || matchedKfin.name,
-          registrar: 'KFin Technologies Ltd',
-          kfinClientId: matchedKfin.clientId,
-          status: targetIpo?.status || 'listed',
-          allotmentDate: targetIpo?.allotmentDate || 'Declared',
-          lotSize: targetIpo?.lotSize || 100,
-          priceBandMax: targetIpo?.priceBandMax || 140
-        };
       } else if (targetIpo && targetIpo.registrar) {
         const reg = targetIpo.registrar.toLowerCase();
         if (reg.includes('bigshare')) {
           const bsMatch = await findBigshareIssue(targetIpo.name);
           targetIpo.bigshareCompanyId = bsMatch?.companyId || targetIpo.bigshareCompanyId;
         } else if (reg.includes('mufg') || reg.includes('link intime')) {
-          const mufgMatch = await findMufgIssue(targetIpo.name);
+          const mufgMatch = await findMufgIssue(targetIpo.name, '', true);
           targetIpo.mufgClientId = mufgMatch?.clientId || targetIpo.mufgClientId;
         } else if (reg.includes('kfin') || reg.includes('karvy')) {
-          const kfinMatch = await findKfinIssue(targetIpo.name);
+          const kfinMatch = await findKfinIssue(targetIpo.name, '', true);
           targetIpo.kfinClientId = kfinMatch?.clientId || targetIpo.kfinClientId;
         }
       } else if (ipoName) {
-        // 3. Fallback search by IPO name
-        const [bsMatch, mMatch, kMatch] = await Promise.all([
-          findBigshareIssue(ipoName),
-          findMufgIssue(ipoName),
-          findKfinIssue(ipoName)
+        // 3. Fallback search by IPO name — KFintech first
+        const [kMatch, mMatch, bsMatch] = await Promise.all([
+          findKfinIssue(ipoName, '', true),
+          findMufgIssue(ipoName, '', true),
+          findBigshareIssue(ipoName)
         ]);
 
-        if (bsMatch) {
+        if (kMatch) {
           targetIpo = {
-            id: bsMatch.companyId,
+            id: kMatch.clientId,
             name: ipoName,
-            registrar: 'Bigshare Services Pvt Ltd',
-            bigshareCompanyId: bsMatch.companyId,
+            registrar: 'KFin Technologies Ltd',
+            kfinClientId: kMatch.clientId,
             status: 'listed'
           };
         } else if (mMatch) {
@@ -609,12 +613,12 @@ app.post('/api/allotment/check', async (req, res) => {
             mufgClientId: mMatch.clientId,
             status: 'listed'
           };
-        } else if (kMatch) {
+        } else if (bsMatch) {
           targetIpo = {
-            id: kMatch.clientId,
+            id: bsMatch.companyId,
             name: ipoName,
-            registrar: 'KFin Technologies Ltd',
-            kfinClientId: kMatch.clientId,
+            registrar: 'Bigshare Services Pvt Ltd',
+            bigshareCompanyId: bsMatch.companyId,
             status: 'listed'
           };
         }
@@ -622,10 +626,12 @@ app.post('/api/allotment/check', async (req, res) => {
     }
 
     if (!targetIpo) {
+      // Last resort: let registrarService do all-registrar parallel search
+      // Set registrar to 'Unknown' so checkRegistrarAllotment falls through to the parallel search
       targetIpo = {
         id: ipoId || 'ipo',
         name: ipoName || 'IPO Issue',
-        registrar: 'Link Intime India Pvt Ltd',
+        registrar: 'Unknown',
         status: 'listed'
       };
     }

@@ -10,7 +10,7 @@ const PORTAL_URL = 'https://in.mpms.mufg.com/Initial_Offer/public-issues.html';
 // In-memory cache for MUFG IPO issues list
 let mufgIssuesCache = [];
 let lastMufgFetchTime = 0;
-const MUFG_CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
+const MUFG_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes (reduced for freshness)
 
 // Static baseline fallback containing confirmed MUFG issues
 const BASELINE_MUFG_ISSUES = [
@@ -36,9 +36,9 @@ export function encryptToken(plainToken) {
 /**
  * Fetches available company list with clientId from MUFG Intime
  */
-export async function fetchMufgIssues() {
+export async function fetchMufgIssues(force = false) {
   const now = Date.now();
-  if (mufgIssuesCache.length > 0 && (now - lastMufgFetchTime < MUFG_CACHE_TTL_MS)) {
+  if (!force && mufgIssuesCache.length > 0 && (now - lastMufgFetchTime < MUFG_CACHE_TTL_MS)) {
     return mufgIssuesCache;
   }
 
@@ -46,7 +46,9 @@ export async function fetchMufgIssues() {
     'Content-Type': 'application/json; charset=utf-8',
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     'Referer': PORTAL_URL,
-    'Origin': 'https://in.mpms.mufg.com'
+    'Origin': 'https://in.mpms.mufg.com',
+    'Cache-Control': 'no-cache',
+    'Pragma': 'no-cache'
   };
 
   try {
@@ -66,17 +68,18 @@ export async function fetchMufgIssues() {
         }));
         mufgIssuesCache = issues;
         lastMufgFetchTime = now;
-        console.log(`[MUFG Service] Loaded ${issues.length} live issues from MUFG Intime portal`);
+        console.log(`[MUFG Service] ✅ Loaded ${issues.length} live issues from MUFG Intime portal`);
         return issues;
       }
     }
   } catch (error) {
-    console.warn('[MUFG Service] Live fetch failed, using baseline issues:', error.message);
+    console.warn('[MUFG Service] Live fetch failed, using cached/baseline issues:', error.message);
   }
 
   if (mufgIssuesCache.length === 0) {
     mufgIssuesCache = BASELINE_MUFG_ISSUES;
   }
+  lastMufgFetchTime = now;
   return mufgIssuesCache;
 }
 
@@ -115,8 +118,8 @@ function getDistinctTokens(name = '') {
 /**
  * Match IPO name / symbol against MUFG issues
  */
-export async function findMufgIssue(targetName = '', symbol = '') {
-  const issues = await fetchMufgIssues();
+export async function findMufgIssue(targetName = '', symbol = '', force = false) {
+  const issues = await fetchMufgIssues(force);
   if (!issues || issues.length === 0) return null;
 
   const cleanTarget = normalizeIssueName(targetName);

@@ -25,12 +25,13 @@ export function getRegistrarUrl(registrarName = '') {
   if (name.includes('purva')) {
     return 'https://www.purvashare.com/queries/';
   }
-  return 'https://in.mpms.mufg.com/Initial_Offer/public-issues.html';
+  // Default: KFintech (most common registrar for IPOs)
+  return 'https://ipostatus.kfintech.com/';
 }
 
 export async function checkRegistrarAllotment(ipo, queryType = 'pan', queryValue = '', extraOptions = {}) {
   const query = (queryValue || '').trim().toUpperCase();
-  const registrar = ipo?.registrar || 'Link Intime India Pvt Ltd';
+  const registrar = ipo?.registrar || 'Unknown';
   const ipoName = ipo?.name || 'IPO Issue';
   const regUrl = getRegistrarUrl(registrar);
 
@@ -179,7 +180,7 @@ export async function checkRegistrarAllotment(ipo, queryType = 'pan', queryValue
 
   if (mufgClientId || isMufgRegistrar) {
     if (!mufgClientId) {
-      const matchedMufg = await findMufgIssue(ipoName, ipo?.symbol);
+      const matchedMufg = await findMufgIssue(ipoName, ipo?.symbol, true);
       if (matchedMufg) mufgClientId = matchedMufg.clientId;
     }
     if (mufgClientId) {
@@ -197,7 +198,7 @@ export async function checkRegistrarAllotment(ipo, queryType = 'pan', queryValue
 
   if (kfinClientId || isKfinRegistrar) {
     if (!kfinClientId) {
-      const matchedKfin = await findKfinIssue(ipoName, ipo?.symbol);
+      const matchedKfin = await findKfinIssue(ipoName, ipo?.symbol, true);
       if (matchedKfin) kfinClientId = matchedKfin.clientId;
     }
     if (kfinClientId) {
@@ -213,15 +214,40 @@ export async function checkRegistrarAllotment(ipo, queryType = 'pan', queryValue
     }
   }
 
-  // 5. Fallback across registrars if registrar was unspecified
-  const [matchedBigshare, matchedMufg, matchedKfin] = await Promise.all([
-    findBigshareIssue(ipoName, ipo?.symbol),
-    findMufgIssue(ipoName, ipo?.symbol),
-    findKfinIssue(ipoName, ipo?.symbol)
+  // 5. Fallback across ALL registrars in parallel if registrar was unspecified
+  // Priority: KFintech first (most IPOs), then MUFG, then Bigshare
+  const [matchedKfin, matchedMufg, matchedBigshare] = await Promise.all([
+    findKfinIssue(ipoName, ipo?.symbol, true),
+    findMufgIssue(ipoName, ipo?.symbol, true),
+    findBigshareIssue(ipoName, ipo?.symbol)
   ]);
 
+  if (matchedKfin) {
+    console.log(`[RegistrarService] ✅ Auto-discovered KFintech issue for "${ipoName}" (clientId: ${matchedKfin.clientId})`);
+    return await queryKfintechAllotment({
+      clientId: matchedKfin.clientId,
+      queryType,
+      queryValue: query,
+      ipoName,
+      lotSize: ipo?.lotSize,
+      priceBandMax: ipo?.priceBandMax
+    });
+  }
+
+  if (matchedMufg) {
+    console.log(`[RegistrarService] ✅ Auto-discovered MUFG issue for "${ipoName}" (clientId: ${matchedMufg.clientId})`);
+    return await queryMufgAllotment({
+      clientId: matchedMufg.clientId,
+      queryType,
+      queryValue: query,
+      ipoName,
+      lotSize: ipo?.lotSize,
+      priceBandMax: ipo?.priceBandMax
+    });
+  }
+
   if (matchedBigshare) {
-    console.log(`[RegistrarService] Discovered Bigshare issue match for ${ipoName} (companyId: ${matchedBigshare.companyId}, server: ${extraOptions?.bigshareServerId || 'default'})`);
+    console.log(`[RegistrarService] ✅ Auto-discovered Bigshare issue for "${ipoName}" (companyId: ${matchedBigshare.companyId})`);
     return await queryBigshareAllotment({
       companyId: matchedBigshare.companyId,
       queryType,
@@ -235,31 +261,7 @@ export async function checkRegistrarAllotment(ipo, queryType = 'pan', queryValue
     });
   }
 
-  if (matchedMufg) {
-    console.log(`[RegistrarService] Discovered MUFG issue match for ${ipoName} (clientId: ${matchedMufg.clientId})`);
-    return await queryMufgAllotment({
-      clientId: matchedMufg.clientId,
-      queryType,
-      queryValue: query,
-      ipoName,
-      lotSize: ipo?.lotSize,
-      priceBandMax: ipo?.priceBandMax
-    });
-  }
-
-  if (matchedKfin) {
-    console.log(`[RegistrarService] Discovered KFintech issue match for ${ipoName} (clientId: ${matchedKfin.clientId})`);
-    return await queryKfintechAllotment({
-      clientId: matchedKfin.clientId,
-      queryType,
-      queryValue: query,
-      ipoName,
-      lotSize: ipo?.lotSize,
-      priceBandMax: ipo?.priceBandMax
-    });
-  }
-
-  // 7. Other Registrars (Skyline, Cameo, etc.)
+  // 7. Truly not found on any registrar
   return {
     ipoId: ipo?.id || 'ipo',
     ipoName,
@@ -271,9 +273,9 @@ export async function checkRegistrarAllotment(ipo, queryType = 'pan', queryValue
     sharesAllotted: 0,
     status: 'Not Found',
     refundAmount: 0,
-    message: `${registrar} portal requires verification on their official website. Please click the button below to verify your application directly on ${registrar}.`,
-    registrar,
+    message: `No allotment record found for "${query}" in "${ipoName}" on KFintech, MUFG Intime, or Bigshare registrars. Please verify the IPO name and PAN are correct, or check directly on the official registrar portal.`,
+    registrar: registrar !== 'Unknown' ? registrar : 'KFin Technologies Ltd',
     finalizedDate: ipo?.allotmentDate,
-    registrarPortalUrl: regUrl
+    registrarPortalUrl: registrar !== 'Unknown' ? regUrl : 'https://ipostatus.kfintech.com/'
   };
 }

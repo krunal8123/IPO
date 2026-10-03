@@ -122,21 +122,6 @@
   background: rgba(100, 116, 139, 0.7);
 }
 
-/* Ticker marquee animation */
-@keyframes marquee {
-  0% { transform: translateX(0%); }
-  100% { transform: translateX(-50%); }
-}
-
-.animate-marquee {
-  display: flex;
-  width: max-content;
-  animation: marquee 120s linear infinite;
-}
-
-.animate-marquee:hover {
-  animation-play-state: paused;
-}
 
 /* Hide scrollbar for Chrome, Safari, Opera, Edge, Firefox */
 .no-scrollbar::-webkit-scrollbar {

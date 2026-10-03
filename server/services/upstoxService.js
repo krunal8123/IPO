@@ -365,14 +365,14 @@ export function mapUpstoxToIpoItem(item, kfinIssues = []) {
   };
 }
 
-export async function fetchUpstoxIpos(kfinIssues = []) {
+export async function fetchUpstoxIpos(kfinIssues = [], force = false) {
   const config = getUpstoxConfig();
   if (!config.accessToken) {
     return null; // Not configured or token missing
   }
 
   const now = Date.now();
-  if (upstoxIposCache.length > 0 && (now - lastFetchTime < CACHE_TTL_MS)) {
+  if (!force && upstoxIposCache.length > 0 && (now - lastFetchTime < CACHE_TTL_MS)) {
     return upstoxIposCache;
   }
 

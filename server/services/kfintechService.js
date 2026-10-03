@@ -6,7 +6,7 @@ const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 // In-memory cache for KFintech IPO issues list
 let kfinIssuesCache = [];
 let lastKfinFetchTime = 0;
-const KFIN_CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
+const KFIN_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes (reduced for freshness)
 
 // Static baseline fallback containing confirmed KFintech issues
 const BASELINE_KFIN_ISSUES = [
@@ -67,49 +67,112 @@ const BASELINE_KFIN_ISSUES = [
   { clientId: '51817446680', name: 'PROPSHARE CELESTIA SM REIT 2026' }
 ];
 
-export async function fetchKfinIssues() {
+/**
+ * Tries multiple regex patterns to extract the issue list from the KFintech JS bundle.
+ * The bundle format has changed historically, so we try several patterns.
+ */
+function extractKfinIssuesFromBundle(jsContent) {
+  // Pattern 1: const rf = JSON.parse('...')
+  const p1 = jsContent.match(/const\s+rf\s*=\s*JSON\.parse\('([^']+)'\)/);
+  if (p1 && p1[1]) {
+    try {
+      const list = JSON.parse(p1[1]);
+      if (Array.isArray(list) && list.length > 0) return list;
+    } catch {}
+  }
+
+  // Pattern 2: var rf=JSON.parse('...') — minified variant
+  const p2 = jsContent.match(/var\s+rf\s*=\s*JSON\.parse\('([^']+)'\)/);
+  if (p2 && p2[1]) {
+    try {
+      const list = JSON.parse(p2[1]);
+      if (Array.isArray(list) && list.length > 0) return list;
+    } catch {}
+  }
+
+  // Pattern 3: rf=JSON.parse('...') — heavily minified
+  const p3 = jsContent.match(/\brf=JSON\.parse\('([^']+)'\)/);
+  if (p3 && p3[1]) {
+    try {
+      const list = JSON.parse(p3[1]);
+      if (Array.isArray(list) && list.length > 0) return list;
+    } catch {}
+  }
+
+  // Pattern 4: inline JSON array with clientId fields
+  const p4 = jsContent.match(/(\[\s*\{[^\[\]]*"clientId"[^\[\]]*\}[^\[\]]*\])/);
+  if (p4 && p4[1]) {
+    try {
+      const list = JSON.parse(p4[1]);
+      if (Array.isArray(list) && list.length > 0) return list;
+    } catch {}
+  }
+
+  return null;
+}
+
+export async function fetchKfinIssues(force = false) {
   const now = Date.now();
-  if (kfinIssuesCache.length > 0 && (now - lastKfinFetchTime < KFIN_CACHE_TTL_MS)) {
+  if (!force && kfinIssuesCache.length > 0 && (now - lastKfinFetchTime < KFIN_CACHE_TTL_MS)) {
     return kfinIssuesCache;
   }
 
   try {
     const indexRes = await axios.get('https://ipostatus.kfintech.com/', {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'text/html'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
       },
       httpsAgent,
-      timeout: 6000
+      timeout: 10000
     });
 
-    const scriptMatch = indexRes.data.match(/static\/js\/main\.[a-z0-9]+\.js/);
-    if (scriptMatch) {
-      const scriptUrl = `https://ipostatus.kfintech.com/${scriptMatch[0]}`;
-      const jsRes = await axios.get(scriptUrl, {
-        headers: { 'User-Agent': 'Mozilla/5.0' },
-        httpsAgent,
-        timeout: 10000
-      });
+    // Find all JS bundle script tags (not just main.*.js)
+    const scriptMatches = [
+      ...indexRes.data.matchAll(/src=["']([^"']*\.js)["']/g)
+    ].map(m => m[1]);
 
-      const rfMatch = jsRes.data.match(/const\s+rf\s*=\s*JSON\.parse\('([^']+)'\)/);
-      if (rfMatch && rfMatch[1]) {
-        const liveList = JSON.parse(rfMatch[1]);
-        if (Array.isArray(liveList) && liveList.length > 0) {
-          kfinIssuesCache = liveList;
+    // Prioritize main bundle, then try others
+    const bundleUrls = scriptMatches
+      .filter(s => s.includes('static/js') || s.includes('main') || s.includes('chunk'))
+      .map(s => s.startsWith('http') ? s : `https://ipostatus.kfintech.com/${s.replace(/^\//, '')}`);
+
+    for (const scriptUrl of bundleUrls) {
+      try {
+        const jsRes = await axios.get(scriptUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Cache-Control': 'no-cache'
+          },
+          httpsAgent,
+          timeout: 15000
+        });
+
+        const extracted = extractKfinIssuesFromBundle(jsRes.data);
+        if (extracted) {
+          kfinIssuesCache = extracted;
           lastKfinFetchTime = now;
-          console.log(`[KFintechService] Synchronized ${liveList.length} live issues from KFintech.`);
-          return liveList;
+          console.log(`[KFintechService] ✅ Synchronized ${extracted.length} live issues from KFintech JS bundle (${scriptUrl}).`);
+          return extracted;
         }
+      } catch (bundleErr) {
+        console.warn(`[KFintechService] Failed to parse bundle ${scriptUrl}:`, bundleErr.message);
       }
     }
+
+    console.warn('[KFintechService] Could not extract issues from any JS bundle, falling back to baseline.');
   } catch (err) {
-    console.warn('[KFintechService] Could not fetch live bundle from KFintech, using verified baseline list:', err.message);
+    console.warn('[KFintechService] Could not fetch live bundle from KFintech:', err.message);
   }
 
-  kfinIssuesCache = BASELINE_KFIN_ISSUES;
+  // Only fall back to baseline if we have nothing at all
+  if (kfinIssuesCache.length === 0) {
+    kfinIssuesCache = BASELINE_KFIN_ISSUES;
+  }
   lastKfinFetchTime = now;
-  return BASELINE_KFIN_ISSUES;
+  return kfinIssuesCache;
 }
 
 const STOP_WORDS = new Set([
@@ -139,8 +202,8 @@ function getDistinctTokens(name = '') {
     .filter(t => t.length > 2 && !STOP_WORDS.has(t));
 }
 
-export async function findKfinIssue(ipoName = '', symbol = '') {
-  const issues = await fetchKfinIssues();
+export async function findKfinIssue(ipoName = '', symbol = '', force = false) {
+  const issues = await fetchKfinIssues(force);
   const cleanTarget = normalizeIssueName(ipoName);
   if (!cleanTarget) return null;
 

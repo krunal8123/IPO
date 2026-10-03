@@ -3,7 +3,6 @@ import { IpoItem, IpoCategory, IpoStatus, BuybackItem } from './types/ipo';
 import { useWatchlist } from './context/WatchlistContext';
 import { liveIpoService } from './services/liveIpoService';
 import { getCachedUpstoxIpos } from './services/upstoxDirectService';
-import { NoticeTicker } from './components/common/NoticeTicker';
 import { Navbar } from './components/common/Navbar';
 import { MobileHeader } from './components/common/MobileHeader';
 import { MobileBottomNav } from './components/common/MobileBottomNav';
@@ -96,10 +95,11 @@ export const App: React.FC = () => {
   const { isInWatchlist, clearWatchlist, watchlist } = useWatchlist();
 
   // Fetch live market data
-  const syncLiveData = async () => {
+  // force=true bypasses all backend caches — used when user explicitly clicks Refresh
+  const syncLiveData = async (force = false) => {
     setIsSyncing(true);
     try {
-      const ipoRes = await liveIpoService.getLiveIpos();
+      const ipoRes = await liveIpoService.getLiveIpos(force);
       setIpos(ipoRes.ipos);
       setIsLive(ipoRes.isLive);
       setLastSyncTime(ipoRes.timestamp);
@@ -114,9 +114,9 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     syncLiveData();
-    // Auto-refresh every 60 seconds
+    // Auto-refresh every 60 seconds (normal cached path, not force)
     const interval = setInterval(() => {
-      syncLiveData();
+      syncLiveData(false);
     }, 60000);
     return () => clearInterval(interval);
   }, []);
@@ -222,9 +222,8 @@ export const App: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-[#070b14] text-slate-900 dark:text-slate-100 selection:bg-indigo-500 selection:text-white pb-16 md:pb-8 transition-colors duration-200">
 
-      {/* 1. Desktop Layout: Top Ticker followed by Desktop Navbar */}
+      {/* 1. Desktop Layout: Desktop Navbar */}
       <div className="hidden md:block">
-        <NoticeTicker ipos={ipos} isLive={isLive} onSelectIpo={(ipo) => setSelectedIpo(ipo)} />
         <Navbar
           activeTab={activeTab}
           setActiveTab={setActiveTab}
@@ -235,11 +234,11 @@ export const App: React.FC = () => {
           onSelectIpo={(ipo) => setSelectedIpo(ipo)}
           isSyncing={isSyncing}
           lastSyncTime={lastSyncTime}
-          onRefresh={syncLiveData}
+          onRefresh={() => syncLiveData(true)}
         />
       </div>
 
-      {/* 2. Mobile Layout: MobileHeader with safe-top first, then NoticeTicker cleanly below it */}
+      {/* 2. Mobile Layout: MobileHeader */}
       <div className="md:hidden">
         <MobileHeader
           activeTab={activeTab}
@@ -251,9 +250,8 @@ export const App: React.FC = () => {
           onNavigateToIpos={() => setActiveTab('ipos')}
           isSyncing={isSyncing}
           lastSyncTime={lastSyncTime}
-          onRefresh={syncLiveData}
+          onRefresh={() => syncLiveData(true)}
         />
-        <NoticeTicker ipos={ipos} isLive={isLive} onSelectIpo={(ipo) => setSelectedIpo(ipo)} />
       </div>
 
       {/* 4. Main Body Container */}
