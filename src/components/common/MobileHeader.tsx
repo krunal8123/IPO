@@ -51,11 +51,11 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
   const q = searchQuery.toLowerCase().trim();
   const searchMatches = q.length > 0 && ipos
     ? ipos.filter(i =>
-        i.name.toLowerCase().includes(q) ||
-        i.symbol.toLowerCase().includes(q) ||
-        i.sector.toLowerCase().includes(q) ||
-        i.registrar.toLowerCase().includes(q)
-      )
+      i.name.toLowerCase().includes(q) ||
+      i.symbol.toLowerCase().includes(q) ||
+      i.sector.toLowerCase().includes(q) ||
+      i.registrar.toLowerCase().includes(q)
+    )
     : [];
 
   return (
