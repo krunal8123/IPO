@@ -13,8 +13,6 @@ interface MobileHeaderProps {
   ipos?: IpoItem[];
   onSelectIpo?: (ipo: IpoItem) => void;
   onNavigateToIpos?: () => void;
-  isSyncing?: boolean;
-  lastSyncTime?: string;
 }
 
 export const MobileHeader: React.FC<MobileHeaderProps> = ({
@@ -24,9 +22,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
   setSearchQuery,
   ipos = [],
   onSelectIpo,
-  onNavigateToIpos,
-  isSyncing = false,
-  lastSyncTime = ''
+  onNavigateToIpos
 }) => {
   const { theme, toggleTheme } = useTheme();
   const { watchlist } = useWatchlist();
@@ -70,21 +66,6 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
               <h1 className="text-base font-bold leading-tight text-slate-900 dark:text-white">
                 {titles[activeTab] || 'IPORadar'}
               </h1>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                {isSyncing ? (
-                  <>
-                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
-                    <span>Fetching latest data…</span>
-                  </>
-                ) : lastSyncTime ? (
-                  <>
-                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    <span>Updated {lastSyncTime}</span>
-                  </>
-                ) : (
-                  'Real-time Indian Stock Market Intelligence'
-                )}
-              </p>
             </div>
           </div>
 

@@ -1,5 +1,5 @@
 // IPORadar Service Worker — Push Notifications + Auto-Update
-const CACHE_NAME = 'iporadar-v3';
+const CACHE_NAME = 'iporadar-v4';
 
 self.addEventListener('install', () => {
   self.skipWaiting();
