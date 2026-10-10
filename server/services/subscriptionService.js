@@ -6,7 +6,7 @@ const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 
 let subscriptionCache = [];
 let lastSubFetchTime = 0;
-const CACHE_TTL_MS = 2 * 60 * 1000; // 2 minutes live cache
+const CACHE_TTL_MS = 0; // always fetch latest data
 
 export async function fetchLiveSubscription() {
   const now = Date.now();

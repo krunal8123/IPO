@@ -29,3 +29,7 @@ scratch/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Generated / scraped runtime data — updated by server & GitHub Actions
+public/data/*.json
+server/data/*.json

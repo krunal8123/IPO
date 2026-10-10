@@ -19,7 +19,7 @@ import { IpoCompareView } from './components/compare/IpoCompareView';
 import { BuybackTracker } from './components/buyback/BuybackTracker';
 import { ServerSettingsModal } from './components/common/ServerSettingsModal';
 import { InstallPwaBanner } from './components/common/InstallPwaBanner';
-import { RefreshCw, Radio, Sparkles, Settings, Bookmark } from 'lucide-react';
+import { Bookmark } from 'lucide-react';
 import { PushNotificationBanner } from './components/common/PushNotificationBanner';
 
 const VALID_TABS = ['ipos', 'gmp', 'subscription', 'allotment', 'calendar', 'analytics', 'compare', 'buyback'] as const;
@@ -87,37 +87,31 @@ export const App: React.FC = () => {
   const [ipos, setIpos] = useState<IpoItem[]>(() => getCachedUpstoxIpos());
   const [buybacks, setBuybacks] = useState<BuybackItem[]>([]);
   const [isLive, setIsLive] = useState<boolean>(false);
-  const [lastSyncTime, setLastSyncTime] = useState<string>('');
-  const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true);
   const [dataSource, setDataSource] = useState<string>('Verified Market Feed');
 
   const { isInWatchlist, clearWatchlist, watchlist } = useWatchlist();
 
-  // Fetch live market data
-  // force=true bypasses all backend caches — used when user explicitly clicks Refresh
-  const syncLiveData = async (force = false) => {
-    setIsSyncing(true);
+  // Fetch live market data — always force=true to bypass all caches
+  const syncLiveData = async () => {
     try {
-      const ipoRes = await liveIpoService.getLiveIpos(force);
+      const ipoRes = await liveIpoService.getLiveIpos(true);
       setIpos(ipoRes.ipos);
       setIsLive(ipoRes.isLive);
-      setLastSyncTime(ipoRes.timestamp);
       setDataSource(ipoRes.source);
     } catch (e) {
       console.warn('Failed to sync live data:', e);
     } finally {
-      setIsSyncing(false);
       setIsInitialLoad(false);
     }
   };
 
   useEffect(() => {
     syncLiveData();
-    // Auto-refresh every 60 seconds (normal cached path, not force)
+    // Auto-refresh every 30 seconds — always fetches fresh data
     const interval = setInterval(() => {
-      syncLiveData(false);
-    }, 60000);
+      syncLiveData();
+    }, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -232,9 +226,6 @@ export const App: React.FC = () => {
           onOpenWatchlist={handleOpenWatchlist}
           ipos={ipos}
           onSelectIpo={(ipo) => setSelectedIpo(ipo)}
-          isSyncing={isSyncing}
-          lastSyncTime={lastSyncTime}
-          onRefresh={() => syncLiveData(true)}
         />
       </div>
 
@@ -248,9 +239,6 @@ export const App: React.FC = () => {
           ipos={ipos}
           onSelectIpo={(ipo) => setSelectedIpo(ipo)}
           onNavigateToIpos={() => setActiveTab('ipos')}
-          isSyncing={isSyncing}
-          lastSyncTime={lastSyncTime}
-          onRefresh={() => syncLiveData(true)}
         />
       </div>
 
@@ -335,10 +323,10 @@ export const App: React.FC = () => {
             </div>
 
             {/* IPO Cards Grid */}
-            {(ipos.length === 0 && isSyncing) || (ipos.length === 0 && isInitialLoad) ? (
+            {(ipos.length === 0 && isInitialLoad) ? (
               <div className="glass-card rounded-3xl p-12 text-center border border-slate-200 dark:border-slate-800 my-8 max-w-lg mx-auto animate-fade-in">
                 <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-500 flex items-center justify-center mx-auto mb-4">
-                  <RefreshCw className="w-7 h-7 animate-spin" />
+                  <div className="w-7 h-7 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
                 </div>
                 <h3 className="text-lg font-black text-slate-900 dark:text-white mb-1">
                   Fetching Latest IPO Data

@@ -14,7 +14,7 @@ const ENV_PATH = path.join(__dirname, '../../.env');
 let cachedAccessToken = process.env.UPSTOX_ACCESS_TOKEN || '';
 let upstoxIposCache = [];
 let lastFetchTime = 0;
-const CACHE_TTL_MS = 3 * 60 * 1000; // 3 minutes
+const CACHE_TTL_MS = 0; // always fetch latest data
 
 export function getUpstoxConfig() {
   // Read fresh from .env if present

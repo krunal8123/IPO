@@ -10,10 +10,8 @@ import {
   Flame, 
   Calendar, 
   CheckCircle2, 
-  Coins, 
   Layers,
   Radar,
-  RefreshCw,
   Target,
   GitCompare
 } from 'lucide-react';
@@ -29,9 +27,6 @@ interface NavbarProps {
   onOpenWatchlist: () => void;
   ipos?: IpoItem[];
   onSelectIpo?: (ipo: IpoItem) => void;
-  isSyncing?: boolean;
-  lastSyncTime?: string;
-  onRefresh?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -42,9 +37,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenWatchlist,
   ipos = [],
   onSelectIpo,
-  isSyncing = false,
-  lastSyncTime = '',
-  onRefresh
 }) => {
   const { theme, toggleTheme } = useTheme();
   const { watchlist } = useWatchlist();
@@ -95,19 +87,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </span>
               </div>
               <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium hidden xl:flex items-center gap-1">
-                {isSyncing ? (
-                  <>
-                    <RefreshCw className="w-2.5 h-2.5 animate-spin text-indigo-500" />
-                    <span>Fetching latest data…</span>
-                  </>
-                ) : lastSyncTime ? (
-                  <>
-                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    <span>Updated {lastSyncTime}</span>
-                  </>
-                ) : (
-                  'GMP • Subscription • Allotment Terminal'
-                )}
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span>GMP • Subscription • Allotment Terminal</span>
               </p>
             </div>
           </div>
@@ -257,17 +238,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
             </button>
 
-            {/* Refresh Button */}
-            {onRefresh && (
-              <button
-                onClick={onRefresh}
-                disabled={isSyncing}
-                className="p-2 rounded-xl bg-slate-100/80 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                title={isSyncing ? 'Refreshing…' : 'Refresh live data'}
-              >
-                <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin text-indigo-500' : ''}`} />
-              </button>
-            )}
+
 
             {/* Theme Toggle */}
             <button

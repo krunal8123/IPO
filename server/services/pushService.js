@@ -18,6 +18,12 @@ const DATA_DIR = path.resolve(__dirname, '../data');
 const SUBS_FILE = path.join(DATA_DIR, 'subscriptions.json');
 const SNAPSHOT_FILE = path.join(DATA_DIR, 'ipo_snapshot.json');
 
+if (typeof process.loadEnvFile === 'function') {
+  try {
+    process.loadEnvFile();
+  } catch {}
+}
+
 // ── VAPID setup ──────────────────────────────────────────────────────────────
 const VAPID_PUBLIC_KEY  = process.env.VAPID_PUBLIC_KEY  || 'BDpLT6qTBzeIQSIlwGrG6NJWIs70CuPKAvD8sWownfg5E2seBThhxzqmdSPcs-CMkg0RdBt6s-vLE0X_Wv0jffk';
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || 'Igw5i22hHPJS_OKvugu67Q7-y7XxsFEof2VNQ75hA_k';
@@ -136,6 +142,14 @@ export async function notifyIpoChanges(currentIpos) {
   const snapshot = loadSnapshot();
   const prev = snapshot.ipos || [];
 
+  // Cold-start guard: if no previous snapshot exists, just save current state.
+  // Sending notifications for ALL IPOs at once (every server restart) would be a flood.
+  if (prev.length === 0) {
+    saveSnapshot({ ipos: currentIpos, updatedAt: new Date().toISOString() });
+    console.log('[Push] Cold start: saved initial IPO snapshot. No notifications sent this run.');
+    return { notificationsSent: 0, devicesSent: 0 };
+  }
+
   const prevMap = {};
   prev.forEach(i => { prevMap[i.id] = i; });
 
@@ -179,7 +193,9 @@ export async function notifyIpoChanges(currentIpos) {
     }
 
     // 3. Allotment declared
-    if (old.status !== 'allotted' && ipo.status === 'allotted') {
+    const wasAllotted = old.status === 'allotted' || old.allotmentDeclared === true || old.allotmentDate === 'Declared';
+    const isNowAllotted = ipo.status === 'allotted' || ipo.allotmentDeclared === true || ipo.allotmentDate === 'Declared';
+    if (!wasAllotted && isNowAllotted) {
       notifications.push({
         title: `Allotment Declared: ${ipo.name}`,
         body: `Check your allotment status now! Listing date: ${ipo.listingDate || 'Soon'}`,
@@ -216,8 +232,8 @@ export async function notifyIpoChanges(currentIpos) {
     }
 
     // 6. Subscription milestone
-    const oldSub = (old.subscriptionRate && old.subscriptionRate.total) ? old.subscriptionRate.total : 0;
-    const newSub = (ipo.subscriptionRate && ipo.subscriptionRate.total) ? ipo.subscriptionRate.total : 0;
+    const oldSub = (old.subscriptionRate && old.subscriptionRate.total) ? old.subscriptionRate.total : (old.subscription && old.subscription.total) ? old.subscription.total : 0;
+    const newSub = (ipo.subscriptionRate && ipo.subscriptionRate.total) ? ipo.subscriptionRate.total : (ipo.subscription && ipo.subscription.total) ? ipo.subscription.total : 0;
     const milestones = [10, 50, 100, 200, 500];
     for (const m of milestones) {
       if (oldSub < m && newSub >= m && ipo.status === 'live') {

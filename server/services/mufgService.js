@@ -10,7 +10,7 @@ const PORTAL_URL = 'https://in.mpms.mufg.com/Initial_Offer/public-issues.html';
 // In-memory cache for MUFG IPO issues list
 let mufgIssuesCache = [];
 let lastMufgFetchTime = 0;
-const MUFG_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes (reduced for freshness)
+const MUFG_CACHE_TTL_MS = 0; // always fetch latest data
 
 // Static baseline fallback containing confirmed MUFG issues
 const BASELINE_MUFG_ISSUES = [

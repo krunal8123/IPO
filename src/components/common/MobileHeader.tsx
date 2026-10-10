@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { useWatchlist } from '../../context/WatchlistContext';
-import { Sun, Moon, Bookmark, Search, X, Radar, RefreshCw } from 'lucide-react';
+import { Sun, Moon, Bookmark, Search, X, Radar } from 'lucide-react';
 import { IpoItem } from '../../types/ipo';
 import { CompanyLogo } from './CompanyLogo';
 
@@ -15,7 +15,6 @@ interface MobileHeaderProps {
   onNavigateToIpos?: () => void;
   isSyncing?: boolean;
   lastSyncTime?: string;
-  onRefresh?: () => void;
 }
 
 export const MobileHeader: React.FC<MobileHeaderProps> = ({
@@ -27,8 +26,7 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
   onSelectIpo,
   onNavigateToIpos,
   isSyncing = false,
-  lastSyncTime = '',
-  onRefresh
+  lastSyncTime = ''
 }) => {
   const { theme, toggleTheme } = useTheme();
   const { watchlist } = useWatchlist();
@@ -91,18 +89,6 @@ export const MobileHeader: React.FC<MobileHeaderProps> = ({
           </div>
 
           <div className="flex items-center gap-1.5">
-            {/* Refresh Button */}
-            {onRefresh && (
-              <button
-                onClick={onRefresh}
-                disabled={isSyncing}
-                className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Refresh data"
-              >
-                <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin text-indigo-500' : ''}`} />
-              </button>
-            )}
-
             {/* Search Toggle Button */}
             <button
               onClick={() => setIsSearchOpen(true)}

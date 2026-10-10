@@ -21,7 +21,13 @@ import { fetchLiveGmp } from './services/gmpService.js';
 import { fetchLiveExchangeIpos, fetchLiveBidding } from './services/nseService.js';
 import { fetchLiveSubscription } from './services/subscriptionService.js';
 import { fetchLiveBuybacks } from './services/buybackService.js';
-import { addSubscription, removeSubscription, getSubscriberCount, getVapidPublicKey, sendPushToAll } from './services/pushService.js';
+import { addSubscription, removeSubscription, getSubscriberCount, getVapidPublicKey, sendPushToAll, notifyIpoChanges } from './services/pushService.js';
+
+if (typeof process.loadEnvFile === 'function') {
+  try {
+    process.loadEnvFile();
+  } catch {}
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -655,6 +661,49 @@ app.use((req, res, next) => {
   if (req.path.startsWith('/api')) return next();
   res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
+
+// ── Background IPO Monitor Loop ───────────────────────────────────────────────
+// Runs every 5 minutes: fetches live data, diffs vs snapshot, fires targeted push alerts.
+// This is what makes notifications work — the server must proactively detect changes.
+const MONITOR_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+
+async function runIpoMonitor() {
+  try {
+    const subscriberCount = getSubscriberCount();
+
+    const [liveGmpList, kfinIssues, liveSubscriptions] = await Promise.all([
+      fetchLiveGmp(false).catch(() => []),
+      fetchKfinIssues(false).catch(() => []),
+      fetchLiveSubscription().catch(() => []),
+    ]);
+
+    const upstoxList = await fetchUpstoxIpos(kfinIssues, false).catch(() => []);
+    let ipos = [];
+
+    if (Array.isArray(upstoxList) && upstoxList.length > 0) {
+      ipos = overlayGmp(upstoxList, liveGmpList);
+    } else if (Array.isArray(liveGmpList) && liveGmpList.length > 0) {
+      ipos = liveGmpList.map(s => buildDynamicIpoFromScraped(s, kfinIssues, liveSubscriptions));
+    }
+
+    if (ipos.length > 0) {
+      currentLiveIpos = ipos; // Keep in-memory cache fresh
+      const result = await notifyIpoChanges(ipos);
+      if (result && result.notificationsSent > 0) {
+        console.log(`[Monitor] 📲 ${result.notificationsSent} alert type(s) → ${result.devicesSent} device(s)`);
+      }
+    }
+  } catch (err) {
+    console.warn('[Monitor] IPO monitor error (non-fatal):', err.message);
+  }
+}
+
+// Start monitoring: wait 15s after boot (let server warm up), then run every 5 min
+setTimeout(() => {
+  console.log('[Monitor] 🔍 Starting IPO change detector (every 5 min)...');
+  runIpoMonitor(); // First check right after boot
+  setInterval(runIpoMonitor, MONITOR_INTERVAL_MS);
+}, 15_000);
 
 app.listen(PORT, () => {
   console.log(`🚀 [IPORadar Hybrid Server] Running at http://localhost:${PORT}`);

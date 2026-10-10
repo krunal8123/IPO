@@ -22,7 +22,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 );
 
 // Register Service Worker with automatic update checking
-if ('serviceWorker' in navigator && (import.meta.env.PROD || window.location.protocol === 'https:')) {
+// Register SW on HTTPS (prod) AND on localhost (dev) — localhost is a secure context for PushManager
+if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js').then((reg) => {
       // Check for updates on every app launch

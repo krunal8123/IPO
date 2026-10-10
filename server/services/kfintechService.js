@@ -6,7 +6,7 @@ const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 // In-memory cache for KFintech IPO issues list
 let kfinIssuesCache = [];
 let lastKfinFetchTime = 0;
-const KFIN_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes (reduced for freshness)
+const KFIN_CACHE_TTL_MS = 0; // always fetch latest data
 
 // Static baseline fallback containing confirmed KFintech issues
 const BASELINE_KFIN_ISSUES = [

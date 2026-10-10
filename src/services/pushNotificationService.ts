@@ -49,28 +49,50 @@ async function fetchVapidPublicKey(): Promise<string> {
 /** Register / retrieve the push subscription and sync to server */
 async function subscribeToPush(registration: ServiceWorkerRegistration): Promise<PushSubscription | null> {
   const publicKey = await fetchVapidPublicKey();
+  const currentKey = urlBase64ToUint8Array(publicKey);
 
   // Check if already subscribed
   let subscription = await registration.pushManager.getSubscription();
 
+  // If already subscribed, verify that the applicationServerKey matches current server key
+  if (subscription && subscription.options && subscription.options.applicationServerKey) {
+    const existingKey = new Uint8Array(subscription.options.applicationServerKey);
+    const isMatch = existingKey.length === currentKey.length && existingKey.every((byte, idx) => byte === currentKey[idx]);
+    if (!isMatch) {
+      console.log('[PushClient] VAPID key updated on server. Renewing push subscription...');
+      await subscription.unsubscribe().catch(() => {});
+      subscription = null;
+    }
+  }
+
   if (!subscription) {
     subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(publicKey)
+      applicationServerKey: currentKey
     });
   }
 
   // Sync to server
   try {
-    await fetch(`${getApiBaseUrl()}/push/subscribe`, {
+    const res = await fetch(`${getApiBaseUrl()}/push/subscribe`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(subscription.toJSON()),
-      signal: AbortSignal.timeout(5000)
+      signal: AbortSignal.timeout(6000)
     });
-  } catch {
-    // Server unreachable — subscription is still active locally
-    console.warn('[PushClient] Could not sync subscription to server (will retry on next load)');
+
+    if (!res.ok) {
+      console.error(`[PushClient] ❌ Server rejected subscription (HTTP ${res.status}): ${await res.text().catch(() => '')}`);
+    } else {
+      console.log('[PushClient] ✅ Push subscription successfully synchronized with server.');
+    }
+  } catch (syncErr) {
+    // Log clearly — if this fails the subscription is NOT on the server and no pushes will arrive
+    console.error(
+      '[PushClient] ❌ CRITICAL: Subscription NOT saved to server. Pushes will not be delivered!',
+      '\nBackend URL:', getApiBaseUrl(),
+      '\nError:', syncErr
+    );
   }
 
   return subscription;
