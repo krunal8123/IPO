@@ -5,6 +5,7 @@ const UPSTOX_API_BASE = 'https://api.upstox.com/v2';
 const TOKEN_KEY = 'upstox_access_token';
 const API_KEY_STORAGE = 'upstox_api_key';
 const CACHE_KEY = 'iporadar_upstox_live_cache';
+const CACHE_TTL_MS = 2 * 60 * 60 * 1000; // 2 hours — stale data older than this is discarded
 
 export function getStoredUpstoxToken(): string {
   if (typeof window === 'undefined') return '';
@@ -40,8 +41,21 @@ export function getCachedUpstoxIpos(): IpoItem[] {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length > 0) {
-      return parsed.map(sanitizeIpoData);
+    // Support both legacy (raw array) and new TTL-wrapped ({ ts, data }) formats
+    if (Array.isArray(parsed)) {
+      // Legacy format — treat as expired so fresh data is fetched
+      console.info('[Cache] Legacy localStorage cache format detected — discarding stale data.');
+      localStorage.removeItem(CACHE_KEY);
+      return [];
+    }
+    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.data) && parsed.data.length > 0) {
+      const age = Date.now() - (parsed.ts || 0);
+      if (age > CACHE_TTL_MS) {
+        console.info(`[Cache] localStorage IPO cache expired (age: ${Math.round(age / 60000)}m) — discarding.`);
+        localStorage.removeItem(CACHE_KEY);
+        return [];
+      }
+      return parsed.data.map(sanitizeIpoData);
     }
   } catch { }
   return [];
@@ -50,7 +64,7 @@ export function getCachedUpstoxIpos(): IpoItem[] {
 export function setCachedUpstoxIpos(ipos: IpoItem[]): void {
   if (typeof window === 'undefined' || !Array.isArray(ipos) || ipos.length === 0) return;
   try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify(ipos));
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: ipos }));
   } catch { }
 }
 
