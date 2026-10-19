@@ -381,12 +381,13 @@ export const liveIpoService = {
 
     // 3. Fetch fresh JSON from GitHub Pages CDN (cache-busted) — always reflects the latest
     //    GitHub Actions scraper run, regardless of what was bundled at APK build time.
+    //    NOTE: We intentionally do NOT write CDN data back to localStorage here —
+    //    the CDN may lag behind the live backend by hours, causing stale-data regressions.
     const remoteResult = await fetchFromGithubPages('ipos.json');
     if (remoteResult) {
       const json = remoteResult.json as { success?: boolean; data?: unknown[]; timestamp?: string; source?: string };
       if (json.success && Array.isArray(json.data) && json.data.length > 0) {
         const sanitized = (json.data as IpoItem[]).map(sanitizeIpoData);
-        setCachedUpstoxIpos(sanitized);
         return {
           ipos: sanitized,
           isLive: true,
@@ -396,7 +397,9 @@ export const liveIpoService = {
       }
     }
 
-    // 4. Try static/bundled data on GitHub Pages / mobile assets (same origin, cached copy)
+    // 4. Try static/bundled data on GitHub Pages / mobile assets (same origin, cached copy).
+    //    NOTE: Static data is potentially very old (build-time snapshot). Never write to
+    //    localStorage from here — it would overwrite fresher data from the backend.
     try {
       const staticRes = await fetch(getStaticDataUrl('ipos.json'), { cache: 'no-cache' });
       if (staticRes.ok) {
@@ -406,7 +409,6 @@ export const liveIpoService = {
           const json = await staticRes.json();
           if (json.success && Array.isArray(json.data) && json.data.length > 0) {
             const sanitized = json.data.map(sanitizeIpoData);
-            setCachedUpstoxIpos(sanitized);
             return {
               ipos: sanitized,
               isLive: true,
