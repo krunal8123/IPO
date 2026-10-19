@@ -342,19 +342,20 @@ export const liveIpoService = {
 
     // 2. Try primary API endpoint — pass force=true to bypass all backend caches
     try {
+      // Always append _t timestamp to bust any URL-level caching (mobile browsers, CDNs, proxies)
       const apiUrl = force
         ? `${getApiBaseUrl()}/ipos?force=true&_t=${Date.now()}`
-        : `${getApiBaseUrl()}/ipos`;
+        : `${getApiBaseUrl()}/ipos?_t=${Date.now()}`;
 
-      const fetchHeaders: Record<string, string> = { 'Accept': 'application/json' };
-      if (force) {
-        fetchHeaders['Cache-Control'] = 'no-cache, no-store, must-revalidate';
-        fetchHeaders['Pragma'] = 'no-cache';
-      }
+      const fetchHeaders: Record<string, string> = {
+        'Accept': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache'
+      };
 
       const res = await fetch(apiUrl, {
         headers: fetchHeaders,
-        cache: force ? 'no-store' : 'default',
+        cache: 'no-store',
         signal: AbortSignal.timeout(force ? 20000 : 8000)  // longer timeout for cold fetch
       });
       if (res.ok) {

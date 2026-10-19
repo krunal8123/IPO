@@ -38,6 +38,15 @@ const PORT = process.env.PORT || 5001;
 app.use(cors({ origin: '*' }));
 app.use(express.json());
 
+// Prevent all caches (mobile browser, CDN, proxy) from storing API responses
+app.use('/api', (_req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('Surrogate-Control', 'no-store');
+  next();
+});
+
 // Direct Mobile Download Endpoints
 app.get(['/download', '/install'], (req, res) => {
   res.send(`
@@ -656,9 +665,18 @@ app.post('/api/allotment/check', async (req, res) => {
 });
 
 // Serve production static assets from dist
-app.use(express.static(path.join(__dirname, '../dist')));
+// HTML files: never cache (ensure app shell is always fresh on mobile)
+// JS/CSS/images: hashed filenames, safe to cache long-term
+app.use(express.static(path.join(__dirname, '../dist'), {
+  setHeaders(res, filePath) {
+    if (filePath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+    }
+  }
+}));
 app.use((req, res, next) => {
   if (req.path.startsWith('/api')) return next();
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
   res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
