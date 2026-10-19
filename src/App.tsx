@@ -331,9 +331,6 @@ export const App: React.FC = () => {
                 <h3 className="text-lg font-black text-slate-900 dark:text-white mb-1">
                   Fetching Latest IPO Data
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Loading live market data from Upstox...
-                </p>
               </div>
             ) : filteredIpos.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
