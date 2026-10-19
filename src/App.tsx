@@ -1,8 +1,7 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { IpoItem, IpoCategory, IpoStatus, BuybackItem } from './types/ipo';
 import { useWatchlist } from './context/WatchlistContext';
 import { liveIpoService } from './services/liveIpoService';
-import { getCachedUpstoxIpos } from './services/upstoxDirectService';
 import { Navbar } from './components/common/Navbar';
 import { MobileHeader } from './components/common/MobileHeader';
 import { MobileBottomNav } from './components/common/MobileBottomNav';
@@ -84,11 +83,16 @@ export const App: React.FC = () => {
   const [showServerModal, setShowServerModal] = useState<boolean>(false);
 
   // Live real-time state directly from Upstox API
-  const [ipos, setIpos] = useState<IpoItem[]>(() => getCachedUpstoxIpos());
+  // Start empty — never pre-populate from localStorage to avoid stale flash
+  const [ipos, setIpos] = useState<IpoItem[]>([]);
   const [buybacks, setBuybacks] = useState<BuybackItem[]>([]);
   const [isLive, setIsLive] = useState<boolean>(false);
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true);
   const [dataSource, setDataSource] = useState<string>('Verified Market Feed');
+
+  // Tracks whether we've already received authoritative backend data this browser session.
+  // Once true, fallback sources (CDN / static JSON) are not allowed to overwrite the UI.
+  const hasLiveBackendData = useRef<boolean>(false);
 
   const { isInWatchlist, clearWatchlist, watchlist } = useWatchlist();
 
@@ -96,6 +100,23 @@ export const App: React.FC = () => {
   const syncLiveData = async () => {
     try {
       const ipoRes = await liveIpoService.getLiveIpos(true);
+      const isFallbackSource = 
+        ipoRes.source.includes('Cached') ||
+        ipoRes.source.includes('Verified Market Feed') ||
+        ipoRes.source.includes('static') ||
+        ipoRes.source.toLowerCase().includes('bundled');
+
+      // If we already have authoritative backend data this session,
+      // ignore any result that came from CDN / static / cache fallbacks.
+      if (hasLiveBackendData.current && isFallbackSource) {
+        console.info(`[App] Skipping fallback-source update (source: "${ipoRes.source}") — already have live backend data.`);
+        return;
+      }
+
+      if (!isFallbackSource && ipoRes.ipos.length > 0) {
+        hasLiveBackendData.current = true;
+      }
+
       setIpos(ipoRes.ipos);
       setIsLive(ipoRes.isLive);
       setDataSource(ipoRes.source);
